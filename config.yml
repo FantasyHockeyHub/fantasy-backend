@@ -1,0 +1,10 @@
+api:
+  port: "8000"
+
+db:
+  username: "postgres"
+  host: "localhost"
+  port: "5420"
+  dbname: "fantasy_db"
+  sslmode: "disable"
+  password: "Qbpsd24mdds"
