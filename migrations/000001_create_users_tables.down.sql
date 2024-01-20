@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS user_profile CASCADE;
+
+DROP TABLE IF EXISTS user_data CASCADE;
+
+DROP TABLE IF EXISTS user_contacts CASCADE;
+
+DROP TABLE IF EXISTS refresh_sessions CASCADE;

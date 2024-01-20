@@ -1,6 +1,9 @@
 api:
   port: "8000"
 
+user:
+  password_salt: "d3m-pz1]+2ks"
+
 db:
   username: "postgres"
   host: "localhost"

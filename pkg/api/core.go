@@ -51,6 +51,8 @@ func (api *Api) registerRoutes() {
 
 	auth := base.Group("/auth")
 	auth.POST("/signup", api.SignUp)
+	auth.POST("/check-email", api.CheckEmailExists)
+	auth.POST("/check-nickname", api.CheckNicknameExists)
 }
 
 type Error struct {
@@ -93,4 +95,8 @@ func getBadRequestError(err error) Error {
 		Error:   BadRequestErrorTitle,
 		Message: err.Error(),
 	}
+}
+
+type StatusResponse struct {
+	Status string `json:"status"`
 }

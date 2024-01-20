@@ -9,10 +9,15 @@ import (
 type ServiceConfiguration struct {
 	PostgresDB `yaml:"db" json:"postgresDB"`
 	Api        `yaml:"api" json:"api"`
+	User       `yaml:"user" json:"user"`
 }
 
 type Api struct {
 	PORT string `yaml:"port"`
+}
+
+type User struct {
+	PasswordSalt string `yaml:"password_salt"`
 }
 
 type PostgresDB struct {

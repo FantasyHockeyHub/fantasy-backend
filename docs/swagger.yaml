@@ -1,7 +1,133 @@
+definitions:
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.SignUpInput:
+    properties:
+      email:
+        maxLength: 64
+        type: string
+      nickname:
+        maxLength: 64
+        minLength: 4
+        type: string
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+    required:
+    - email
+    - nickname
+    - password
+    type: object
+  pkg_api.EmailInput:
+    properties:
+      email:
+        maxLength: 64
+        type: string
+    required:
+    - email
+    type: object
+  pkg_api.Error:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+  pkg_api.NicknameInput:
+    properties:
+      nickname:
+        maxLength: 64
+        minLength: 4
+        type: string
+    required:
+    - nickname
+    type: object
+  pkg_api.StatusResponse:
+    properties:
+      status:
+        type: string
+    type: object
 info:
   contact: {}
   title: fantasy api doc
-paths: {}
+paths:
+  /auth/check-email:
+    post:
+      consumes:
+      - application/json
+      description: Существует ли уже пользователь с таким email
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/pkg_api.EmailInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Использован ли данный email в сервисе
+      tags:
+      - profile
+  /auth/check-nickname:
+    post:
+      consumes:
+      - application/json
+      description: Существует ли уже пользователь с таким nickname
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/pkg_api.NicknameInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Использован ли данный nickname в сервисе
+      tags:
+      - profile
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Регистрация нового пользователя в системе
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.SignUpInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Регистрация
+      tags:
+      - auth
 securityDefinitions:
   ApiKeyAuth:
     in: header
