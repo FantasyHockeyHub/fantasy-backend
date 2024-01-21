@@ -15,7 +15,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "auth"
                 ],
                 "summary": "Использован ли данный email в сервисе",
                 "parameters": [
@@ -55,7 +55,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "auth"
                 ],
                 "summary": "Использован ли данный nickname в сервисе",
                 "parameters": [

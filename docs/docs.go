@@ -25,7 +25,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "auth"
                 ],
                 "summary": "Использован ли данный email в сервисе",
                 "parameters": [
@@ -65,7 +65,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "auth"
                 ],
                 "summary": "Использован ли данный nickname в сервисе",
                 "parameters": [

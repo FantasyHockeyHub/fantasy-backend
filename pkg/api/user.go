@@ -27,35 +27,30 @@ func (api Api) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	exists, err := api.user.CheckEmailExists(inp.Email)
+	err := api.user.CheckEmailExists(inp.Email)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
-		return
-	}
-	if exists == true {
 		ctx.JSON(http.StatusBadRequest, Error{
 			Error:   BadRequestErrorTitle,
-			Message: "user already exists",
+			Message: err.Error(),
 		})
 		return
 	}
 
-	exists, err = api.user.CheckNicknameExists(inp.Nickname)
+	err = api.user.CheckNicknameExists(inp.Nickname)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
-		return
-	}
-	if exists == true {
 		ctx.JSON(http.StatusBadRequest, Error{
 			Error:   BadRequestErrorTitle,
-			Message: "nickname is already taken",
+			Message: err.Error(),
 		})
 		return
 	}
 
 	err = api.user.SignUp(ctx, inp)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		ctx.JSON(http.StatusBadRequest, Error{
+			Error:   BadRequestErrorTitle,
+			Message: err.Error(),
+		})
 		return
 	}
 
@@ -70,7 +65,7 @@ type EmailInput struct {
 // @Summary Использован ли данный email в сервисе
 // @Schemes
 // @Description Существует ли уже пользователь с таким email
-// @Tags profile
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Param data body EmailInput true "Входные параметры"
@@ -87,15 +82,11 @@ func (api Api) CheckEmailExists(ctx *gin.Context) {
 		return
 	}
 
-	exists, err := api.user.CheckEmailExists(inp.Email)
+	err := api.user.CheckEmailExists(inp.Email)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
-		return
-	}
-	if exists == true {
 		ctx.JSON(http.StatusBadRequest, Error{
 			Error:   BadRequestErrorTitle,
-			Message: "user already exists",
+			Message: err.Error(),
 		})
 		return
 	}
@@ -111,7 +102,7 @@ type NicknameInput struct {
 // @Summary Использован ли данный nickname в сервисе
 // @Schemes
 // @Description Существует ли уже пользователь с таким nickname
-// @Tags profile
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Param data body NicknameInput true "Входные параметры"
@@ -128,15 +119,11 @@ func (api Api) CheckNicknameExists(ctx *gin.Context) {
 		return
 	}
 
-	exists, err := api.user.CheckNicknameExists(inp.Nickname)
+	err := api.user.CheckNicknameExists(inp.Nickname)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
-		return
-	}
-	if exists == true {
 		ctx.JSON(http.StatusBadRequest, Error{
 			Error:   BadRequestErrorTitle,
-			Message: "nickname is already taken",
+			Message: err.Error(),
 		})
 		return
 	}

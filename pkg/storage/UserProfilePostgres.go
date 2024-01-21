@@ -24,7 +24,7 @@ func (p *PostgresStorage) CreateUserProfile(tx *sqlx.Tx, u user.SignUpModel) err
 func (p *PostgresStorage) CheckNicknameExists(nickname string) (bool, error) {
 	var exists bool
 
-	query := "SELECT EXISTS (SELECT 1 FROM user_profile WHERE nickname = $1)"
+	query := "SELECT EXISTS (SELECT 1 FROM user_profile WHERE LOWER(nickname) = LOWER($1))"
 	row := p.db.QueryRow(query, nickname)
 	err := row.Scan(&exists)
 	if err != nil {

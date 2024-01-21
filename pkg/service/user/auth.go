@@ -2,9 +2,11 @@ package user
 
 import (
 	"context"
+	"errors"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/config"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
 	"github.com/jmoiron/sqlx"
+	"unicode"
 )
 
 const startBalance = 1000
@@ -29,6 +31,10 @@ type Service struct {
 }
 
 func (s *Service) SignUp(ctx context.Context, input user.SignUpInput) error {
+	isValid := ValidatePassword(input.Password)
+	if isValid != true {
+		return errors.New("password is not valid")
+	}
 	cfg := config.Load()
 	hasher := NewSHA1Hasher(cfg.User.PasswordSalt)
 	passwordHash, err := hasher.Hash(input.Password)
@@ -50,20 +56,44 @@ func (s *Service) SignUp(ctx context.Context, input user.SignUpInput) error {
 	return nil
 }
 
-func (s *Service) CheckEmailExists(email string) (bool, error) {
-	exists, err := s.storage.CheckEmailExists(email)
-	if err != nil {
-		return true, err
+func ValidatePassword(password string) bool {
+	var hasLower, hasUpper, hasDigit bool
+
+	for _, char := range password {
+		if unicode.IsLower(char) {
+			hasLower = true
+		}
+		if unicode.IsUpper(char) {
+			hasUpper = true
+		}
+		if unicode.IsDigit(char) {
+			hasDigit = true
+		}
 	}
 
-	return exists, nil
+	return hasLower && hasUpper && hasDigit
 }
 
-func (s *Service) CheckNicknameExists(nickname string) (bool, error) {
-	exists, err := s.storage.CheckNicknameExists(nickname)
+func (s *Service) CheckEmailExists(email string) error {
+	exists, err := s.storage.CheckEmailExists(email)
 	if err != nil {
-		return true, err
+		return err
+	}
+	if exists == true {
+		return errors.New("user already exists")
 	}
 
-	return exists, nil
+	return nil
+}
+
+func (s *Service) CheckNicknameExists(nickname string) error {
+	exists, err := s.storage.CheckNicknameExists(nickname)
+	if err != nil {
+		return err
+	}
+	if exists == true {
+		return errors.New("nickname is already taken")
+	}
+
+	return nil
 }

@@ -75,7 +75,7 @@ paths:
             $ref: '#/definitions/pkg_api.Error'
       summary: Использован ли данный email в сервисе
       tags:
-      - profile
+      - auth
   /auth/check-nickname:
     post:
       consumes:
@@ -101,7 +101,7 @@ paths:
             $ref: '#/definitions/pkg_api.Error'
       summary: Использован ли данный nickname в сервисе
       tags:
-      - profile
+      - auth
   /auth/signup:
     post:
       consumes:

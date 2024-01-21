@@ -22,7 +22,7 @@ func (p *PostgresStorage) CreateUserContacts(tx *sqlx.Tx, u user.SignUpModel) er
 func (p *PostgresStorage) CheckEmailExists(email string) (bool, error) {
 	var exists bool
 
-	query := "SELECT EXISTS (SELECT 1 FROM user_contacts WHERE email = $1)"
+	query := "SELECT EXISTS (SELECT 1 FROM user_contacts WHERE LOWER(email) = LOWER($1))"
 	row := p.db.QueryRow(query, email)
 	err := row.Scan(&exists)
 	if err != nil {
