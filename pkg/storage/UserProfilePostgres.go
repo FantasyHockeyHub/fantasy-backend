@@ -25,8 +25,7 @@ func (p *PostgresStorage) CheckNicknameExists(nickname string) (bool, error) {
 	var exists bool
 
 	query := "SELECT EXISTS (SELECT 1 FROM user_profile WHERE LOWER(nickname) = LOWER($1))"
-	row := p.db.QueryRow(query, nickname)
-	err := row.Scan(&exists)
+	err := p.db.QueryRow(query, nickname).Scan(&exists)
 	if err != nil {
 		return false, err
 	}

@@ -95,7 +95,47 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/signup": {
+        "/auth/sign-in": {
+            "post": {
+                "description": "Авторизация пользователя в системе",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Авторизация",
+                "parameters": [
+                    {
+                        "description": "Входные параметры",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.SignInInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/sign-up": {
             "post": {
                 "description": "Регистрация нового пользователя в системе",
                 "consumes": [
@@ -137,6 +177,24 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.SignInInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 8
+                }
+            }
+        },
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.SignUpInput": {
             "type": "object",
             "required": [
