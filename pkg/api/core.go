@@ -54,6 +54,7 @@ func (api *Api) registerRoutes() {
 	auth.POST("/check-email", api.CheckEmailExists)
 	auth.POST("/check-nickname", api.CheckNicknameExists)
 	auth.POST("/sign-in", api.SignIn)
+	auth.POST("/email/send-code", api.SendVerificationCode)
 }
 
 type Error struct {

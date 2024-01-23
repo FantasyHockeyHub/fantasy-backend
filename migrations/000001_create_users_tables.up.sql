@@ -31,3 +31,10 @@ CREATE TABLE refresh_sessions
     issued_at        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     expires_in       TIMESTAMP WITH TIME ZONE NOT NULL
 );
+
+CREATE TABLE email_verification
+(
+    id    SERIAL PRIMARY KEY,
+    email VARCHAR(255),
+    code  INT
+);

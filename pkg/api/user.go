@@ -121,3 +121,30 @@ func (api Api) CheckNicknameExists(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
 }
+
+// SendVerificationCode godoc
+// @Summary Отправка кода подтверждения
+// @Schemes
+// @Description Отправка письма с кодом для подтверждения email пользователя
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param data body EmailInput true "Входные параметры"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} Error
+// @Router /auth/email/send-code [post]
+func (api Api) SendVerificationCode(ctx *gin.Context) {
+	var inp EmailInput
+	if err := ctx.BindJSON(&inp); err != nil {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		return
+	}
+
+	err := api.user.SendVerificationCode(inp.Email)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
+}

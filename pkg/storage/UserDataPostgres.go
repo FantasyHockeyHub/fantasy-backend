@@ -21,6 +21,7 @@ func (p *PostgresStorage) CreateUserData(tx *sqlx.Tx, u user.SignUpModel) error 
 
 	return nil
 }
+
 func (p *PostgresStorage) GetUserDataByID(profileID uuid.UUID) (user.UserDataModel, error) {
 	var u user.UserDataModel
 	u.ProfileID = profileID

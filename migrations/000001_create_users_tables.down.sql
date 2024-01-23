@@ -5,3 +5,5 @@ DROP TABLE IF EXISTS user_data CASCADE;
 DROP TABLE IF EXISTS user_contacts CASCADE;
 
 DROP TABLE IF EXISTS refresh_sessions CASCADE;
+
+DROP TABLE IF EXISTS email_verification;

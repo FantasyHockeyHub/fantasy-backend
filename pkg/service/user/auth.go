@@ -7,8 +7,6 @@ import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"strings"
-	"unicode"
 )
 
 const startBalance = 1000
@@ -22,6 +20,9 @@ type Storage interface {
 	CheckNicknameExists(nickname string) (bool, error)
 	GetProfileIDByEmail(email string) (uuid.UUID, error)
 	GetUserDataByID(profileID uuid.UUID) (user.UserDataModel, error)
+	CreateVerificationCode(email string) (int, error)
+	GetVerificationCode(email string) (int, error)
+	UpdateVerificationCode(email string) (int, error)
 }
 
 func NewService(storage Storage) *Service {
@@ -40,15 +41,26 @@ func (s *Service) SignUp(ctx context.Context, input user.SignUpInput) error {
 		return err
 	}
 
+	isValid := ValidateNickname(input.Nickname)
+	if isValid != true {
+		return service.InvalidNicknameError
+	}
+
 	err = s.CheckNicknameExists(input.Nickname)
 	if err != nil {
 		return err
 	}
 
-	isValid := ValidatePassword(input.Password)
+	isValid = ValidatePassword(input.Password)
 	if isValid != true {
 		return service.PasswordValidationError
 	}
+
+	err = s.CheckEmailVerification(input.Email, input.Code)
+	if err != nil {
+		return err
+	}
+
 	cfg := config.Load()
 	hasher := NewSHA1Hasher(cfg.User.PasswordSalt)
 	passwordHash, err := hasher.Hash(input.Password)
@@ -84,67 +96,6 @@ func (s *Service) SignIn(ctx context.Context, input user.SignInInput) error {
 	err = ComparePasswords(userData.PasswordEncoded, input.Password, userData.PasswordSalt)
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func ComparePasswords(currentPasswod string, passwordInput string, passwordSalt string) error {
-	hasher := NewSHA1Hasher(passwordSalt)
-	inputPasswordHash, err := hasher.Hash(passwordInput)
-	if err != nil {
-		return err
-	}
-	if inputPasswordHash != currentPasswod {
-		return service.IncorrectPasswordError
-	}
-
-	return nil
-}
-
-func ValidatePassword(password string) bool {
-	var hasLower, hasUpper, hasDigit bool
-	inSpecialChars := true
-	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%*?"
-
-	for _, char := range password {
-		if !strings.ContainsAny(string(char), charset) {
-			inSpecialChars = false
-			return false
-		}
-		if unicode.IsLower(char) {
-			hasLower = true
-		}
-		if unicode.IsUpper(char) {
-			hasUpper = true
-		}
-		if unicode.IsDigit(char) {
-			hasDigit = true
-		}
-	}
-
-	return hasLower && hasUpper && hasDigit && inSpecialChars
-}
-
-func (s *Service) CheckEmailExists(email string) error {
-	exists, err := s.storage.CheckEmailExists(email)
-	if err != nil {
-		return err
-	}
-	if exists == true {
-		return service.UserAlreadyExistsError
-	}
-
-	return nil
-}
-
-func (s *Service) CheckNicknameExists(nickname string) error {
-	exists, err := s.storage.CheckNicknameExists(nickname)
-	if err != nil {
-		return err
-	}
-	if exists == true {
-		return service.NicknameTakenError
 	}
 
 	return nil

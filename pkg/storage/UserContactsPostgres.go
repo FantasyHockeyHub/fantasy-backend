@@ -9,7 +9,7 @@ import (
 )
 
 func (p *PostgresStorage) CreateUserContacts(tx *sqlx.Tx, u user.SignUpModel) error {
-	_, err := tx.Exec(`INSERT INTO user_contacts (profile_id, email, email_subscription) VALUES ($1, $2, $3);`,
+	_, err := tx.Exec(`INSERT INTO user_contacts (profile_id, email, email_subscription) VALUES ($1, LOWER($2), $3);`,
 		u.ID,
 		u.Email,
 		false,
