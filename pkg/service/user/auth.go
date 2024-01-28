@@ -7,6 +7,7 @@ import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"time"
 )
 
 const startBalance = 1000
@@ -23,6 +24,9 @@ type Storage interface {
 	CreateVerificationCode(email string) (int, error)
 	GetVerificationCode(email string) (int, error)
 	UpdateVerificationCode(email string) (int, error)
+	CreateSession(session user.RefreshSession) error
+	GetSessionByRefreshToken(refreshTokenID string) (user.RefreshSession, error)
+	DeleteSessionByRefreshToken(refreshTokenID string) error
 }
 
 func NewService(storage Storage) *Service {
@@ -82,23 +86,83 @@ func (s *Service) SignUp(ctx context.Context, input user.SignUpInput) error {
 	return nil
 }
 
-func (s *Service) SignIn(ctx context.Context, input user.SignInInput) error {
+func (s *Service) SignIn(ctx context.Context, input user.SignInInput) (user.Tokens, error) {
+	var tokens user.Tokens
+
 	profileID, err := s.storage.GetProfileIDByEmail(input.Email)
 	if err != nil {
-		return err
+		return tokens, err
 	}
 
 	userData, err := s.storage.GetUserDataByID(profileID)
 	if err != nil {
-		return err
+		return tokens, err
 	}
 
 	err = ComparePasswords(userData.PasswordEncoded, input.Password, userData.PasswordSalt)
 	if err != nil {
-		return err
+		return tokens, err
 	}
 
-	return nil
+	tokens, err = s.CreateSession(ctx, profileID)
+	if err != nil {
+		return tokens, err
+	}
+
+	return tokens, nil
+}
+
+func (s *Service) RefreshTokens(ctx context.Context, refreshTokenID string) (user.Tokens, error) {
+	var tokens user.Tokens
+
+	session, err := s.storage.GetSessionByRefreshToken(refreshTokenID)
+	if err != nil {
+		return tokens, err
+	}
+
+	tokens, err = s.CreateSession(ctx, session.ProfileID)
+	if err != nil {
+		return tokens, err
+	}
+
+	err = s.storage.DeleteSessionByRefreshToken(refreshTokenID)
+	if err != nil {
+		return tokens, err
+	}
+
+	return tokens, nil
+}
+
+func (s *Service) CreateSession(ctx context.Context, userID uuid.UUID) (user.Tokens, error) {
+	var (
+		pair user.Tokens
+		err  error
+	)
+
+	cfg := config.Load()
+	accessTokenLifetime := time.Duration(cfg.User.AccessTokenLifetime) * time.Minute
+	refreshTokenLifetime := time.Duration(cfg.User.RefreshTokenLifetime) * time.Minute
+
+	m := NewManager()
+	pair.AccessToken, err = m.CreateJWT(userID.String(), accessTokenLifetime)
+	if err != nil {
+		return pair, err
+	}
+
+	pair.RefreshToken, err = m.CreateRefreshToken()
+	if err != nil {
+		return pair, err
+	}
+
+	session := user.RefreshSession{
+		ProfileID:    userID,
+		RefreshToken: pair.RefreshToken,
+		ExpiresAt:    time.Now().Add(refreshTokenLifetime),
+	}
+
+	err = s.storage.CreateSession(session)
+
+	return pair, err
 }
 
 func (s *Service) GetProfileIDByEmail(email string) (uuid.UUID, error) {
@@ -108,4 +172,22 @@ func (s *Service) GetProfileIDByEmail(email string) (uuid.UUID, error) {
 	}
 
 	return profileID, nil
+}
+
+func (s *Service) GetSessionByRefreshToken(refreshTokenID string) (user.RefreshSession, error) {
+	session, err := s.storage.GetSessionByRefreshToken(refreshTokenID)
+	if err != nil {
+		return session, err
+	}
+
+	return session, nil
+}
+
+func (s *Service) DeleteSessionByRefreshToken(refreshTokenID string) error {
+	err := s.storage.DeleteSessionByRefreshToken(refreshTokenID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

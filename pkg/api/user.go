@@ -41,7 +41,7 @@ func (api Api) SignUp(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param data body user.SignInInput true "Входные параметры"
-// @Success 200 {object} StatusResponse
+// @Success 200 {object} user.Tokens
 // @Failure 400 {object} Error
 // @Router /auth/sign-in [post]
 func (api Api) SignIn(ctx *gin.Context) {
@@ -51,13 +51,44 @@ func (api Api) SignIn(ctx *gin.Context) {
 		return
 	}
 
-	err := api.user.SignIn(ctx, inp)
+	tokens, err := api.user.SignIn(ctx, inp)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
+	ctx.JSON(http.StatusOK, tokens)
+}
+
+type RefreshInput struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
+// RefreshTokens godoc
+// @Summary Обновление токенов
+// @Schemes
+// @Description Обновление access и refresh токенов
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param data body RefreshInput true "Входные параметры"
+// @Success 200 {object} user.Tokens
+// @Failure 400 {object} Error
+// @Router /auth/refresh-tokens [post]
+func (api Api) RefreshTokens(ctx *gin.Context) {
+	var inp RefreshInput
+	if err := ctx.BindJSON(&inp); err != nil {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		return
+	}
+
+	tokens, err := api.user.RefreshTokens(ctx, inp.RefreshToken)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, tokens)
 }
 
 type EmailInput struct {
@@ -68,13 +99,13 @@ type EmailInput struct {
 // @Summary Использован ли данный email в сервисе
 // @Schemes
 // @Description Существует ли уже пользователь с таким email
-// @Tags auth
+// @Tags user
 // @Accept json
 // @Produce json
 // @Param data body EmailInput true "Входные параметры"
 // @Success 200 {object} StatusResponse
 // @Failure 400 {object} Error
-// @Router /auth/check-email [post]
+// @Router /user/check-email [post]
 func (api Api) CheckEmailExists(ctx *gin.Context) {
 	var inp EmailInput
 	if err := ctx.BindJSON(&inp); err != nil {
@@ -99,13 +130,13 @@ type NicknameInput struct {
 // @Summary Использован ли данный nickname в сервисе
 // @Schemes
 // @Description Существует ли уже пользователь с таким nickname
-// @Tags auth
+// @Tags user
 // @Accept json
 // @Produce json
 // @Param data body NicknameInput true "Входные параметры"
 // @Success 200 {object} StatusResponse
 // @Failure 400 {object} Error
-// @Router /auth/check-nickname [post]
+// @Router /user/check-nickname [post]
 func (api Api) CheckNicknameExists(ctx *gin.Context) {
 	var inp NicknameInput
 	if err := ctx.BindJSON(&inp); err != nil {

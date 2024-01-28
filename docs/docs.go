@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/check-email": {
+        "/auth/email/send-code": {
             "post": {
-                "description": "Существует ли уже пользователь с таким email",
+                "description": "Отправка письма с кодом для подтверждения email пользователя",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,7 +27,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Использован ли данный email в сервисе",
+                "summary": "Отправка кода подтверждения",
                 "parameters": [
                     {
                         "description": "Входные параметры",
@@ -55,9 +55,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/check-nickname": {
+        "/auth/refresh-tokens": {
             "post": {
-                "description": "Существует ли уже пользователь с таким nickname",
+                "description": "Обновление access и refresh токенов",
                 "consumes": [
                     "application/json"
                 ],
@@ -67,7 +67,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Использован ли данный nickname в сервисе",
+                "summary": "Обновление токенов",
                 "parameters": [
                     {
                         "description": "Входные параметры",
@@ -75,7 +75,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/pkg_api.NicknameInput"
+                            "$ref": "#/definitions/pkg_api.RefreshInput"
                         }
                     }
                 ],
@@ -83,7 +83,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pkg_api.StatusResponse"
+                            "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.Tokens"
                         }
                     },
                     "400": {
@@ -123,7 +123,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pkg_api.StatusResponse"
+                            "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.Tokens"
                         }
                     },
                     "400": {
@@ -174,6 +174,86 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/check-email": {
+            "post": {
+                "description": "Существует ли уже пользователь с таким email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Использован ли данный email в сервисе",
+                "parameters": [
+                    {
+                        "description": "Входные параметры",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.EmailInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/check-nickname": {
+            "post": {
+                "description": "Существует ли уже пользователь с таким nickname",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Использован ли данный nickname в сервисе",
+                "parameters": [
+                    {
+                        "description": "Входные параметры",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.NicknameInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -198,11 +278,15 @@ const docTemplate = `{
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.SignUpInput": {
             "type": "object",
             "required": [
+                "code",
                 "email",
                 "nickname",
                 "password"
             ],
             "properties": {
+                "code": {
+                    "type": "integer"
+                },
                 "email": {
                     "type": "string",
                     "maxLength": 64
@@ -216,6 +300,17 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 64,
                     "minLength": 8
+                }
+            }
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.Tokens": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "refreshToken": {
+                    "type": "string"
                 }
             }
         },
@@ -252,6 +347,17 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 64,
                     "minLength": 4
+                }
+            }
+        },
+        "pkg_api.RefreshInput": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
                 }
             }
         },

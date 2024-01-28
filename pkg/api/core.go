@@ -50,11 +50,19 @@ func (api *Api) registerRoutes() {
 	//baseWithAuth.Use(api.AuthMW())
 
 	auth := base.Group("/auth")
-	auth.POST("/sign-up", api.SignUp)
-	auth.POST("/check-email", api.CheckEmailExists)
-	auth.POST("/check-nickname", api.CheckNicknameExists)
-	auth.POST("/sign-in", api.SignIn)
-	auth.POST("/email/send-code", api.SendVerificationCode)
+	{
+		auth.POST("/sign-up", api.SignUp)
+		auth.POST("/sign-in", api.SignIn)
+		auth.POST("/email/send-code", api.SendVerificationCode)
+		auth.POST("/refresh-tokens", api.RefreshTokens)
+	}
+
+	user := base.Group("/user")
+	{
+		user.POST("/check-email", api.CheckEmailExists)
+		user.POST("/check-nickname", api.CheckNicknameExists)
+	}
+
 }
 
 type Error struct {

@@ -3,6 +3,9 @@ api:
 
 user:
   password_salt: "d3m-pz1]+2ks"
+  signing_key: "jbds82sk0da[s"
+  access_token_lifetime: 60
+  refresh_token_lifetime: 43200
 
 db:
   username: "postgres"

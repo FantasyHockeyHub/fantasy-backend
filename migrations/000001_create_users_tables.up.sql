@@ -27,7 +27,7 @@ CREATE TABLE refresh_sessions
 (
     id               SERIAL PRIMARY KEY,
     profile_id       UUID REFERENCES user_profile (id) ON DELETE CASCADE,
-    refresh_token_id UUID                     NOT NULL,
+    refresh_token_id VARCHAR(255)             NOT NULL,
     issued_at        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     expires_in       TIMESTAMP WITH TIME ZONE NOT NULL
 );

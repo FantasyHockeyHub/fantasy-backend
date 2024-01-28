@@ -10,4 +10,7 @@ var (
 	IncorrectPasswordError       = errors.New("incorrect password")
 	InvalidNicknameError         = errors.New("invalid nickname")
 	InvalidVerificationCodeError = errors.New("invalid verification code")
+	InvalidAccessTokenError      = errors.New("invalid access token")
+	InvalidRefreshTokenError     = errors.New("invalid refresh token")
+	ParseTokenError              = errors.New("unable to get token parameters")
 )
