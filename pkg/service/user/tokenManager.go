@@ -1,35 +1,43 @@
 package user
 
 import (
+	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/config"
-	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/golang-jwt/jwt/v5"
 	"math/rand"
 	"time"
 )
 
+var (
+	ParseTokenError         = errors.New("unable to get token parameters")
+	InvalidAccessTokenError = errors.New("invalid access token")
+)
+
 type TokenManager interface {
-	CreateJWT(userID string, t time.Duration) (string, error)
+	CreateJWT(userID string) (string, error)
 	ParseJWT(accessToken string) (string, error)
 	CreateRefreshToken() (string, error)
 }
 
 type Manager struct {
-	signingKey string
+	signingKey           string
+	AccessTokenLifetime  time.Duration
+	RefreshTokenLifetime time.Duration
 }
 
-func NewManager() Manager {
-	cfg := config.Load()
-	m := Manager{signingKey: cfg.User.SigningKey}
-
-	return m
+func NewManager(cfg config.ServiceConfiguration) *Manager {
+	return &Manager{
+		signingKey:           cfg.User.SigningKey,
+		AccessTokenLifetime:  time.Duration(cfg.User.AccessTokenLifetime) * time.Minute,
+		RefreshTokenLifetime: time.Duration(cfg.User.RefreshTokenLifetime) * time.Minute,
+	}
 }
 
-func (m *Manager) CreateJWT(userID string, t time.Duration) (string, error) {
+func (m *Manager) CreateJWT(userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
-			"exp": time.Now().Add(t).Unix(),
+			"exp": time.Now().Add(m.AccessTokenLifetime).Unix(),
 			"sub": userID,
 		})
 	return token.SignedString([]byte(m.signingKey))
@@ -44,12 +52,12 @@ func (m *Manager) ParseJWT(accessToken string) (string, error) {
 	}
 
 	if !token.Valid {
-		return "", service.InvalidAccessTokenError
+		return "", InvalidAccessTokenError
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return "", service.ParseTokenError
+		return "", ParseTokenError
 	}
 
 	return claims["sub"].(string), nil

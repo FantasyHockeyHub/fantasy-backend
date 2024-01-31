@@ -2,10 +2,14 @@ package storage
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
-	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+)
+
+var (
+	UserDoesNotExistError = errors.New("user does not exist")
 )
 
 func (p *PostgresStorage) CreateUserContacts(tx *sqlx.Tx, u user.SignUpModel) error {
@@ -41,7 +45,7 @@ func (p *PostgresStorage) GetProfileIDByEmail(email string) (uuid.UUID, error) {
 	err := p.db.QueryRow(query, email).Scan(&profileIDString)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return uuid.Nil, service.UserDoesNotExistError
+			return uuid.Nil, UserDoesNotExistError
 		} else {
 			return uuid.Nil, err
 		}

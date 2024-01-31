@@ -3,7 +3,6 @@ package storage
 import (
 	"database/sql"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
-	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -30,7 +29,7 @@ func (p *PostgresStorage) GetUserDataByID(profileID uuid.UUID) (user.UserDataMod
 	err := p.db.QueryRow(query, u.ProfileID.String()).Scan(&u.PasswordEncoded, &u.PasswordSalt)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return u, service.UserDoesNotExistError
+			return u, UserDoesNotExistError
 		} else {
 			return u, err
 		}

@@ -1,11 +1,18 @@
 package user
 
 import (
+	"crypto/rand"
 	"crypto/sha1"
+	"encoding/base64"
+	"errors"
 	"fmt"
-	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"strings"
 	"unicode"
+)
+
+var (
+	IncorrectPasswordError  = errors.New("incorrect password")
+	PasswordValidationError = errors.New("password is not valid")
 )
 
 type SHA1Hasher struct {
@@ -33,19 +40,28 @@ func ComparePasswords(currentPasswod string, passwordInput string, passwordSalt 
 		return err
 	}
 	if inputPasswordHash != currentPasswod {
-		return service.IncorrectPasswordError
+		return IncorrectPasswordError
 	}
 
 	return nil
 }
 
-func ValidatePassword(password string) bool {
+func GenerateSalt() (string, error) {
+	salt := make([]byte, 16)
+	_, err := rand.Read(salt)
+	if err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(salt), nil
+}
+
+func ValidatePassword(password string) error {
 	var hasLower, hasUpper, hasDigit bool
 	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%*?"
 
 	for _, char := range password {
 		if !strings.ContainsAny(string(char), charset) {
-			return false
+			return PasswordValidationError
 		}
 		if unicode.IsLower(char) {
 			hasLower = true
@@ -58,5 +74,8 @@ func ValidatePassword(password string) bool {
 		}
 	}
 
-	return hasLower && hasUpper && hasDigit
+	if hasLower && hasUpper && hasDigit {
+		return nil
+	}
+	return PasswordValidationError
 }

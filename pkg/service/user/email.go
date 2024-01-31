@@ -1,9 +1,14 @@
 package user
 
 import (
+	"errors"
 	"fmt"
-	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"gopkg.in/gomail.v2"
+)
+
+var (
+	UserAlreadyExistsError       = errors.New("user already exists")
+	InvalidVerificationCodeError = errors.New("invalid verification code")
 )
 
 func (s *Service) SendVerificationCode(email string) error {
@@ -51,7 +56,7 @@ func (s *Service) CheckEmailVerification(email string, inputCode int) error {
 	}
 
 	if code == 0 || code != inputCode {
-		return service.InvalidVerificationCodeError
+		return InvalidVerificationCodeError
 	}
 
 	return nil
@@ -63,7 +68,7 @@ func (s *Service) CheckEmailExists(email string) error {
 		return err
 	}
 	if exists == true {
-		return service.UserAlreadyExistsError
+		return UserAlreadyExistsError
 	}
 
 	return nil

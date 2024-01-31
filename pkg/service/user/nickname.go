@@ -1,26 +1,31 @@
 package user
 
 import (
-	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
+	"errors"
 	"strings"
 )
 
-func ValidateNickname(nickname string) bool {
+var (
+	NicknameTakenError   = errors.New("nickname is already taken")
+	InvalidNicknameError = errors.New("invalid nickname")
+)
+
+func ValidateNickname(nickname string) error {
 	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 	for _, char := range nickname {
 		if !strings.ContainsAny(string(char), charset) {
-			return false
+			return InvalidNicknameError
 		}
 	}
 
-	return true
+	return nil
 }
 
 func (s *Service) CheckNicknameExists(nickname string) error {
-	isValid := ValidateNickname(nickname)
-	if isValid != true {
-		return service.InvalidNicknameError
+	err := ValidateNickname(nickname)
+	if err != nil {
+		return err
 	}
 
 	exists, err := s.storage.CheckNicknameExists(nickname)
@@ -28,7 +33,7 @@ func (s *Service) CheckNicknameExists(nickname string) error {
 		return err
 	}
 	if exists == true {
-		return service.NicknameTakenError
+		return NicknameTakenError
 	}
 
 	return nil

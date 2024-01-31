@@ -1,12 +1,11 @@
 package storage
 
 import (
-	"context"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
 	"github.com/google/uuid"
 )
 
-func (p *PostgresStorage) SignUp(ctx context.Context, u user.SignUpModel) error {
+func (p *PostgresStorage) SignUp(u user.SignUpModel) error {
 	u.ID = uuid.New()
 	tx, err := p.db.Beginx()
 	if err != nil {

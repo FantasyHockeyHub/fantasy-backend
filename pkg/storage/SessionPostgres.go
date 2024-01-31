@@ -2,8 +2,12 @@ package storage
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
-	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
+)
+
+var (
+	InvalidRefreshTokenError = errors.New("invalid refresh token")
 )
 
 func (p *PostgresStorage) CreateSession(session user.RefreshSession) error {
@@ -32,7 +36,7 @@ func (p *PostgresStorage) GetSessionByRefreshToken(refreshTokenID string) (user.
                                                            WHERE refresh_token_id = $1;`, refreshTokenID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return session, service.InvalidRefreshTokenError
+			return session, InvalidRefreshTokenError
 		} else {
 			return session, err
 		}

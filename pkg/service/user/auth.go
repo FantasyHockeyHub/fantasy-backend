@@ -1,19 +1,24 @@
 package user
 
 import (
-	"context"
-	"github.com/Frozen-Fantasy/fantasy-backend.git/config"
+	"errors"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
-	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"time"
 )
 
+var (
+	InvalidRefreshTokenError = errors.New("invalid refresh token")
+	AuthHeaderError          = errors.New("empty authorization header")
+	InvalidAuthHeaderError   = errors.New("invalid authorization header")
+	EmptyTokenError          = errors.New("access token is empty")
+)
+
 const startBalance = 1000
 
 type Storage interface {
-	SignUp(ctx context.Context, u user.SignUpModel) error
+	SignUp(u user.SignUpModel) error
 	CreateUserProfile(tx *sqlx.Tx, u user.SignUpModel) error
 	CreateUserData(tx *sqlx.Tx, u user.SignUpModel) error
 	CreateUserContacts(tx *sqlx.Tx, u user.SignUpModel) error
@@ -29,25 +34,27 @@ type Storage interface {
 	DeleteSessionByRefreshToken(refreshTokenID string) error
 }
 
-func NewService(storage Storage) *Service {
+func NewService(storage Storage, jwt *Manager) *Service {
 	return &Service{
 		storage: storage,
+		Jwt:     jwt,
 	}
 }
 
 type Service struct {
 	storage Storage
+	Jwt     *Manager
 }
 
-func (s *Service) SignUp(ctx context.Context, input user.SignUpInput) error {
+func (s *Service) SignUp(input user.SignUpInput) error {
 	err := s.CheckEmailExists(input.Email)
 	if err != nil {
 		return err
 	}
 
-	isValid := ValidateNickname(input.Nickname)
-	if isValid != true {
-		return service.InvalidNicknameError
+	err = ValidateNickname(input.Nickname)
+	if err != nil {
+		return err
 	}
 
 	err = s.CheckNicknameExists(input.Nickname)
@@ -55,9 +62,9 @@ func (s *Service) SignUp(ctx context.Context, input user.SignUpInput) error {
 		return err
 	}
 
-	isValid = ValidatePassword(input.Password)
-	if isValid != true {
-		return service.PasswordValidationError
+	err = ValidatePassword(input.Password)
+	if err != nil {
+		return err
 	}
 
 	err = s.CheckEmailVerification(input.Email, input.Code)
@@ -65,8 +72,12 @@ func (s *Service) SignUp(ctx context.Context, input user.SignUpInput) error {
 		return err
 	}
 
-	cfg := config.Load()
-	hasher := NewSHA1Hasher(cfg.User.PasswordSalt)
+	salt, err := GenerateSalt()
+	if err != nil {
+		return err
+	}
+
+	hasher := NewSHA1Hasher(salt)
 	passwordHash, err := hasher.Hash(input.Password)
 	if err != nil {
 		return err
@@ -78,7 +89,7 @@ func (s *Service) SignUp(ctx context.Context, input user.SignUpInput) error {
 		PasswordSalt:    hasher.salt,
 		Coins:           startBalance,
 	}
-	err = s.storage.SignUp(ctx, userInfo)
+	err = s.storage.SignUp(userInfo)
 	if err != nil {
 		return err
 	}
@@ -86,7 +97,7 @@ func (s *Service) SignUp(ctx context.Context, input user.SignUpInput) error {
 	return nil
 }
 
-func (s *Service) SignIn(ctx context.Context, input user.SignInInput) (user.Tokens, error) {
+func (s *Service) SignIn(input user.SignInInput) (user.Tokens, error) {
 	var tokens user.Tokens
 
 	profileID, err := s.storage.GetProfileIDByEmail(input.Email)
@@ -104,7 +115,7 @@ func (s *Service) SignIn(ctx context.Context, input user.SignInInput) (user.Toke
 		return tokens, err
 	}
 
-	tokens, err = s.CreateSession(ctx, profileID)
+	tokens, err = s.CreateSession(profileID)
 	if err != nil {
 		return tokens, err
 	}
@@ -112,15 +123,10 @@ func (s *Service) SignIn(ctx context.Context, input user.SignInInput) (user.Toke
 	return tokens, nil
 }
 
-func (s *Service) RefreshTokens(ctx context.Context, refreshTokenID string) (user.Tokens, error) {
+func (s *Service) RefreshTokens(refreshTokenID string) (user.Tokens, error) {
 	var tokens user.Tokens
 
 	session, err := s.storage.GetSessionByRefreshToken(refreshTokenID)
-	if err != nil {
-		return tokens, err
-	}
-
-	tokens, err = s.CreateSession(ctx, session.ProfileID)
 	if err != nil {
 		return tokens, err
 	}
@@ -130,26 +136,30 @@ func (s *Service) RefreshTokens(ctx context.Context, refreshTokenID string) (use
 		return tokens, err
 	}
 
+	if session.ExpiresAt.Before(time.Now()) {
+		return tokens, InvalidRefreshTokenError
+	}
+
+	tokens, err = s.CreateSession(session.ProfileID)
+	if err != nil {
+		return tokens, err
+	}
+
 	return tokens, nil
 }
 
-func (s *Service) CreateSession(ctx context.Context, userID uuid.UUID) (user.Tokens, error) {
+func (s *Service) CreateSession(userID uuid.UUID) (user.Tokens, error) {
 	var (
 		pair user.Tokens
 		err  error
 	)
 
-	cfg := config.Load()
-	accessTokenLifetime := time.Duration(cfg.User.AccessTokenLifetime) * time.Minute
-	refreshTokenLifetime := time.Duration(cfg.User.RefreshTokenLifetime) * time.Minute
-
-	m := NewManager()
-	pair.AccessToken, err = m.CreateJWT(userID.String(), accessTokenLifetime)
+	pair.AccessToken, err = s.Jwt.CreateJWT(userID.String())
 	if err != nil {
 		return pair, err
 	}
 
-	pair.RefreshToken, err = m.CreateRefreshToken()
+	pair.RefreshToken, err = s.Jwt.CreateRefreshToken()
 	if err != nil {
 		return pair, err
 	}
@@ -157,7 +167,7 @@ func (s *Service) CreateSession(ctx context.Context, userID uuid.UUID) (user.Tok
 	session := user.RefreshSession{
 		ProfileID:    userID,
 		RefreshToken: pair.RefreshToken,
-		ExpiresAt:    time.Now().Add(refreshTokenLifetime),
+		ExpiresAt:    time.Now().Add(s.Jwt.RefreshTokenLifetime),
 	}
 
 	err = s.storage.CreateSession(session)

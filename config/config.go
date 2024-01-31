@@ -17,7 +17,6 @@ type Api struct {
 }
 
 type User struct {
-	PasswordSalt         string `yaml:"password_salt"`
 	SigningKey           string `yaml:"signing_key"`
 	AccessTokenLifetime  int    `yaml:"access_token_lifetime"`
 	RefreshTokenLifetime int    `yaml:"refresh_token_lifetime"`

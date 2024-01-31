@@ -21,6 +21,7 @@ func Core() fx.Option {
 			config.NewConfig,
 			gin.Default,
 			api.NewApi,
+			user.NewManager,
 			user.NewService,
 		),
 		fx.Invoke(restAPIHook),

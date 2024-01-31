@@ -24,7 +24,7 @@ func (api Api) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	err := api.user.SignUp(ctx, inp)
+	err := api.user.SignUp(inp)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 		return
@@ -51,7 +51,7 @@ func (api Api) SignIn(ctx *gin.Context) {
 		return
 	}
 
-	tokens, err := api.user.SignIn(ctx, inp)
+	tokens, err := api.user.SignIn(inp)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 		return
@@ -82,7 +82,7 @@ func (api Api) RefreshTokens(ctx *gin.Context) {
 		return
 	}
 
-	tokens, err := api.user.RefreshTokens(ctx, inp.RefreshToken)
+	tokens, err := api.user.RefreshTokens(inp.RefreshToken)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 		return
