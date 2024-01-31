@@ -1,7 +1,30 @@
+definitions:
+  pkg_api.Error:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+    type: object
 info:
   contact: {}
   title: fantasy api doc
-paths: {}
+paths:
+  /tournament/create_team_nhl:
+    get:
+      description: Добавлят информацию о команде NHL
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Создание команд NHL
+      tags:
+      - tournament
 securityDefinitions:
   ApiKeyAuth:
     in: header

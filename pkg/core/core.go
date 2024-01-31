@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/config"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/api"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/tournaments"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/user"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ func Core() fx.Option {
 	return fx.Options(
 		fx.Provide(
 			fx.Annotate(storage.NewPostgresStorage, fx.As(new(user.Storage))),
+			fx.Annotate(storage.NewPostgresStorage, fx.As(new(tournaments.Storage))),
 		),
 		fx.Provide(
 			context.Background,
@@ -22,6 +24,7 @@ func Core() fx.Option {
 			gin.Default,
 			api.NewApi,
 			user.NewService,
+			tournaments.NewService,
 		),
 		fx.Invoke(restAPIHook),
 	)

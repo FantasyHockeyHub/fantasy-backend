@@ -4,6 +4,7 @@ import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/config"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/docs"
 	_ "github.com/Frozen-Fantasy/fantasy-backend.git/docs"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/tournaments"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/user"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
@@ -11,20 +12,23 @@ import (
 )
 
 type Api struct {
-	router *gin.Engine
-	cfg    config.ServiceConfiguration
-	user   *user.Service
+	router      *gin.Engine
+	cfg         config.ServiceConfiguration
+	user        *user.Service
+	tournaments *tournaments.Service
 }
 
 func NewApi(
 	router *gin.Engine,
 	cfg config.ServiceConfiguration,
 	user *user.Service,
+	tournaments *tournaments.Service,
 ) *Api {
 	svc := &Api{
-		router: router,
-		cfg:    cfg,
-		user:   user,
+		router:      router,
+		cfg:         cfg,
+		user:        user,
+		tournaments: tournaments,
 	}
 	//svc.router.Use(CORSMiddleware())
 	svc.registerRoutes()
@@ -51,6 +55,9 @@ func (api *Api) registerRoutes() {
 
 	auth := base.Group("/auth")
 	auth.POST("/signup", api.SignUp)
+
+	team := base.Group("/tournament")
+	team.GET("/create_team_nhl", api.CreateTeamsNHL)
 }
 
 type Error struct {
