@@ -18,7 +18,7 @@ const (
 	Division   = "division"
 )
 
-func (p *PostgresStorage) CreateTeams(ctx context.Context, teams []tournaments.Standing) error {
+func (p *PostgresStorage) CreateTeamsNHL(ctx context.Context, teams []tournaments.Standing) error {
 	tx, err := p.db.Begin()
 	if err != nil {
 		return err
@@ -37,6 +37,47 @@ func (p *PostgresStorage) CreateTeams(ctx context.Context, teams []tournaments.S
 				team.League,
 				team.ConferenceName,
 				team.DivisionName,
+			).
+			PlaceholderFormat(sq.Dollar).
+			ToSql()
+
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.ExecContext(ctx, query, args...)
+		if err != nil {
+			log.Printf("team insert query error: %w", err)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("cant commit CreateTeams: %w", err)
+	}
+
+	return nil
+}
+
+func (p *PostgresStorage) CreateTeamsKHL(ctx context.Context, teams []tournaments.TeamKHL) error {
+	tx, err := p.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+
+	for _, team := range teams {
+		query, args, err := sq.
+			Insert(TeamsTable).
+			Columns(TeamAbbrev, TeamName, TeamLogo, League, Conference, Division).
+			Values(
+				team.Team.TeamAbbrev,
+				team.Team.TeamName,
+				team.Team.TeamLogo,
+				team.Team.League,
+				team.Team.ConferenceName,
+				team.Team.DivisionName,
 			).
 			PlaceholderFormat(sq.Dollar).
 			ToSql()

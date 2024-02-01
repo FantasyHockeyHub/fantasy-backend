@@ -35,3 +35,49 @@ var LeagueTitles = map[League]string{
 	NHL: "NHL",
 	KHL: "KHL",
 }
+
+var KHLAbrev = map[string]string{
+	"Металлург Мг":  "ММГ",
+	"Авангард":      "АВГ",
+	"СКА":           "СКА",
+	"Динамо М":      "ДИН",
+	"Салават Юлаев": "СЮЛ",
+	"Локомотив":     "ЛОК",
+	"Спартак":       "СПР",
+	"Лада":          "ЛАД",
+	"Автомобилист":  "АВТ",
+	"Ак Барс":       "АКБ",
+	"Трактор":       "ТРК",
+	"Торпедо":       "ТОР",
+	"Северсталь":    "СЕВ",
+	"ЦСКА":          "ЦСК",
+	"Нефтехимик":    "НХК",
+	"Динамо Мн":     "ДМН",
+	"Амур":          "АМР",
+	"Сибирь":        "СИБ",
+	"Адмирал":       "АДМ",
+	"Барыс":         "БАР",
+	"Куньлунь РС":   "КРС",
+	"Витязь":        "ВИТ",
+	"ХК Сочи":       "СОЧ",
+}
+
+type TeamKHL struct {
+	Team struct {
+		TeamName       string `json:"name"`
+		TeamLogo       string `json:"image"`
+		DivisionName   string `json:"division"`
+		League         League `json:"league"`
+		ConferenceName string `json:"conference"`
+		TeamAbbrev     string `json:"teamAbbrev"`
+	} `json:"team"`
+}
+
+type Teams struct {
+	TeamName       string `json:"teamName"`
+	TeamLogo       string `json:"teamLogo"`
+	DivisionName   string `json:"divisionName"`
+	League         League `json:"league"`
+	ConferenceName string `json:"conferenceName"`
+	TeamAbbrev     string `json:"teamAbbrev"`
+}

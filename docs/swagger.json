@@ -5,6 +5,29 @@
         "contact": {}
     },
     "paths": {
+        "/tournament/create_team_khl": {
+            "get": {
+                "description": "Добавлят информацию о команде KHL",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Создание команд KHL",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/tournament/create_team_nhl": {
             "get": {
                 "description": "Добавлят информацию о команде NHL",

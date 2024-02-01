@@ -2,8 +2,8 @@ package tournaments
 
 import (
 	"context"
+	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
-	"log"
 )
 
 func NewService(storage Storage) *Service {
@@ -13,19 +13,30 @@ func NewService(storage Storage) *Service {
 }
 
 type Storage interface {
-	CreateTeams(context.Context, []tournaments.Standing) error
+	CreateTeamsNHL(context.Context, []tournaments.Standing) error
+	CreateTeamsKHL(context.Context, []tournaments.TeamKHL) error
 }
 
 type Service struct {
 	storage Storage
 }
 
-func (s *Service) CreateTeams(ctx context.Context, response []tournaments.Standing) error {
+func (s *Service) CreateTeamsNHL(ctx context.Context, teams []tournaments.Standing) error {
 
-	err := s.storage.CreateTeams(ctx, response)
+	err := s.storage.CreateTeamsNHL(ctx, teams)
 	if err != nil {
-		log.Printf("CreateTeams: Cant create teams: %s", err)
+		return fmt.Errorf("CreateTeamsNHL: %w", err)
 	}
 
-	return err
+	return nil
+}
+
+func (s *Service) CreateTeamsKHL(ctx context.Context, teams []tournaments.TeamKHL) error {
+
+	err := s.storage.CreateTeamsKHL(ctx, teams)
+	if err != nil {
+		return fmt.Errorf("CreateTeamsKHL: %w", err)
+	}
+
+	return nil
 }

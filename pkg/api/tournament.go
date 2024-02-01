@@ -38,14 +38,16 @@ func (api *Api) CreateTeamsNHL(ctx *gin.Context) {
 	err = decoder.Decode(&standings)
 	if err != nil {
 		fmt.Println("Error decoding JSON:", err)
+		ctx.JSON(http.StatusBadRequest, getInternalServerError())
 		return
 	}
 	for idT, _ := range standings.Standings {
 		standings.Standings[idT].League = tournaments.NHL
 	}
 
-	err = api.tournaments.CreateTeams(ctx, standings.Standings)
+	err = api.tournaments.CreateTeamsNHL(ctx, standings.Standings)
 	if err != nil {
+		log.Printf("CreateTeamsNHL: %w", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
 		return
 	}
@@ -64,7 +66,7 @@ func (api *Api) CreateTeamsNHL(ctx *gin.Context) {
 // @Router /tournament/create_team_khl [get]
 func (api *Api) CreateTeamsKHL(ctx *gin.Context) {
 
-	url := "https://api-web.nhle.com/v1/standings/now"
+	url := "https://khl.api.webcaster.pro/api/khl_mobile/teams_v2"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Print(err.Error())
@@ -77,20 +79,22 @@ func (api *Api) CreateTeamsKHL(ctx *gin.Context) {
 	defer res.Body.Close()
 	decoder := json.NewDecoder(res.Body)
 
-	var standings tournaments.StandingsResponse
+	var teamKHL []tournaments.TeamKHL
 
-	err = decoder.Decode(&standings)
+	err = decoder.Decode(&teamKHL)
 	if err != nil {
 		fmt.Println("Error decoding JSON:", err)
+		ctx.JSON(http.StatusBadRequest, getInternalServerError())
 		return
 	}
-	for idT, _ := range standings.Standings {
-		standings.Standings[idT].League = tournaments.NHL
+	for idT, _ := range teamKHL {
+		teamKHL[idT].Team.League = tournaments.KHL
+		teamKHL[idT].Team.TeamAbbrev = tournaments.KHLAbrev[teamKHL[idT].Team.TeamName]
 	}
 
-	err = api.tournaments.CreateTeams(ctx, standings.Standings)
+	err = api.tournaments.CreateTeamsKHL(ctx, teamKHL)
 	if err != nil {
-		log.Printf("CreateTeam %w", err)
+		log.Printf("CreateTeamKHL: %w", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
 		return
 	}

@@ -10,6 +10,21 @@ info:
   contact: {}
   title: fantasy api doc
 paths:
+  /tournament/create_team_khl:
+    get:
+      description: Добавлят информацию о команде KHL
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Создание команд KHL
+      tags:
+      - tournament
   /tournament/create_team_nhl:
     get:
       description: Добавлят информацию о команде NHL
