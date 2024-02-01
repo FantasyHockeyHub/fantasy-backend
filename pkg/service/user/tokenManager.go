@@ -34,13 +34,18 @@ func NewManager(cfg config.ServiceConfiguration) *Manager {
 	}
 }
 
-func (m *Manager) CreateJWT(userID string) (string, error) {
+func (m *Manager) CreateJWT(userID string) (int64, string, error) {
+	expiresIn := time.Now().Add(m.AccessTokenLifetime).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
-			"exp": time.Now().Add(m.AccessTokenLifetime).Unix(),
+			"exp": expiresIn,
 			"sub": userID,
 		})
-	return token.SignedString([]byte(m.signingKey))
+	signedToken, err := token.SignedString([]byte(m.signingKey))
+	if err != nil {
+		return 0, "", err
+	}
+	return expiresIn, signedToken, nil
 }
 
 func (m *Manager) ParseJWT(accessToken string) (string, error) {

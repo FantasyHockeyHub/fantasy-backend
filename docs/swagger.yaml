@@ -37,6 +37,8 @@ definitions:
     properties:
       accessToken:
         type: string
+      expiresIn:
+        type: integer
       refreshToken:
         type: string
     type: object
@@ -66,10 +68,10 @@ definitions:
     type: object
   pkg_api.RefreshInput:
     properties:
-      refresh_token:
+      refreshToken:
         type: string
     required:
-    - refresh_token
+    - refreshToken
     type: object
   pkg_api.StatusResponse:
     properties:
@@ -103,6 +105,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
       summary: Отправка кода подтверждения
       tags:
       - auth
@@ -127,6 +133,10 @@ paths:
             $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.Tokens'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/pkg_api.Error'
       summary: Обновление токенов
@@ -155,6 +165,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
       summary: Авторизация
       tags:
       - auth
@@ -179,6 +193,10 @@ paths:
             $ref: '#/definitions/pkg_api.StatusResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/pkg_api.Error'
       summary: Регистрация
@@ -207,6 +225,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
       summary: Использован ли данный email в сервисе
       tags:
       - user
@@ -231,6 +253,10 @@ paths:
             $ref: '#/definitions/pkg_api.StatusResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/pkg_api.Error'
       summary: Использован ли данный nickname в сервисе

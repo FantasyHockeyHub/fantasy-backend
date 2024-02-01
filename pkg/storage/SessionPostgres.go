@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	InvalidRefreshTokenError = errors.New("invalid refresh token")
+	RefreshTokenNotFoundError = errors.New("refresh token not found")
 )
 
 func (p *PostgresStorage) CreateSession(session user.RefreshSession) error {
@@ -36,7 +36,7 @@ func (p *PostgresStorage) GetSessionByRefreshToken(refreshTokenID string) (user.
                                                            WHERE refresh_token_id = $1;`, refreshTokenID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return session, InvalidRefreshTokenError
+			return session, RefreshTokenNotFoundError
 		} else {
 			return session, err
 		}

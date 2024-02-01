@@ -51,6 +51,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
                     }
                 }
             }
@@ -88,6 +94,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }
@@ -131,6 +143,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
                     }
                 }
             }
@@ -168,6 +186,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }
@@ -211,6 +235,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
                     }
                 }
             }
@@ -248,6 +278,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }
@@ -309,6 +345,9 @@ const docTemplate = `{
                 "accessToken": {
                     "type": "string"
                 },
+                "expiresIn": {
+                    "type": "integer"
+                },
                 "refreshToken": {
                     "type": "string"
                 }
@@ -353,10 +392,10 @@ const docTemplate = `{
         "pkg_api.RefreshInput": {
             "type": "object",
             "required": [
-                "refresh_token"
+                "refreshToken"
             ],
             "properties": {
-                "refresh_token": {
+                "refreshToken": {
                     "type": "string"
                 }
             }

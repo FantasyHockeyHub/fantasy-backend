@@ -154,7 +154,7 @@ func (s *Service) CreateSession(userID uuid.UUID) (user.Tokens, error) {
 		err  error
 	)
 
-	pair.AccessToken, err = s.Jwt.CreateJWT(userID.String())
+	pair.ExpiresIn, pair.AccessToken, err = s.Jwt.CreateJWT(userID.String())
 	if err != nil {
 		return pair, err
 	}
@@ -173,31 +173,4 @@ func (s *Service) CreateSession(userID uuid.UUID) (user.Tokens, error) {
 	err = s.storage.CreateSession(session)
 
 	return pair, err
-}
-
-func (s *Service) GetProfileIDByEmail(email string) (uuid.UUID, error) {
-	profileID, err := s.storage.GetProfileIDByEmail(email)
-	if err != nil {
-		return profileID, err
-	}
-
-	return profileID, nil
-}
-
-func (s *Service) GetSessionByRefreshToken(refreshTokenID string) (user.RefreshSession, error) {
-	session, err := s.storage.GetSessionByRefreshToken(refreshTokenID)
-	if err != nil {
-		return session, err
-	}
-
-	return session, nil
-}
-
-func (s *Service) DeleteSessionByRefreshToken(refreshTokenID string) error {
-	err := s.storage.DeleteSessionByRefreshToken(refreshTokenID)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

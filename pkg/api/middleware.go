@@ -3,6 +3,7 @@ package api
 import (
 	user_service "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/user"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -10,6 +11,7 @@ import (
 func (api Api) UserIdentity(ctx *gin.Context) {
 	id, err := api.ParseAuthHeader(ctx)
 	if err != nil {
+		log.Println("Authorization:", err)
 		ctx.JSON(http.StatusUnauthorized, getUnauthorizedError(err))
 		return
 	}
