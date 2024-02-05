@@ -40,6 +40,21 @@ paths:
       summary: Создание команд NHL
       tags:
       - tournament
+  /tournament/events_day_khl:
+    get:
+      description: Добавляет в бд матчи за день
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Получение событий на текущий день
+      tags:
+      - tournament
 securityDefinitions:
   ApiKeyAuth:
     in: header

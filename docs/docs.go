@@ -60,6 +60,29 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/tournament/events_day_khl": {
+            "get": {
+                "description": "Добавляет в бд матчи за день",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Получение событий на текущий день",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

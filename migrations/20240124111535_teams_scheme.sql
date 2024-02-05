@@ -8,7 +8,8 @@ CREATE TABLE if NOT EXISTS teams
     team_logo TEXT DEFAULT ''::TEXT,
     league SMALLINT,
     conference_name VARCHAR(255),
-    division VARCHAR(255)
+    division VARCHAR(255),
+    khl_id INT DEFAULT 0::INT
 );
 
 CREATE INDEX if NOT EXISTS idx_teams

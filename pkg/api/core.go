@@ -59,6 +59,7 @@ func (api *Api) registerRoutes() {
 	team := base.Group("/tournament")
 	team.GET("/create_team_nhl", api.CreateTeamsNHL)
 	team.GET("/create_team_khl", api.CreateTeamsKHL)
+	team.GET("/events_day_khl", api.EventsKHL)
 }
 
 type Error struct {

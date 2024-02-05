@@ -64,6 +64,7 @@ var KHLAbrev = map[string]string{
 
 type TeamKHL struct {
 	Team struct {
+		ID             int    `json:"id"`
 		TeamName       string `json:"name"`
 		TeamLogo       string `json:"image"`
 		DivisionName   string `json:"division"`
@@ -80,4 +81,33 @@ type Teams struct {
 	League         League `json:"league"`
 	ConferenceName string `json:"conferenceName"`
 	TeamAbbrev     string `json:"teamAbbrev"`
+}
+
+type Team struct {
+	ID       int    `json:"id"`
+	KHLID    int    `json:"khl_id"`
+	Image    string `json:"image"`
+	Name     string `json:"name"`
+	Location string `json:"location"`
+	Score    int
+}
+
+type EventKHL struct {
+	GameStateKey string      `json:"game_state_key"`
+	Period       interface{} `json:"period"`
+	HD           bool        `json:"hd"`
+	ID           int         `json:"id"`
+	TeamA        Team        `json:"team_a"`
+	TeamB        Team        `json:"team_b"`
+	Name         string      `json:"name"`
+	StartAtDay   int64       `json:"start_at_day"`
+	StartAt      int64       `json:"start_at"`
+	EventStartAt int64       `json:"event_start_at"`
+	EndAt        int64       `json:"end_at"`
+	Score        string      `json:"score"`
+}
+
+// EventDataKHL структура для представления информации о событии внутри объекта JSON
+type EventDataKHL struct {
+	Event EventKHL `json:"event"`
 }
