@@ -14,10 +14,12 @@ func Core() fx.Option {
 	return fx.Options(
 		fx.Provide(
 			fx.Annotate(storage.NewPostgresStorage, fx.As(new(user.Storage))),
+			fx.Annotate(storage.NewRedisStorage, fx.As(new(user.RStorage))),
 		),
 		fx.Provide(
 			context.Background,
 			storage.NewPostgresStorage,
+			storage.NewRedisStorage,
 			config.NewConfig,
 			gin.Default,
 			api.NewApi,

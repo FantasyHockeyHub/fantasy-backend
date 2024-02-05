@@ -36,7 +36,8 @@ func (api Api) signUp(ctx *gin.Context) {
 			user_service.InvalidNicknameError,
 			user_service.NicknameTakenError,
 			user_service.PasswordValidationError,
-			user_service.InvalidVerificationCodeError:
+			user_service.InvalidVerificationCodeError,
+			storage.VerificationCodeError:
 			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 			return
 		default:

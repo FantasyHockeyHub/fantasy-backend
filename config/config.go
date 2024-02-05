@@ -7,7 +7,8 @@ import (
 )
 
 type ServiceConfiguration struct {
-	PostgresDB `yaml:"db" json:"postgresDB"`
+	PostgresDB `yaml:"postgres_db" json:"postgresDB"`
+	RedisDB    `yaml:"redis_db" json:"redisDB"`
 	Api        `yaml:"api" json:"api"`
 	User       `yaml:"user" json:"user"`
 }
@@ -29,6 +30,12 @@ type PostgresDB struct {
 	Password string `yaml:"password"`
 	DBName   string `yaml:"dbname"`
 	SSLMode  string `yaml:"sslmode"`
+}
+
+type RedisDB struct {
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Password string `yaml:"password"`
 }
 
 func (api *Api) GetAddr() string {

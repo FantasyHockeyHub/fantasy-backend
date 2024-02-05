@@ -26,25 +26,29 @@ type Storage interface {
 	CheckNicknameExists(nickname string) (bool, error)
 	GetProfileIDByEmail(email string) (uuid.UUID, error)
 	GetUserDataByID(profileID uuid.UUID) (user.UserDataModel, error)
-	CreateVerificationCode(email string) (int, error)
-	GetVerificationCode(email string) (int, error)
-	UpdateVerificationCode(email string) (int, error)
 	CreateSession(session user.RefreshSession) error
 	GetSessionByRefreshToken(refreshTokenID string) (user.RefreshSession, error)
 	DeleteSessionByRefreshToken(refreshTokenID string) error
 	GetUserInfo(userID uuid.UUID) (user.UserInfoModel, error)
 }
 
-func NewService(storage Storage, jwt *Manager) *Service {
+type RStorage interface {
+	CreateVerificationCode(email string) (int, error)
+	GetVerificationCode(email string) (int, error)
+}
+
+func NewService(storage Storage, rStorage RStorage, jwt *Manager) *Service {
 	return &Service{
-		storage: storage,
-		Jwt:     jwt,
+		storage:  storage,
+		rStorage: rStorage,
+		Jwt:      jwt,
 	}
 }
 
 type Service struct {
-	storage Storage
-	Jwt     *Manager
+	storage  Storage
+	rStorage RStorage
+	Jwt      *Manager
 }
 
 func (s *Service) SignUp(input user.SignUpInput) error {

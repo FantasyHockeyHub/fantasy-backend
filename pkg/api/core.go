@@ -46,9 +46,6 @@ func (api *Api) registerRoutes() {
 
 	api.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	//baseWithAuth := base.Group("/")
-	//baseWithAuth.Use(api.AuthMW())
-
 	auth := base.Group("/auth")
 	{
 		auth.POST("/sign-up", api.signUp)

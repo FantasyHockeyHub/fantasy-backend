@@ -10,7 +10,7 @@ import (
 func NewPostgresStorage(cfg config.ServiceConfiguration) *PostgresStorage {
 
 	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
-		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))
+		cfg.PostgresDB.Host, cfg.PostgresDB.Port, cfg.PostgresDB.Username, cfg.PostgresDB.DBName, cfg.PostgresDB.Password, cfg.PostgresDB.SSLMode))
 	if err != nil {
 		log.Fatalln(err)
 	}
