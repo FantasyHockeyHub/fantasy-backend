@@ -42,6 +42,21 @@ definitions:
       refreshToken:
         type: string
     type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.UserInfoModel:
+    properties:
+      coins:
+        type: integer
+      dateRegistration:
+        type: string
+      email:
+        type: string
+      nickname:
+        type: string
+      photoLink:
+        type: string
+      profileID:
+        type: string
+    type: object
   pkg_api.EmailInput:
     properties:
       email:
@@ -110,6 +125,36 @@ paths:
           schema:
             $ref: '#/definitions/pkg_api.Error'
       summary: Отправка кода подтверждения
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Выход пользователя из системы
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/pkg_api.RefreshInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Выход из системы
       tags:
       - auth
   /auth/refresh-tokens:
@@ -260,6 +305,35 @@ paths:
           schema:
             $ref: '#/definitions/pkg_api.Error'
       summary: Использован ли данный nickname в сервисе
+      tags:
+      - user
+  /user/info:
+    get:
+      consumes:
+      - application/json
+      description: Получение пользовательской информации по access токену
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.UserInfoModel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Получение информации о пользователе
       tags:
       - user
 securityDefinitions:

@@ -21,7 +21,7 @@ import (
 // @Failure 400 {object} Error
 // @Failure 500 {object} Error
 // @Router /auth/sign-up [post]
-func (api Api) SignUp(ctx *gin.Context) {
+func (api Api) signUp(ctx *gin.Context) {
 	var inp user.SignUpInput
 	if err := ctx.BindJSON(&inp); err != nil {
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
@@ -60,7 +60,7 @@ func (api Api) SignUp(ctx *gin.Context) {
 // @Failure 400 {object} Error
 // @Failure 500 {object} Error
 // @Router /auth/sign-in [post]
-func (api Api) SignIn(ctx *gin.Context) {
+func (api Api) signIn(ctx *gin.Context) {
 	var inp user.SignInInput
 	if err := ctx.BindJSON(&inp); err != nil {
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
@@ -84,6 +84,45 @@ func (api Api) SignIn(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, tokens)
 }
 
+type EmailInput struct {
+	Email string `json:"email" binding:"required,email,max=64"`
+}
+
+// SendVerificationCode godoc
+// @Summary Отправка кода подтверждения
+// @Schemes
+// @Description Отправка письма с кодом для подтверждения email пользователя
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param data body EmailInput true "Входные параметры"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} Error
+// @Failure 500 {object} Error
+// @Router /auth/email/send-code [post]
+func (api Api) sendVerificationCode(ctx *gin.Context) {
+	var inp EmailInput
+	if err := ctx.BindJSON(&inp); err != nil {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		return
+	}
+
+	err := api.user.SendVerificationCode(inp.Email)
+	if err != nil {
+		log.Println("SendVerificationCode:", err)
+		switch err {
+		case user_service.UserAlreadyExistsError:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+			return
+		default:
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
+}
+
 type RefreshInput struct {
 	RefreshToken string `json:"refreshToken" binding:"required"`
 }
@@ -100,7 +139,7 @@ type RefreshInput struct {
 // @Failure 400 {object} Error
 // @Failure 500 {object} Error
 // @Router /auth/refresh-tokens [post]
-func (api Api) RefreshTokens(ctx *gin.Context) {
+func (api Api) refreshTokens(ctx *gin.Context) {
 	var inp RefreshInput
 	if err := ctx.BindJSON(&inp); err != nil {
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
@@ -124,8 +163,39 @@ func (api Api) RefreshTokens(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, tokens)
 }
 
-type EmailInput struct {
-	Email string `json:"email" binding:"required,email,max=64"`
+// Logout godoc
+// @Summary Выход из системы
+// @Schemes
+// @Description Выход пользователя из системы
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param data body RefreshInput true "Входные параметры"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} Error
+// @Failure 500 {object} Error
+// @Router /auth/logout [post]
+func (api Api) logout(ctx *gin.Context) {
+	var inp RefreshInput
+	if err := ctx.BindJSON(&inp); err != nil {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		return
+	}
+
+	err := api.user.Logout(inp.RefreshToken)
+	if err != nil {
+		log.Println("Logout:", err)
+		switch err {
+		case storage.RefreshTokenNotFoundError:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+			return
+		default:
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
 }
 
 // CheckEmailExists godoc
@@ -140,7 +210,7 @@ type EmailInput struct {
 // @Failure 400 {object} Error
 // @Failure 500 {object} Error
 // @Router /user/check-email [post]
-func (api Api) CheckEmailExists(ctx *gin.Context) {
+func (api Api) checkEmailExists(ctx *gin.Context) {
 	var inp EmailInput
 	if err := ctx.BindJSON(&inp); err != nil {
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
@@ -179,7 +249,7 @@ type NicknameInput struct {
 // @Failure 400 {object} Error
 // @Failure 500 {object} Error
 // @Router /user/check-nickname [post]
-func (api Api) CheckNicknameExists(ctx *gin.Context) {
+func (api Api) checkNicknameExists(ctx *gin.Context) {
 	var inp NicknameInput
 	if err := ctx.BindJSON(&inp); err != nil {
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
@@ -203,30 +273,29 @@ func (api Api) CheckNicknameExists(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
 }
 
-// SendVerificationCode godoc
-// @Summary Отправка кода подтверждения
+// UserInfo godoc
+// @Summary Получение информации о пользователе
+// @Security ApiKeyAuth
 // @Schemes
-// @Description Отправка письма с кодом для подтверждения email пользователя
-// @Tags auth
+// @Description Получение пользовательской информации по access токену
+// @Tags user
 // @Accept json
 // @Produce json
-// @Param data body EmailInput true "Входные параметры"
-// @Success 200 {object} StatusResponse
-// @Failure 400 {object} Error
+// @Success 200 {object} user.UserInfoModel
+// @Failure 400,401 {object} Error
 // @Failure 500 {object} Error
-// @Router /auth/email/send-code [post]
-func (api Api) SendVerificationCode(ctx *gin.Context) {
-	var inp EmailInput
-	if err := ctx.BindJSON(&inp); err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+// @Router /user/info [get]
+func (api Api) userInfo(ctx *gin.Context) {
+	userID, err := parseUserIDFromContext(ctx)
+	if err != nil {
 		return
 	}
 
-	err := api.user.SendVerificationCode(inp.Email)
+	userInfo, err := api.user.GetUserInfo(userID)
 	if err != nil {
-		log.Println("SendVerificationCode:", err)
+		log.Println("UserInfo:", err)
 		switch err {
-		case user_service.UserAlreadyExistsError:
+		case storage.UserDoesNotExistError:
 			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 			return
 		default:
@@ -235,5 +304,5 @@ func (api Api) SendVerificationCode(ctx *gin.Context) {
 		}
 	}
 
-	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
+	ctx.JSON(http.StatusOK, userInfo)
 }

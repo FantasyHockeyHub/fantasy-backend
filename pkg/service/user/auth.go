@@ -32,6 +32,7 @@ type Storage interface {
 	CreateSession(session user.RefreshSession) error
 	GetSessionByRefreshToken(refreshTokenID string) (user.RefreshSession, error)
 	DeleteSessionByRefreshToken(refreshTokenID string) error
+	GetUserInfo(userID uuid.UUID) (user.UserInfoModel, error)
 }
 
 func NewService(storage Storage, jwt *Manager) *Service {
@@ -173,4 +174,13 @@ func (s *Service) CreateSession(userID uuid.UUID) (user.Tokens, error) {
 	err = s.storage.CreateSession(session)
 
 	return pair, err
+}
+
+func (s *Service) Logout(refreshTokenID string) error {
+	err := s.storage.DeleteSessionByRefreshToken(refreshTokenID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

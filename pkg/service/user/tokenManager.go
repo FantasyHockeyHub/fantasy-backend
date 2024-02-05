@@ -53,7 +53,7 @@ func (m *Manager) ParseJWT(accessToken string) (string, error) {
 		return []byte(m.signingKey), nil
 	})
 	if err != nil {
-		return "", err
+		return "", InvalidAccessTokenError
 	}
 
 	if !token.Valid {

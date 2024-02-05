@@ -26,7 +26,7 @@ func NewApi(
 		cfg:    cfg,
 		user:   user,
 	}
-	//svc.router.Use(CORSMiddleware())
+	svc.router.Use(CORSMiddleware())
 	svc.registerRoutes()
 	return svc
 }
@@ -51,16 +51,21 @@ func (api *Api) registerRoutes() {
 
 	auth := base.Group("/auth")
 	{
-		auth.POST("/sign-up", api.SignUp)
-		auth.POST("/sign-in", api.SignIn)
-		auth.POST("/email/send-code", api.SendVerificationCode)
-		auth.POST("/refresh-tokens", api.RefreshTokens)
+		auth.POST("/sign-up", api.signUp)
+		auth.POST("/sign-in", api.signIn)
+		auth.POST("/email/send-code", api.sendVerificationCode)
+		auth.POST("/refresh-tokens", api.refreshTokens)
+		auth.POST("/logout", api.logout)
 	}
 
 	user := base.Group("/user")
 	{
-		user.POST("/check-email", api.CheckEmailExists)
-		user.POST("/check-nickname", api.CheckNicknameExists)
+		user.POST("/check-email", api.checkEmailExists)
+		user.POST("/check-nickname", api.checkNicknameExists)
+		userAuthenticated := user.Group("/", api.userIdentity)
+		{
+			userAuthenticated.GET("/info", api.userInfo)
+		}
 	}
 
 }

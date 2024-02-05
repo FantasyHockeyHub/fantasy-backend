@@ -37,10 +37,19 @@ type RefreshSession struct {
 }
 
 type SignUpModel struct {
-	ID              uuid.UUID `db:"id"`
+	ID              uuid.UUID `db:"profile_id"`
 	Nickname        string    `db:"nickname"`
 	Email           string    `db:"email"`
 	PasswordEncoded string    `db:"password_encoded"`
 	PasswordSalt    string    `db:"password_salt"`
 	Coins           int       `db:"coins"`
+}
+
+type UserInfoModel struct {
+	ProfileID        uuid.UUID `json:"profileID" db:"id"`
+	Nickname         string    `json:"nickname" db:"nickname"`
+	DateRegistration time.Time `json:"dateRegistration" db:"date_registration"`
+	PhotoLink        string    `json:"photoLink" db:"photo_link"`
+	Coins            int       `json:"coins" db:"coins"`
+	Email            string    `json:"email" db:"email"`
 }

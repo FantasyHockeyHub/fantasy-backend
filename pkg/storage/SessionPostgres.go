@@ -46,9 +46,18 @@ func (p *PostgresStorage) GetSessionByRefreshToken(refreshTokenID string) (user.
 }
 
 func (p *PostgresStorage) DeleteSessionByRefreshToken(refreshTokenID string) error {
-	_, err := p.db.Exec(`DELETE FROM refresh_sessions WHERE refresh_token_id = $1;`, refreshTokenID)
+	result, err := p.db.Exec(`DELETE FROM refresh_sessions WHERE refresh_token_id = $1;`, refreshTokenID)
 	if err != nil {
 		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return RefreshTokenNotFoundError
 	}
 
 	return nil
