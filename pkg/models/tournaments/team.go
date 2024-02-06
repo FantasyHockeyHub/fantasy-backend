@@ -62,6 +62,41 @@ var KHLAbrev = map[string]string{
 	"ХК Сочи":       "СОЧ",
 }
 
+var NHLId = map[string]int{
+	"VAN": 23,
+	"BOS": 6,
+	"COL": 21,
+	"FLA": 13,
+	"DAL": 25,
+	"WPG": 52,
+	"VGK": 54,
+	"NYR": 3,
+	"CAR": 12,
+	"EDM": 22,
+	"TBL": 14,
+	"TOR": 10,
+	"DET": 17,
+	"LAK": 26,
+	"PHI": 4,
+	"STL": 19,
+	"NSH": 18,
+	"NYI": 2,
+	"SEA": 55,
+	"PIT": 5,
+	"NJD": 1,
+	"WSH": 15,
+	"ARI": 53,
+	"CGY": 20,
+	"BUF": 7,
+	"MTL": 8,
+	"MIN": 30,
+	"OTT": 9,
+	"CBJ": 29,
+	"ANA": 24,
+	"SJS": 28,
+	"CHI": 16,
+}
+
 type TeamKHL struct {
 	Team struct {
 		ID             int    `json:"id"`
@@ -82,6 +117,8 @@ type Teams struct {
 	ConferenceName string `json:"conferenceName"`
 	TeamAbbrev     string `json:"teamAbbrev"`
 }
+
+//Matches KHL
 
 type Team struct {
 	ID       int    `json:"id"`
@@ -107,7 +144,38 @@ type EventKHL struct {
 	Score        string      `json:"score"`
 }
 
-// EventDataKHL структура для представления информации о событии внутри объекта JSON
 type EventDataKHL struct {
 	Event EventKHL `json:"event"`
+}
+
+//Matches NHL
+
+type ScheduleNHL struct {
+	NextStartDate     string     `json:"nextStartDate"`
+	PreviousStartDate string     `json:"previousStartDate"`
+	GameWeeks         []GameWeek `json:"gameWeek"`
+}
+
+type GameWeek struct {
+	Date          string `json:"date"`
+	DayAbbrev     string `json:"dayAbbrev"`
+	NumberOfGames int    `json:"numberOfGames"`
+	Games         []Game `json:"games"`
+}
+
+type Game struct {
+	ID             int    `json:"id"`
+	StartTimeUTC   string `json:"startTimeUTC"`
+	StartEvnUnix   int64
+	EndEvnUnix     int64
+	AwayTeam       TeamNHL `json:"awayTeam"`
+	HomeTeam       TeamNHL `json:"homeTeam"`
+	TicketsLink    string  `json:"ticketsLink"`
+	GameCenterLink string  `json:"gameCenterLink"`
+}
+
+type TeamNHL struct {
+	ID     int    `json:"id"`
+	Abbrev string `json:"abbrev"`
+	Score  int    `json:"score"`
 }

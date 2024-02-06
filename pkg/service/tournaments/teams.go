@@ -6,6 +6,7 @@ import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func NewService(storage Storage) *Service {
@@ -18,6 +19,7 @@ type Storage interface {
 	CreateTeamsNHL(context.Context, []tournaments.Standing) error
 	CreateTeamsKHL(context.Context, []tournaments.TeamKHL) error
 	AddKHLEvents(context.Context, []tournaments.EventDataKHL) error
+	AddNHLEvents(context.Context, []tournaments.Game) error
 }
 
 type Service struct {
@@ -59,5 +61,25 @@ func (s *Service) AddEventsKHL(ctx context.Context, events []tournaments.EventDa
 	if err != nil {
 		return fmt.Errorf("AddEventsKHL: %w", err)
 	}
+	return nil
+}
+
+func (s *Service) AddEventsNHL(ctx context.Context, events []tournaments.Game) error {
+
+	for idEnv, curEnv := range events {
+		startTime, err := time.Parse("2006-01-02T15:04:05Z", curEnv.StartTimeUTC)
+		if err != nil {
+			return fmt.Errorf("AddEventsNHL: %w", err)
+		}
+
+		events[idEnv].StartEvnUnix = startTime.UnixMilli()
+		events[idEnv].EndEvnUnix = startTime.Add(3 * time.Hour).UnixMilli()
+	}
+
+	err := s.storage.AddNHLEvents(ctx, events)
+	if err != nil {
+		return fmt.Errorf("AddEventsNHL: %w", err)
+	}
+
 	return nil
 }

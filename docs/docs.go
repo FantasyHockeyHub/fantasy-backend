@@ -70,7 +70,30 @@ const docTemplate = `{
                 "tags": [
                     "tournament"
                 ],
-                "summary": "Получение событий на текущий день",
+                "summary": "Получение событий на следующий день KHL",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tournament/events_day_nhl": {
+            "get": {
+                "description": "Добавляет в бд матчи за день",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Получение событий на следующий день NHL",
                 "responses": {
                     "200": {
                         "description": "OK"

@@ -4,13 +4,14 @@ CREATE TABLE if NOT EXISTS matches
 (
     id         SERIAL PRIMARY KEY,
     home_team_id INT,
-    home_team_score SMALLINT,
+    home_team_score SMALLINT DEFAULT 0::SMALLINT,
     away_team_id INT,
-    away_team_score SMALLINT,
+    away_team_score SMALLINT DEFAULT 0::SMALLINT,
     start_at BIGINT,
     end_at BIGINT,
     event_id INT,
-    status varchar(255)
+    status VARCHAR(255) DEFAULT 'not_yet_started'::VARCHAR,
+    league SMALLINT
 );
 
 CREATE INDEX if NOT EXISTS idx_matches

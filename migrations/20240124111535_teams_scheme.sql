@@ -9,7 +9,7 @@ CREATE TABLE if NOT EXISTS teams
     league SMALLINT,
     conference_name VARCHAR(255),
     division VARCHAR(255),
-    khl_id INT DEFAULT 0::INT
+    api_id INT DEFAULT 0::INT
 );
 
 CREATE INDEX if NOT EXISTS idx_teams

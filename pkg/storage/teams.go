@@ -16,7 +16,7 @@ const (
 	League     = "league"
 	Conference = "conference_name"
 	Division   = "division"
-	KhlId      = "khl_id"
+	ApiId      = "api_id"
 
 	MatchesTable = "matches"
 	MatchId      = "id"
@@ -41,7 +41,7 @@ func (p *PostgresStorage) CreateTeamsNHL(ctx context.Context, teams []tournament
 	for _, team := range teams {
 		query, args, err := sq.
 			Insert(TeamsTable).
-			Columns(TeamAbbrev, TeamName, TeamLogo, League, Conference, Division).
+			Columns(TeamAbbrev, TeamName, TeamLogo, League, Conference, Division, ApiId).
 			Values(
 				team.TeamAbbrev.Default,
 				team.TeamName.Default,
@@ -49,6 +49,7 @@ func (p *PostgresStorage) CreateTeamsNHL(ctx context.Context, teams []tournament
 				team.League,
 				team.ConferenceName,
 				team.DivisionName,
+				tournaments.NHLId[team.TeamAbbrev.Default],
 			).
 			PlaceholderFormat(sq.Dollar).
 			ToSql()
@@ -82,7 +83,7 @@ func (p *PostgresStorage) CreateTeamsKHL(ctx context.Context, teams []tournament
 	for _, team := range teams {
 		query, args, err := sq.
 			Insert(TeamsTable).
-			Columns(TeamAbbrev, TeamName, TeamLogo, League, Conference, Division, KhlId).
+			Columns(TeamAbbrev, TeamName, TeamLogo, League, Conference, Division, ApiId).
 			Values(
 				team.Team.TeamAbbrev,
 				team.Team.TeamName,
@@ -125,16 +126,17 @@ func (p *PostgresStorage) AddKHLEvents(ctx context.Context, events []tournaments
 	for _, event := range events {
 		query, args, err := sq.
 			Insert(MatchesTable).
-			Columns(HomeTeam, HomeScore, AwayTeam, AwayScore, StartTime, EndTime, EventId, StatusMatch).
+			Columns(HomeTeam, HomeScore, AwayTeam, AwayScore, StartTime, EndTime, EventId, StatusMatch, League).
 			Values(
 				event.Event.TeamA.ID,
 				int8(event.Event.TeamA.Score),
 				event.Event.TeamB.ID,
 				int8(event.Event.TeamB.Score),
-				event.Event.EventStartAt,
+				event.Event.StartAt,
 				event.Event.EndAt,
 				event.Event.ID,
 				event.Event.GameStateKey,
+				tournaments.KHL,
 			).
 			PlaceholderFormat(sq.Dollar).
 			ToSql()
@@ -152,6 +154,49 @@ func (p *PostgresStorage) AddKHLEvents(ctx context.Context, events []tournaments
 	err = tx.Commit()
 	if err != nil {
 		return fmt.Errorf("cant commit AddKHLEvents: %w", err)
+	}
+	return nil
+}
+
+func (p *PostgresStorage) AddNHLEvents(ctx context.Context, events []tournaments.Game) error {
+
+	tx, err := p.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+
+	for _, event := range events {
+		query, args, err := sq.
+			Insert(MatchesTable).
+			Columns(HomeTeam, HomeScore, AwayTeam, AwayScore, StartTime, EndTime, EventId, League).
+			Values(
+				event.HomeTeam.ID,
+				event.HomeTeam.Score,
+				event.AwayTeam.ID,
+				event.AwayTeam.Score,
+				event.StartEvnUnix,
+				event.EndEvnUnix,
+				event.ID,
+				tournaments.NHL,
+			).
+			PlaceholderFormat(sq.Dollar).
+			ToSql()
+
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.ExecContext(ctx, query, args...)
+		if err != nil {
+			log.Printf("event insert query error: %w", err)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("cant commit AddNHLEvents: %w", err)
 	}
 	return nil
 }
