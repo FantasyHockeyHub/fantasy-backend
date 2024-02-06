@@ -30,11 +30,14 @@ type Storage interface {
 	GetSessionByRefreshToken(refreshTokenID string) (user.RefreshSession, error)
 	DeleteSessionByRefreshToken(refreshTokenID string) error
 	GetUserInfo(userID uuid.UUID) (user.UserInfoModel, error)
+	ChangePassword(inp user.ChangePasswordModel) error
 }
 
 type RStorage interface {
 	CreateVerificationCode(email string) (int, error)
 	GetVerificationCode(email string) (int, error)
+	CreateResetPasswordHash(email string) (string, error)
+	GetEmailByResetPasswordHash(resetHash string) (string, error)
 }
 
 func NewService(storage Storage, rStorage RStorage, jwt *Manager) *Service {

@@ -62,6 +62,12 @@ func (api *Api) registerRoutes() {
 		userAuthenticated := user.Group("/", api.userIdentity)
 		{
 			userAuthenticated.GET("/info", api.userInfo)
+			userAuthenticated.PATCH("password/change", api.changePassword)
+		}
+		password := user.Group("/password")
+		{
+			password.POST("/forgot", api.forgotPassword)
+			password.PATCH("/reset", api.resetPassword)
 		}
 	}
 

@@ -15,12 +15,11 @@ func NewRedisStorage(cfg config.ServiceConfiguration) *RedisStorage {
 		DB:       0,
 	})
 
-	pong, err := client.Ping(context.Background()).Result()
+	_, err := client.Ping(context.Background()).Result()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println(cfg.RedisDB.Password)
-	fmt.Println("Подключено к Redis:", pong)
+
 	return &RedisStorage{
 		client: client,
 	}

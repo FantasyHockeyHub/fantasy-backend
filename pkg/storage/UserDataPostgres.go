@@ -37,3 +37,22 @@ func (p *PostgresStorage) GetUserDataByID(profileID uuid.UUID) (user.UserDataMod
 
 	return u, nil
 }
+
+func (p *PostgresStorage) ChangePassword(inp user.ChangePasswordModel) error {
+	tx, err := p.db.Beginx()
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`UPDATE user_data SET password_encoded = $1, password_salt = $2 WHERE profile_id = $3;`,
+		inp.NewPassword,
+		inp.PasswordSalt,
+		inp.ProfileID,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}

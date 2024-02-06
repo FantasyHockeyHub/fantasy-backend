@@ -1,4 +1,54 @@
 definitions:
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.ChangePasswordInput:
+    properties:
+      newPassword:
+        maxLength: 64
+        minLength: 8
+        type: string
+      oldPassword:
+        maxLength: 64
+        minLength: 8
+        type: string
+    required:
+    - newPassword
+    - oldPassword
+    type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.EmailInput:
+    properties:
+      email:
+        maxLength: 64
+        type: string
+    required:
+    - email
+    type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.NicknameInput:
+    properties:
+      nickname:
+        maxLength: 64
+        minLength: 4
+        type: string
+    required:
+    - nickname
+    type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.RefreshInput:
+    properties:
+      refreshToken:
+        type: string
+    required:
+    - refreshToken
+    type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.ResetPasswordInput:
+    properties:
+      hash:
+        type: string
+      newPassword:
+        maxLength: 64
+        minLength: 8
+        type: string
+    required:
+    - hash
+    - newPassword
+    type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.SignInInput:
     properties:
       email:
@@ -57,36 +107,12 @@ definitions:
       profileID:
         type: string
     type: object
-  pkg_api.EmailInput:
-    properties:
-      email:
-        maxLength: 64
-        type: string
-    required:
-    - email
-    type: object
   pkg_api.Error:
     properties:
       error:
         type: string
       message:
         type: string
-    type: object
-  pkg_api.NicknameInput:
-    properties:
-      nickname:
-        maxLength: 64
-        minLength: 4
-        type: string
-    required:
-    - nickname
-    type: object
-  pkg_api.RefreshInput:
-    properties:
-      refreshToken:
-        type: string
-    required:
-    - refreshToken
     type: object
   pkg_api.StatusResponse:
     properties:
@@ -108,7 +134,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/pkg_api.EmailInput'
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.EmailInput'
       produces:
       - application/json
       responses:
@@ -138,7 +164,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/pkg_api.RefreshInput'
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.RefreshInput'
       produces:
       - application/json
       responses:
@@ -168,7 +194,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/pkg_api.RefreshInput'
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.RefreshInput'
       produces:
       - application/json
       responses:
@@ -258,7 +284,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/pkg_api.EmailInput'
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.EmailInput'
       produces:
       - application/json
       responses:
@@ -288,7 +314,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/pkg_api.NicknameInput'
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.NicknameInput'
       produces:
       - application/json
       responses:
@@ -334,6 +360,102 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Получение информации о пользователе
+      tags:
+      - user
+  /user/password/change:
+    patch:
+      consumes:
+      - application/json
+      description: Смена пароля
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.ChangePasswordInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Смена пароля
+      tags:
+      - user
+  /user/password/forgot:
+    post:
+      consumes:
+      - application/json
+      description: Отправка письма с информацией о сбросе пароля
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.EmailInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Забыли пароль
+      tags:
+      - user
+  /user/password/reset:
+    patch:
+      consumes:
+      - application/json
+      description: Восстановление пароля
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.ResetPasswordInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Восстановление пароля
       tags:
       - user
 securityDefinitions:
