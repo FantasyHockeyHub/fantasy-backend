@@ -2,8 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
+	tournaments2 "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/tournaments"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -193,4 +195,32 @@ func (api *Api) EventsNHL(ctx *gin.Context) {
 	}
 
 	ctx.AbortWithStatus(http.StatusOK)
+}
+
+// GetMatches godoc
+// @Summary Получение матчей на текущий день
+// @Schemes
+// @Description Дата берётся автоматически
+// @Tags tournament
+// @Produce json
+// @Success 200 {object} []tournaments.Matches
+// @Failure 400 {object} Error
+// @Failure 401 {object} Error
+// @Router /tournament/get_matches [get]
+func (api *Api) GetMatches(ctx *gin.Context) {
+
+	//var matches []tournaments.Matches
+
+	matches, err := api.tournaments.GetMatchesDay(ctx)
+	if errors.Is(err, tournaments2.NotFoundMatches) {
+		ctx.JSON(http.StatusBadRequest, getNotFoundError())
+		return
+	}
+	if err != nil {
+		log.Printf("GetMatches: %w", err)
+		ctx.JSON(http.StatusBadRequest, getInternalServerError())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, matches)
 }

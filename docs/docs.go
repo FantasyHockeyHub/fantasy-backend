@@ -106,9 +106,92 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/tournament/get_matches": {
+            "get": {
+                "description": "Дата берётся автоматически",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Получение матчей на текущий день",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Matches"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ErrLeague",
+                "NHL",
+                "KHL"
+            ]
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Matches": {
+            "type": "object",
+            "properties": {
+                "awayScore": {
+                    "type": "integer"
+                },
+                "awayTeamId": {
+                    "type": "integer"
+                },
+                "endAt": {
+                    "type": "integer"
+                },
+                "eventId": {
+                    "type": "integer"
+                },
+                "homeScore": {
+                    "type": "integer"
+                },
+                "homeTeamId": {
+                    "type": "integer"
+                },
+                "league": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League"
+                },
+                "matchId": {
+                    "type": "integer"
+                },
+                "startAt": {
+                    "type": "integer"
+                },
+                "statusEvent": {
+                    "type": "string"
+                }
+            }
+        },
         "pkg_api.Error": {
             "type": "object",
             "properties": {

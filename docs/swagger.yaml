@@ -1,4 +1,37 @@
 definitions:
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ErrLeague
+    - NHL
+    - KHL
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Matches:
+    properties:
+      awayScore:
+        type: integer
+      awayTeamId:
+        type: integer
+      endAt:
+        type: integer
+      eventId:
+        type: integer
+      homeScore:
+        type: integer
+      homeTeamId:
+        type: integer
+      league:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League'
+      matchId:
+        type: integer
+      startAt:
+        type: integer
+      statusEvent:
+        type: string
+    type: object
   pkg_api.Error:
     properties:
       error:
@@ -68,6 +101,29 @@ paths:
           schema:
             $ref: '#/definitions/pkg_api.Error'
       summary: Получение событий на следующий день NHL
+      tags:
+      - tournament
+  /tournament/get_matches:
+    get:
+      description: Дата берётся автоматически
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Matches'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Получение матчей на текущий день
       tags:
       - tournament
 securityDefinitions:

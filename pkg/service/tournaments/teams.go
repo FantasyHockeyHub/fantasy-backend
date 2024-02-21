@@ -2,12 +2,15 @@ package tournaments
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"strconv"
 	"strings"
 	"time"
 )
+
+var NotFoundMatches = errors.New("not found matches by this date")
 
 func NewService(storage Storage) *Service {
 	return &Service{
@@ -20,6 +23,7 @@ type Storage interface {
 	CreateTeamsKHL(context.Context, []tournaments.TeamKHL) error
 	AddKHLEvents(context.Context, []tournaments.EventDataKHL) error
 	AddNHLEvents(context.Context, []tournaments.Game) error
+	GetMatchesByDate(context.Context, int64, int64) ([]tournaments.Matches, error)
 }
 
 type Service struct {
@@ -80,6 +84,28 @@ func (s *Service) AddEventsNHL(ctx context.Context, events []tournaments.Game) e
 	if err != nil {
 		return fmt.Errorf("AddEventsNHL: %w", err)
 	}
+
+	return nil
+}
+
+func (s *Service) GetMatchesDay(ctx context.Context) ([]tournaments.Matches, error) {
+	curTime := time.Now()
+	curTime = curTime.Add(24 * time.Hour)
+	startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 0, 0, 0, 0, time.UTC)
+	endDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 23, 59, 59, 0, time.UTC)
+
+	matches, err := s.storage.GetMatchesByDate(ctx, startDay.UnixMilli(), endDay.UnixMilli())
+	if err != nil {
+		return matches, fmt.Errorf("GetMatchesDay: %w", err)
+	}
+	if len(matches) == 0 {
+		return matches, NotFoundMatches
+	}
+
+	return matches, nil
+}
+
+func (s *Service) CreateTournamets(ctx context.Context) error {
 
 	return nil
 }

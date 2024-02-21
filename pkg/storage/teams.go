@@ -2,6 +2,8 @@ package storage
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	sq "github.com/Masterminds/squirrel"
@@ -199,4 +201,34 @@ func (p *PostgresStorage) AddNHLEvents(ctx context.Context, events []tournaments
 		return fmt.Errorf("cant commit AddNHLEvents: %w", err)
 	}
 	return nil
+}
+
+func (p *PostgresStorage) GetMatchesByDate(ctx context.Context, startUnixDate int64, endUnixDate int64) ([]tournaments.Matches, error) {
+
+	query, args, err := sq.
+		Select(MatchId, HomeTeam, HomeScore, AwayTeam, AwayScore, StartTime, EndTime, EventId, StatusMatch, League).
+		From(MatchesTable).
+		Where(
+			sq.GtOrEq{
+				StartTime: startUnixDate,
+			},
+			sq.LtOrEq{
+				StartTime: endUnixDate,
+			},
+		).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	var matches []tournaments.Matches
+	if err != nil {
+		return matches, err
+	}
+
+	err = p.db.SelectContext(ctx, &matches, query, args...)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = nil
+	}
+
+	return matches, nil
 }

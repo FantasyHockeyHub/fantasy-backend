@@ -179,3 +179,16 @@ type TeamNHL struct {
 	Abbrev string `json:"abbrev"`
 	Score  int    `json:"score"`
 }
+
+type Matches struct {
+	MatchId     int    `json:"matchId" db:"id"`
+	HomeTeamId  int    `json:"homeTeamId" db:"home_team_id"`
+	HomeScore   int    `json:"homeScore" db:"home_team_score"`
+	AwayTeamId  int    `json:"awayTeamId" db:"away_team_id"`
+	AwayScore   int    `json:"awayScore" db:"away_team_score"`
+	StartAt     int64  `json:"startAt" db:"start_at"`
+	EndAt       int64  `json:"endAt" db:"end_at"`
+	EventId     int    `json:"eventId" db:"event_id"`
+	StatusEvent string `json:"statusEvent" db:"status"`
+	League      League `json:"league" db:"league"`
+}
