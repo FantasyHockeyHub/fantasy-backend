@@ -1,4 +1,4 @@
-package tournaments
+package service
 
 import (
 	"context"
@@ -12,13 +12,13 @@ import (
 
 var NotFoundMatches = errors.New("not found matches by this date")
 
-func NewService(storage Storage) *Service {
-	return &Service{
+func NewTeamsService(storage TeamsStorage) *TeamsService {
+	return &TeamsService{
 		storage: storage,
 	}
 }
 
-type Storage interface {
+type TeamsStorage interface {
 	CreateTeamsNHL(context.Context, []tournaments.Standing) error
 	CreateTeamsKHL(context.Context, []tournaments.TeamKHL) error
 	AddKHLEvents(context.Context, []tournaments.EventDataKHL) error
@@ -26,12 +26,11 @@ type Storage interface {
 	GetMatchesByDate(context.Context, int64, int64) ([]tournaments.Matches, error)
 }
 
-type Service struct {
-	storage Storage
+type TeamsService struct {
+	storage TeamsStorage
 }
 
-func (s *Service) CreateTeamsNHL(ctx context.Context, teams []tournaments.Standing) error {
-
+func (s *TeamsService) CreateTeamsNHL(ctx context.Context, teams []tournaments.Standing) error {
 	err := s.storage.CreateTeamsNHL(ctx, teams)
 	if err != nil {
 		return fmt.Errorf("CreateTeamsNHL: %w", err)
@@ -40,7 +39,7 @@ func (s *Service) CreateTeamsNHL(ctx context.Context, teams []tournaments.Standi
 	return nil
 }
 
-func (s *Service) CreateTeamsKHL(ctx context.Context, teams []tournaments.TeamKHL) error {
+func (s *TeamsService) CreateTeamsKHL(ctx context.Context, teams []tournaments.TeamKHL) error {
 
 	err := s.storage.CreateTeamsKHL(ctx, teams)
 	if err != nil {
@@ -50,7 +49,7 @@ func (s *Service) CreateTeamsKHL(ctx context.Context, teams []tournaments.TeamKH
 	return nil
 }
 
-func (s *Service) AddEventsKHL(ctx context.Context, events []tournaments.EventDataKHL) error {
+func (s *TeamsService) AddEventsKHL(ctx context.Context, events []tournaments.EventDataKHL) error {
 
 	for id, _ := range events {
 		var err error
@@ -68,7 +67,7 @@ func (s *Service) AddEventsKHL(ctx context.Context, events []tournaments.EventDa
 	return nil
 }
 
-func (s *Service) AddEventsNHL(ctx context.Context, events []tournaments.Game) error {
+func (s *TeamsService) AddEventsNHL(ctx context.Context, events []tournaments.Game) error {
 
 	for idEnv, curEnv := range events {
 		startTime, err := time.Parse("2006-01-02T15:04:05Z", curEnv.StartTimeUTC)
@@ -88,7 +87,7 @@ func (s *Service) AddEventsNHL(ctx context.Context, events []tournaments.Game) e
 	return nil
 }
 
-func (s *Service) GetMatchesDay(ctx context.Context) ([]tournaments.Matches, error) {
+func (s *TeamsService) GetMatchesDay(ctx context.Context) ([]tournaments.Matches, error) {
 	curTime := time.Now()
 	curTime = curTime.Add(24 * time.Hour)
 	startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 0, 0, 0, 0, time.UTC)
@@ -103,9 +102,4 @@ func (s *Service) GetMatchesDay(ctx context.Context) ([]tournaments.Matches, err
 	}
 
 	return matches, nil
-}
-
-func (s *Service) CreateTournamets(ctx context.Context) error {
-
-	return nil
 }

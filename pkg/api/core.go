@@ -1,36 +1,38 @@
 package api
 
 import (
+	"errors"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/config"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/docs"
 	_ "github.com/Frozen-Fantasy/fantasy-backend.git/docs"
-	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/tournaments"
-	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/user"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Api struct {
-	router      *gin.Engine
-	cfg         config.ServiceConfiguration
-	user        *user.Service
-	tournaments *tournaments.Service
+	router   *gin.Engine
+	cfg      config.ServiceConfiguration
+	services *service.Services
 }
 
 func NewApi(
 	router *gin.Engine,
 	cfg config.ServiceConfiguration,
-	user *user.Service,
-	tournaments *tournaments.Service,
 ) *Api {
 	svc := &Api{
-		router:      router,
-		cfg:         cfg,
-		user:        user,
-		tournaments: tournaments,
+		router: router,
+		cfg:    cfg,
+		services: service.NewServices(service.Deps{
+			Cfg:      cfg,
+			Storage:  storage.NewPostgresStorage(cfg),
+			RStorage: storage.NewRedisStorage(cfg),
+			Jwt:      service.NewTokenManager(cfg),
+		}),
 	}
-	//svc.router.Use(CORSMiddleware())
+	svc.router.Use(CORSMiddleware())
 	svc.registerRoutes()
 	return svc
 }
@@ -50,11 +52,28 @@ func (api *Api) registerRoutes() {
 
 	api.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	//baseWithAuth := base.Group("/")
-	//baseWithAuth.Use(api.AuthMW())
-
 	auth := base.Group("/auth")
-	auth.POST("/signup", api.SignUp)
+	{
+		auth.POST("/sign-up", api.signUp)
+		auth.POST("/sign-in", api.signIn)
+		auth.POST("/email/send-code", api.sendVerificationCode)
+		auth.POST("/refresh-tokens", api.refreshTokens)
+		auth.POST("/logout", api.logout)
+	}
+	user := base.Group("/user")
+	{
+		user.GET("/exists", api.checkUserDataExists)
+		userAuthenticated := user.Group("/", api.userIdentity)
+		{
+			userAuthenticated.GET("/info", api.userInfo)
+			userAuthenticated.PATCH("password/change", api.changePassword)
+		}
+		password := user.Group("/password")
+		{
+			password.POST("/forgot", api.forgotPassword)
+			password.PATCH("/reset", api.resetPassword)
+		}
+	}
 
 	team := base.Group("/tournament")
 	team.GET("/create_team_nhl", api.CreateTeamsNHL)
@@ -76,6 +95,11 @@ const (
 	NotFoundErrorTitle         = "Ошибка произошла на стороне сервера"
 	NotFoundErrorMessage       = "Ошибка на сервере. Зайдите позже :("
 	BadRequestErrorTitle       = "Программная ошибка"
+)
+
+var (
+	InvalidInputBodyError       = errors.New("invalid input body")
+	InvalidInputParametersError = errors.New("invalid input parameters")
 )
 
 func getUnauthorizedError(err error) Error {
@@ -104,4 +128,13 @@ func getBadRequestError(err error) Error {
 		Error:   BadRequestErrorTitle,
 		Message: err.Error(),
 	}
+}
+
+type StatusResponse struct {
+	Status string `json:"status"`
+}
+
+type CheckEntityExistsResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
 }

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
-	tournaments2 "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/tournaments"
+	tournaments2 "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -48,7 +48,7 @@ func (api *Api) CreateTeamsNHL(ctx *gin.Context) {
 		standings.Standings[idT].League = tournaments.NHL
 	}
 
-	err = api.tournaments.CreateTeamsNHL(ctx, standings.Standings)
+	err = api.services.Teams.CreateTeamsNHL(ctx, standings.Standings)
 	if err != nil {
 		log.Printf("CreateTeamsNHL: %w", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
@@ -95,7 +95,7 @@ func (api *Api) CreateTeamsKHL(ctx *gin.Context) {
 		teamKHL[idT].Team.TeamAbbrev = tournaments.KHLAbrev[teamKHL[idT].Team.TeamName]
 	}
 
-	err = api.tournaments.CreateTeamsKHL(ctx, teamKHL)
+	err = api.services.Teams.CreateTeamsKHL(ctx, teamKHL)
 	if err != nil {
 		log.Printf("CreateTeamKHL: %w", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
@@ -142,7 +142,7 @@ func (api *Api) EventsKHL(ctx *gin.Context) {
 		return
 	}
 
-	err = api.tournaments.AddEventsKHL(ctx, eventKHL)
+	err = api.services.Teams.AddEventsKHL(ctx, eventKHL)
 	if err != nil {
 		log.Printf("EventsKHL: %w", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
@@ -187,7 +187,7 @@ func (api *Api) EventsNHL(ctx *gin.Context) {
 		return
 	}
 
-	err = api.tournaments.AddEventsNHL(ctx, eventNHL.GameWeeks[0].Games)
+	err = api.services.Teams.AddEventsNHL(ctx, eventNHL.GameWeeks[0].Games)
 	if err != nil {
 		log.Printf("EventsNHL: %w", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
@@ -211,7 +211,7 @@ func (api *Api) GetMatches(ctx *gin.Context) {
 
 	//var matches []tournaments.Matches
 
-	matches, err := api.tournaments.GetMatchesDay(ctx)
+	matches, err := api.services.Teams.GetMatchesDay(ctx)
 	if errors.Is(err, tournaments2.NotFoundMatches) {
 		ctx.JSON(http.StatusBadRequest, getNotFoundError())
 		return
