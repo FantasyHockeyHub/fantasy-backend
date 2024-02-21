@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/config"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/api"
-	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/user"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
@@ -13,15 +13,18 @@ import (
 func Core() fx.Option {
 	return fx.Options(
 		fx.Provide(
-			fx.Annotate(storage.NewPostgresStorage, fx.As(new(user.Storage))),
+			fx.Annotate(storage.NewPostgresStorage, fx.As(new(service.Storage))),
+			fx.Annotate(storage.NewRedisStorage, fx.As(new(service.RStorage))),
 		),
 		fx.Provide(
 			context.Background,
 			storage.NewPostgresStorage,
+			storage.NewRedisStorage,
 			config.NewConfig,
 			gin.Default,
 			api.NewApi,
-			user.NewService,
+			service.NewTokenManager,
+			service.NewServices,
 		),
 		fx.Invoke(restAPIHook),
 	)
