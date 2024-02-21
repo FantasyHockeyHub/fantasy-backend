@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
-	user_service "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/user"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -24,19 +24,19 @@ import (
 func (api Api) signUp(ctx *gin.Context) {
 	var inp user.SignUpInput
 	if err := ctx.BindJSON(&inp); err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputBodyError))
 		return
 	}
 
-	err := api.user.SignUp(inp)
+	err := api.services.User.SignUp(inp)
 	if err != nil {
 		log.Println("SignUp:", err)
 		switch err {
-		case user_service.UserAlreadyExistsError,
-			user_service.InvalidNicknameError,
-			user_service.NicknameTakenError,
-			user_service.PasswordValidationError,
-			user_service.InvalidVerificationCodeError,
+		case service.UserAlreadyExistsError,
+			service.InvalidNicknameError,
+			service.NicknameTakenError,
+			service.PasswordValidationError,
+			service.InvalidVerificationCodeError,
 			storage.VerificationCodeError:
 			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 			return
@@ -64,16 +64,16 @@ func (api Api) signUp(ctx *gin.Context) {
 func (api Api) signIn(ctx *gin.Context) {
 	var inp user.SignInInput
 	if err := ctx.BindJSON(&inp); err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputBodyError))
 		return
 	}
 
-	tokens, err := api.user.SignIn(inp)
+	tokens, err := api.services.User.SignIn(inp)
 	if err != nil {
 		log.Println("SignIn:", err)
 		switch err {
 		case storage.UserDoesNotExistError,
-			user_service.IncorrectPasswordError:
+			service.IncorrectPasswordError:
 			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 			return
 		default:
@@ -100,15 +100,15 @@ func (api Api) signIn(ctx *gin.Context) {
 func (api Api) sendVerificationCode(ctx *gin.Context) {
 	var inp user.EmailInput
 	if err := ctx.BindJSON(&inp); err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputBodyError))
 		return
 	}
 
-	err := api.user.SendVerificationCode(inp.Email)
+	err := api.services.User.SendVerificationCode(inp.Email)
 	if err != nil {
 		log.Println("SendVerificationCode:", err)
 		switch err {
-		case user_service.UserAlreadyExistsError:
+		case service.UserAlreadyExistsError:
 			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 			return
 		default:
@@ -135,15 +135,15 @@ func (api Api) sendVerificationCode(ctx *gin.Context) {
 func (api Api) refreshTokens(ctx *gin.Context) {
 	var inp user.RefreshInput
 	if err := ctx.BindJSON(&inp); err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputBodyError))
 		return
 	}
 
-	tokens, err := api.user.RefreshTokens(inp.RefreshToken)
+	tokens, err := api.services.User.RefreshTokens(inp.RefreshToken)
 	if err != nil {
 		log.Println("RefreshTokens:", err)
 		switch err {
-		case user_service.InvalidRefreshTokenError,
+		case service.InvalidRefreshTokenError,
 			storage.RefreshTokenNotFoundError:
 			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 			return
@@ -171,11 +171,11 @@ func (api Api) refreshTokens(ctx *gin.Context) {
 func (api Api) logout(ctx *gin.Context) {
 	var inp user.RefreshInput
 	if err := ctx.BindJSON(&inp); err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputBodyError))
 		return
 	}
 
-	err := api.user.Logout(inp.RefreshToken)
+	err := api.services.User.Logout(inp.RefreshToken)
 	if err != nil {
 		log.Println("Logout:", err)
 		switch err {
@@ -191,75 +191,61 @@ func (api Api) logout(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
 }
 
-// CheckEmailExists godoc
-// @Summary Использован ли данный email в сервисе
+// CheckUserDataExists godoc
+// @Summary Существует ли пользователь с указанными параметрами
 // @Schemes
-// @Description Существует ли уже пользователь с таким email
+// @Description Существует ли уже пользователь с таким email или nickname. Код 200: пользователь с такими данными уже существует, код 404: пользователь с такими данными не найден.
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param data body user.EmailInput true "Входные параметры"
+// @Param email query string false "Email пользователя" Example(test@test.test)
+// @Param nickname query string false "Nickname пользователя" Example(Qwerty1)
 // @Success 200 {object} StatusResponse
 // @Failure 400 {object} Error
+// @Failure 404 {object} StatusResponse
 // @Failure 500 {object} Error
-// @Router /user/check-email [post]
-func (api Api) checkEmailExists(ctx *gin.Context) {
-	var inp user.EmailInput
-	if err := ctx.BindJSON(&inp); err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+// @Router /user/exists [get]
+func (api Api) checkUserDataExists(ctx *gin.Context) {
+	var inp user.UserExistsDataInput
+
+	if err := ctx.ShouldBindQuery(&inp); err != nil || (inp.Email == "" && inp.Nickname == "") {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
 		return
 	}
 
-	err := api.user.CheckEmailExists(inp.Email)
-	if err != nil {
-		log.Println("CheckEmailExists:", err)
-		switch err {
-		case user_service.UserAlreadyExistsError:
-			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
-			return
-		default:
+	if inp.Email != "" {
+		exists, err := api.services.User.CheckEmailExists(inp.Email)
+		if err != nil {
+			log.Println("CheckEmailExists:", err)
 			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
 			return
 		}
-	}
-
-	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
-}
-
-// CheckNicknameExists godoc
-// @Summary Использован ли данный nickname в сервисе
-// @Schemes
-// @Description Существует ли уже пользователь с таким nickname
-// @Tags user
-// @Accept json
-// @Produce json
-// @Param data body user.NicknameInput true "Входные параметры"
-// @Success 200 {object} StatusResponse
-// @Failure 400 {object} Error
-// @Failure 500 {object} Error
-// @Router /user/check-nickname [post]
-func (api Api) checkNicknameExists(ctx *gin.Context) {
-	var inp user.NicknameInput
-	if err := ctx.BindJSON(&inp); err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
-		return
-	}
-
-	err := api.user.CheckNicknameExists(inp.Nickname)
-	if err != nil {
-		log.Println("CheckNicknameExists:", err)
-		switch err {
-		case user_service.InvalidNicknameError,
-			user_service.NicknameTakenError:
-			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
-			return
-		default:
-			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+		if exists == true {
+			ctx.JSON(http.StatusOK, StatusResponse{"email is already taken"})
 			return
 		}
-	}
 
-	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
+		ctx.JSON(http.StatusNotFound, StatusResponse{"email is not taken"})
+	} else if inp.Nickname != "" {
+		exists, err := api.services.User.CheckNicknameExists(inp.Nickname)
+		if err != nil {
+			log.Println("CheckNicknameExists:", err)
+			switch err {
+			case service.InvalidNicknameError:
+				ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+				return
+			default:
+				ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+				return
+			}
+		}
+		if exists == true {
+			ctx.JSON(http.StatusOK, StatusResponse{"nickname is already taken"})
+			return
+		}
+
+		ctx.JSON(http.StatusNotFound, StatusResponse{"nickname is not taken"})
+	}
 }
 
 // UserInfo godoc
@@ -277,10 +263,11 @@ func (api Api) checkNicknameExists(ctx *gin.Context) {
 func (api Api) userInfo(ctx *gin.Context) {
 	userID, err := parseUserIDFromContext(ctx)
 	if err != nil {
+		log.Println("UserInfo:", err)
 		return
 	}
 
-	userInfo, err := api.user.GetUserInfo(userID)
+	userInfo, err := api.services.User.GetUserInfo(userID)
 	if err != nil {
 		log.Println("UserInfo:", err)
 		switch err {
@@ -312,12 +299,13 @@ func (api Api) userInfo(ctx *gin.Context) {
 func (api Api) changePassword(ctx *gin.Context) {
 	var inp user.ChangePasswordInput
 	if err := ctx.BindJSON(&inp); err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputBodyError))
 		return
 	}
 
 	userID, err := parseUserIDFromContext(ctx)
 	if err != nil {
+		log.Println("ChangePassword:", err)
 		return
 	}
 
@@ -327,12 +315,12 @@ func (api Api) changePassword(ctx *gin.Context) {
 		NewPassword: inp.NewPassword,
 	}
 
-	err = api.user.ChangePassword(changePasswordData)
+	err = api.services.User.ChangePassword(changePasswordData)
 	if err != nil {
 		log.Println("ChangePassword:", err)
 		switch err {
-		case user_service.PasswordValidationError,
-			user_service.IncorrectPasswordError,
+		case service.PasswordValidationError,
+			service.IncorrectPasswordError,
 			storage.UserDoesNotExistError:
 			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 			return
@@ -360,15 +348,15 @@ func (api Api) changePassword(ctx *gin.Context) {
 func (api Api) forgotPassword(ctx *gin.Context) {
 	var inp user.EmailInput
 	if err := ctx.BindJSON(&inp); err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputBodyError))
 		return
 	}
 
-	err := api.user.ForgotPassword(inp.Email)
+	err := api.services.User.ForgotPassword(inp.Email)
 	if err != nil {
 		log.Println("ForgotPassword:", err)
 		switch err {
-		case user_service.UserDoesNotExistError:
+		case service.UserDoesNotExistError:
 			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 			return
 		default:
@@ -395,15 +383,15 @@ func (api Api) forgotPassword(ctx *gin.Context) {
 func (api Api) resetPassword(ctx *gin.Context) {
 	var inp user.ResetPasswordInput
 	if err := ctx.BindJSON(&inp); err != nil {
-		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputBodyError))
 		return
 	}
 
-	err := api.user.ResetPassword(inp)
+	err := api.services.User.ResetPassword(inp)
 	if err != nil {
 		log.Println("ResetPassword:", err)
 		switch err {
-		case user_service.PasswordValidationError,
+		case service.PasswordValidationError,
 			storage.ResetHashError,
 			storage.UserDoesNotExistError:
 			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))

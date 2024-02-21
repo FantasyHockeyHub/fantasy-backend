@@ -1,30 +1,36 @@
 package api
 
 import (
+	"errors"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/config"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/docs"
 	_ "github.com/Frozen-Fantasy/fantasy-backend.git/docs"
-	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/user"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Api struct {
-	router *gin.Engine
-	cfg    config.ServiceConfiguration
-	user   *user.Service
+	router   *gin.Engine
+	cfg      config.ServiceConfiguration
+	services *service.Services
 }
 
 func NewApi(
 	router *gin.Engine,
 	cfg config.ServiceConfiguration,
-	user *user.Service,
 ) *Api {
 	svc := &Api{
 		router: router,
 		cfg:    cfg,
-		user:   user,
+		services: service.NewServices(service.Deps{
+			Cfg:      cfg,
+			Storage:  storage.NewPostgresStorage(cfg),
+			RStorage: storage.NewRedisStorage(cfg),
+			Jwt:      service.NewTokenManager(cfg),
+		}),
 	}
 	svc.router.Use(CORSMiddleware())
 	svc.registerRoutes()
@@ -57,8 +63,7 @@ func (api *Api) registerRoutes() {
 
 	user := base.Group("/user")
 	{
-		user.POST("/check-email", api.checkEmailExists)
-		user.POST("/check-nickname", api.checkNicknameExists)
+		user.GET("/exists", api.checkUserDataExists)
 		userAuthenticated := user.Group("/", api.userIdentity)
 		{
 			userAuthenticated.GET("/info", api.userInfo)
@@ -85,6 +90,11 @@ const (
 	NotFoundErrorTitle         = "Ошибка произошла на стороне сервера"
 	NotFoundErrorMessage       = "Ошибка на сервере. Зайдите позже :("
 	BadRequestErrorTitle       = "Программная ошибка"
+)
+
+var (
+	InvalidInputBodyError       = errors.New("invalid input body")
+	InvalidInputParametersError = errors.New("invalid input parameters")
 )
 
 func getUnauthorizedError(err error) Error {
@@ -117,4 +127,9 @@ func getBadRequestError(err error) Error {
 
 type StatusResponse struct {
 	Status string `json:"status"`
+}
+
+type CheckEntityExistsResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
 }

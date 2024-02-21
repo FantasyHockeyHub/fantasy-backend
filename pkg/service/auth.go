@@ -1,7 +1,8 @@
-package user
+package service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -40,7 +41,7 @@ type RStorage interface {
 	GetEmailByResetPasswordHash(resetHash string) (string, error)
 }
 
-func NewService(storage Storage, rStorage RStorage, jwt *Manager) *Service {
+func NewUserService(storage Storage, rStorage RStorage, jwt *Manager) *Service {
 	return &Service{
 		storage:  storage,
 		rStorage: rStorage,
@@ -55,9 +56,12 @@ type Service struct {
 }
 
 func (s *Service) SignUp(input user.SignUpInput) error {
-	err := s.CheckEmailExists(input.Email)
+	exists, err := s.CheckEmailExists(input.Email)
 	if err != nil {
 		return err
+	}
+	if exists == true {
+		return UserAlreadyExistsError
 	}
 
 	err = ValidateNickname(input.Nickname)
@@ -65,9 +69,12 @@ func (s *Service) SignUp(input user.SignUpInput) error {
 		return err
 	}
 
-	err = s.CheckNicknameExists(input.Nickname)
+	exists, err = s.CheckNicknameExists(input.Nickname)
 	if err != nil {
 		return err
+	}
+	if exists == true {
+		return NicknameTakenError
 	}
 
 	err = ValidatePassword(input.Password)
@@ -161,7 +168,8 @@ func (s *Service) CreateSession(userID uuid.UUID) (user.Tokens, error) {
 		pair user.Tokens
 		err  error
 	)
-
+	fmt.Println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\")
+	fmt.Println(s.Jwt.RefreshTokenLifetime)
 	pair.ExpiresIn, pair.AccessToken, err = s.Jwt.CreateJWT(userID.String())
 	if err != nil {
 		return pair, err

@@ -2,7 +2,7 @@ package api
 
 import (
 	"errors"
-	user_service "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/user"
+	user_service "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"log"
@@ -36,7 +36,7 @@ func (api Api) parseAuthHeader(ctx *gin.Context) (string, error) {
 		return "", user_service.EmptyTokenError
 	}
 
-	return api.user.Jwt.ParseJWT(headerParts[1])
+	return api.services.TokenManager.ParseJWT(headerParts[1])
 }
 
 func parseUserIDFromContext(c *gin.Context) (uuid.UUID, error) {

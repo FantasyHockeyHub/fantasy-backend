@@ -1,4 +1,4 @@
-package user
+package service
 
 import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"

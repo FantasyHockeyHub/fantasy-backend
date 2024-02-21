@@ -16,12 +16,13 @@ type EmailInput struct {
 	Email string `json:"email" binding:"required,email,max=64"`
 }
 
-type RefreshInput struct {
-	RefreshToken string `json:"refreshToken" binding:"required"`
+type UserExistsDataInput struct {
+	Email    string `form:"email" binding:"omitempty,email,max=64"`
+	Nickname string `form:"nickname" binding:"omitempty,min=4,max=64"`
 }
 
-type NicknameInput struct {
-	Nickname string `json:"nickname" binding:"required,min=4,max=64"`
+type RefreshInput struct {
+	RefreshToken string `json:"refreshToken" binding:"required,min=64,max=64"`
 }
 
 type ChangePasswordInput struct {
@@ -30,6 +31,6 @@ type ChangePasswordInput struct {
 }
 
 type ResetPasswordInput struct {
-	Hash        string `json:"hash" binding:"required"`
+	Hash        string `json:"hash" binding:"required,min=32,max=32"`
 	NewPassword string `json:"newPassword" binding:"required,min=8,max=64"`
 }

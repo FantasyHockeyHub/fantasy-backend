@@ -1,4 +1,4 @@
-package user
+package service
 
 import (
 	"errors"
@@ -14,19 +14,13 @@ var (
 	InvalidAccessTokenError = errors.New("invalid access token")
 )
 
-type TokenManager interface {
-	CreateJWT(userID string) (string, error)
-	ParseJWT(accessToken string) (string, error)
-	CreateRefreshToken() (string, error)
-}
-
 type Manager struct {
 	signingKey           string
 	AccessTokenLifetime  time.Duration
 	RefreshTokenLifetime time.Duration
 }
 
-func NewManager(cfg config.ServiceConfiguration) *Manager {
+func NewTokenManager(cfg config.ServiceConfiguration) *Manager {
 	return &Manager{
 		signingKey:           cfg.User.SigningKey,
 		AccessTokenLifetime:  time.Duration(cfg.User.AccessTokenLifetime) * time.Minute,

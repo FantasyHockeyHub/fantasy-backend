@@ -1,4 +1,4 @@
-package user
+package service
 
 import (
 	"errors"
@@ -15,9 +15,12 @@ var (
 func (s *Service) SendVerificationCode(email string) error {
 	email = strings.ToLower(email)
 
-	err := s.CheckEmailExists(email)
+	exists, err := s.CheckEmailExists(email)
 	if err != nil {
 		return err
+	}
+	if exists == true {
+		return UserAlreadyExistsError
 	}
 
 	code, err := s.rStorage.CreateVerificationCode(email)
@@ -53,14 +56,11 @@ func (s *Service) CheckEmailVerification(email string, inputCode int) error {
 	return nil
 }
 
-func (s *Service) CheckEmailExists(email string) error {
+func (s *Service) CheckEmailExists(email string) (bool, error) {
 	exists, err := s.storage.CheckEmailExists(email)
 	if err != nil {
-		return err
-	}
-	if exists == true {
-		return UserAlreadyExistsError
+		return exists, err
 	}
 
-	return nil
+	return exists, nil
 }

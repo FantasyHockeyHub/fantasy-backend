@@ -1,4 +1,4 @@
-package user
+package service
 
 import (
 	"errors"
@@ -22,19 +22,16 @@ func ValidateNickname(nickname string) error {
 	return nil
 }
 
-func (s *Service) CheckNicknameExists(nickname string) error {
+func (s *Service) CheckNicknameExists(nickname string) (bool, error) {
 	err := ValidateNickname(nickname)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	exists, err := s.storage.CheckNicknameExists(nickname)
 	if err != nil {
-		return err
-	}
-	if exists == true {
-		return NicknameTakenError
+		return exists, err
 	}
 
-	return nil
+	return exists, err
 }

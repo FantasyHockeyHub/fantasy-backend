@@ -21,18 +21,11 @@ definitions:
     required:
     - email
     type: object
-  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.NicknameInput:
-    properties:
-      nickname:
-        maxLength: 64
-        minLength: 4
-        type: string
-    required:
-    - nickname
-    type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.RefreshInput:
     properties:
       refreshToken:
+        maxLength: 64
+        minLength: 64
         type: string
     required:
     - refreshToken
@@ -40,6 +33,8 @@ definitions:
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.ResetPasswordInput:
     properties:
       hash:
+        maxLength: 32
+        minLength: 32
         type: string
       newPassword:
         maxLength: 64
@@ -273,18 +268,24 @@ paths:
       summary: Регистрация
       tags:
       - auth
-  /user/check-email:
-    post:
+  /user/exists:
+    get:
       consumes:
       - application/json
-      description: Существует ли уже пользователь с таким email
+      description: 'Существует ли уже пользователь с таким email или nickname. Код
+        200: пользователь с такими данными уже существует, код 404: пользователь с
+        такими данными не найден.'
       parameters:
-      - description: Входные параметры
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.EmailInput'
+      - description: Email пользователя
+        example: test@test.test
+        in: query
+        name: email
+        type: string
+      - description: Nickname пользователя
+        example: Qwerty1
+        in: query
+        name: nickname
+        type: string
       produces:
       - application/json
       responses:
@@ -296,41 +297,15 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/pkg_api.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/pkg_api.Error'
-      summary: Использован ли данный email в сервисе
-      tags:
-      - user
-  /user/check-nickname:
-    post:
-      consumes:
-      - application/json
-      description: Существует ли уже пользователь с таким nickname
-      parameters:
-      - description: Входные параметры
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.NicknameInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/pkg_api.StatusResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/pkg_api.Error'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/pkg_api.Error'
-      summary: Использован ли данный nickname в сервисе
+      summary: Существует ли пользователь с указанными параметрами
       tags:
       - user
   /user/info:

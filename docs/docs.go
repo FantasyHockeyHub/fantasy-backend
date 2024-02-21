@@ -245,9 +245,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/check-email": {
-            "post": {
-                "description": "Существует ли уже пользователь с таким email",
+        "/user/exists": {
+            "get": {
+                "description": "Существует ли уже пользователь с таким email или nickname. Код 200: пользователь с такими данными уже существует, код 404: пользователь с такими данными не найден.",
                 "consumes": [
                     "application/json"
                 ],
@@ -257,16 +257,21 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Использован ли данный email в сервисе",
+                "summary": "Существует ли пользователь с указанными параметрами",
                 "parameters": [
                     {
-                        "description": "Входные параметры",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.EmailInput"
-                        }
+                        "type": "string",
+                        "example": "test@test.test",
+                        "description": "Email пользователя",
+                        "name": "email",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Qwerty1",
+                        "description": "Nickname пользователя",
+                        "name": "nickname",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -282,50 +287,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/pkg_api.Error"
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/pkg_api.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/user/check-nickname": {
-            "post": {
-                "description": "Существует ли уже пользователь с таким nickname",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Использован ли данный nickname в сервисе",
-                "parameters": [
-                    {
-                        "description": "Входные параметры",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.NicknameInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/pkg_api.StatusResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/pkg_api.Error"
                         }
                     },
                     "500": {
@@ -565,19 +530,6 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.NicknameInput": {
-            "type": "object",
-            "required": [
-                "nickname"
-            ],
-            "properties": {
-                "nickname": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 4
-                }
-            }
-        },
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.RefreshInput": {
             "type": "object",
             "required": [
@@ -585,7 +537,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "refreshToken": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 64
                 }
             }
         },
@@ -597,7 +551,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "hash": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 32
                 },
                 "newPassword": {
                     "type": "string",
