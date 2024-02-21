@@ -235,6 +235,133 @@
                 }
             }
         },
+        "/tournament/create_team_khl": {
+            "get": {
+                "description": "Добавлят информацию о команде KHL",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Создание команд KHL",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tournament/create_team_nhl": {
+            "get": {
+                "description": "Добавлят информацию о команде NHL",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Создание команд NHL",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tournament/events_day_khl": {
+            "get": {
+                "description": "Добавляет в бд матчи за день",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Получение событий на следующий день KHL",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tournament/events_day_nhl": {
+            "get": {
+                "description": "Добавляет в бд матчи за день",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Получение событий на следующий день NHL",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tournament/get_matches": {
+            "get": {
+                "description": "Дата берётся автоматически",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Получение матчей на текущий день",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Matches"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/user/exists": {
             "get": {
                 "description": "Существует ли уже пользователь с таким email или nickname. Код 200: пользователь с такими данными уже существует, код 404: пользователь с такими данными не найден.",
@@ -489,6 +616,54 @@
         }
     },
     "definitions": {
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ErrLeague",
+                "NHL",
+                "KHL"
+            ]
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Matches": {
+            "type": "object",
+            "properties": {
+                "awayScore": {
+                    "type": "integer"
+                },
+                "awayTeamId": {
+                    "type": "integer"
+                },
+                "endAt": {
+                    "type": "integer"
+                },
+                "eventId": {
+                    "type": "integer"
+                },
+                "homeScore": {
+                    "type": "integer"
+                },
+                "homeTeamId": {
+                    "type": "integer"
+                },
+                "league": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League"
+                },
+                "matchId": {
+                    "type": "integer"
+                },
+                "startAt": {
+                    "type": "integer"
+                },
+                "statusEvent": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.ChangePasswordInput": {
             "type": "object",
             "required": [

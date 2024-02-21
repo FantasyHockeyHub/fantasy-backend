@@ -1,7 +1,9 @@
 package service
 
 import (
+	"context"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/config"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/google/uuid"
@@ -31,9 +33,18 @@ type TokenManager interface {
 	CreateRefreshToken() (string, error)
 }
 
+type Teams interface {
+	CreateTeamsNHL(context.Context, []tournaments.Standing) error
+	CreateTeamsKHL(ctx context.Context, teams []tournaments.TeamKHL) error
+	AddEventsKHL(ctx context.Context, events []tournaments.EventDataKHL) error
+	AddEventsNHL(ctx context.Context, events []tournaments.Game) error
+	GetMatchesDay(ctx context.Context) ([]tournaments.Matches, error)
+}
+
 type Services struct {
 	User
 	TokenManager
+	Teams
 }
 
 type Deps struct {
@@ -45,8 +56,10 @@ type Deps struct {
 
 func NewServices(deps Deps) *Services {
 	userService := NewUserService(deps.Storage, deps.RStorage, deps.Jwt)
+	teamsService := NewTeamsService(deps.Storage)
 	return &Services{
 		User:         userService,
 		TokenManager: deps.Jwt,
+		Teams:        teamsService,
 	}
 }
