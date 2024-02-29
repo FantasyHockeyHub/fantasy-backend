@@ -36,6 +36,10 @@ var LeagueTitles = map[League]string{
 	KHL: "KHL",
 }
 
+func (t *League) GetLeagueString() string {
+	return LeagueTitles[*t]
+}
+
 var KHLAbrev = map[string]string{
 	"Металлург Мг":  "ММГ",
 	"Авангард":      "АВГ",

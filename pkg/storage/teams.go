@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/lib/pq"
 	"log"
 )
 
@@ -30,6 +31,16 @@ const (
 	EndTime      = "end_at"
 	EventId      = "event_id"
 	StatusMatch  = "status"
+
+	TournamentsTable = "tournaments"
+	TournamentsId    = "id"
+	TournTitle       = "title"
+	MatchesIds       = "matches_ids"
+	PlayersAmount    = "players_amount"
+	Deposit          = "deposit"
+	PrizeFond        = "prize_fond"
+	TourStatus       = "status_tournament"
+	TimeStartTour    = "started_at"
 )
 
 func (p *PostgresStorage) CreateTeamsNHL(ctx context.Context, teams []tournaments.Standing) error {
@@ -62,13 +73,13 @@ func (p *PostgresStorage) CreateTeamsNHL(ctx context.Context, teams []tournament
 
 		_, err = tx.ExecContext(ctx, query, args...)
 		if err != nil {
-			log.Printf("team insert query error: %w", err)
+			log.Printf("team insert query error: %v", err)
 		}
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return fmt.Errorf("cant commit CreateTeams: %w", err)
+		return fmt.Errorf("cant commit CreateTeams: %v", err)
 	}
 
 	return nil
@@ -104,13 +115,13 @@ func (p *PostgresStorage) CreateTeamsKHL(ctx context.Context, teams []tournament
 
 		_, err = tx.ExecContext(ctx, query, args...)
 		if err != nil {
-			log.Printf("team insert query error: %w", err)
+			log.Printf("team insert query error: %v", err)
 		}
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return fmt.Errorf("cant commit CreateTeams: %w", err)
+		return fmt.Errorf("cant commit CreateTeams: %v", err)
 	}
 
 	return nil
@@ -149,13 +160,13 @@ func (p *PostgresStorage) AddKHLEvents(ctx context.Context, events []tournaments
 
 		_, err = tx.ExecContext(ctx, query, args...)
 		if err != nil {
-			log.Printf("event insert query error: %w", err)
+			log.Printf("event insert query error: %v", err)
 		}
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return fmt.Errorf("cant commit AddKHLEvents: %w", err)
+		return fmt.Errorf("cant commit AddKHLEvents: %v", err)
 	}
 	return nil
 }
@@ -192,28 +203,30 @@ func (p *PostgresStorage) AddNHLEvents(ctx context.Context, events []tournaments
 
 		_, err = tx.ExecContext(ctx, query, args...)
 		if err != nil {
-			log.Printf("event insert query error: %w", err)
+			log.Printf("event insert query error: %v", err)
 		}
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return fmt.Errorf("cant commit AddNHLEvents: %w", err)
+		return fmt.Errorf("cant commit AddNHLEvents: %v", err)
 	}
 	return nil
 }
 
-func (p *PostgresStorage) GetMatchesByDate(ctx context.Context, startUnixDate int64, endUnixDate int64) ([]tournaments.Matches, error) {
+func (p *PostgresStorage) GetMatchesByDate(ctx context.Context, startUnixDate int64, endUnixDate int64, league tournaments.League) ([]tournaments.Matches, error) {
 
 	query, args, err := sq.
 		Select(MatchId, HomeTeam, HomeScore, AwayTeam, AwayScore, StartTime, EndTime, EventId, StatusMatch, League).
 		From(MatchesTable).
 		Where(
-			sq.GtOrEq{
-				StartTime: startUnixDate,
-			},
-			sq.LtOrEq{
-				StartTime: endUnixDate,
+
+			sq.And{
+				sq.Eq{
+					League: league,
+				},
+				sq.GtOrEq{StartTime: startUnixDate},
+				sq.LtOrEq{StartTime: endUnixDate},
 			},
 		).
 		PlaceholderFormat(sq.Dollar).
@@ -231,4 +244,49 @@ func (p *PostgresStorage) GetMatchesByDate(ctx context.Context, startUnixDate in
 	}
 
 	return matches, nil
+}
+
+func (p *PostgresStorage) CreateTournaments(ctx context.Context, tournaments []tournaments.Tournament) error {
+
+	tx, err := p.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+
+	for _, tournament := range tournaments {
+		query, args, err := sq.
+			Insert(TournamentsTable).
+			Columns(TournamentsId, League, TournTitle, MatchesIds, TimeStartTour, EndTime, PlayersAmount, Deposit, PrizeFond, TourStatus).
+			Values(
+				tournament.TournamentId,
+				tournament.League,
+				tournament.Title,
+				pq.Array(tournament.MatchesIds),
+				tournament.TimeStart,
+				tournament.TimeEnd,
+				tournament.PlayersAmount,
+				tournament.Deposit,
+				tournament.PrizeFond,
+				tournament.StatusTournament,
+			).
+			PlaceholderFormat(sq.Dollar).
+			ToSql()
+
+		if err != nil {
+			return err
+		}
+
+		_, err = p.db.ExecContext(ctx, query, args...)
+		if err != nil {
+			return fmt.Errorf("cant insert CreateTournaments: %v", err)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("cant commit CreateTournaments: %v", err)
+	}
+	return err
 }
