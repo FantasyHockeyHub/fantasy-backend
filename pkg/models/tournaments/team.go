@@ -40,6 +40,10 @@ func (t *League) GetLeagueString() string {
 	return LeagueTitles[*t]
 }
 
+func (t *League) GetLeagueId(str string) League {
+	return Leagues[str]
+}
+
 var KHLAbrev = map[string]string{
 	"Металлург Мг":  "ММГ",
 	"Авангард":      "АВГ",

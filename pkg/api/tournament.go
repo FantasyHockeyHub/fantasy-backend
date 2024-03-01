@@ -26,12 +26,12 @@ func (api *Api) CreateTeamsNHL(ctx *gin.Context) {
 	url := "https://api-web.nhle.com/v1/standings/now"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Print(err.Error())
+		log.Println("CreateTeamsNHL:", err)
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Print(err.Error())
+		log.Println("CreateTeamsNHL:", err)
 	}
 	defer res.Body.Close()
 	decoder := json.NewDecoder(res.Body)
@@ -40,7 +40,7 @@ func (api *Api) CreateTeamsNHL(ctx *gin.Context) {
 
 	err = decoder.Decode(&standings)
 	if err != nil {
-		fmt.Println("Error decoding JSON:", err)
+		log.Println("Error decoding JSON:", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
 		return
 	}
@@ -72,12 +72,12 @@ func (api *Api) CreateTeamsKHL(ctx *gin.Context) {
 	url := "https://khl.api.webcaster.pro/api/khl_mobile/teams_v2"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Print(err.Error())
+		log.Println("CreateTeamsKHL:", err)
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Print(err.Error())
+		log.Println("CreateTeamsKHL:", err)
 	}
 	defer res.Body.Close()
 	decoder := json.NewDecoder(res.Body)
@@ -86,7 +86,7 @@ func (api *Api) CreateTeamsKHL(ctx *gin.Context) {
 
 	err = decoder.Decode(&teamKHL)
 	if err != nil {
-		fmt.Println("Error decoding JSON:", err)
+		log.Println("Error decoding JSON:", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
 		return
 	}
@@ -124,12 +124,12 @@ func (api *Api) EventsKHL(ctx *gin.Context) {
 	url := fmt.Sprint("https://khl.api.webcaster.pro/api/khl_mobile/events_v2?q[start_at_lt_time_from_unixtime]=", endDay.Unix(), "&order_direction=desc&q[start_at_gt_time_from_unixtime]=", startDay.Unix())
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Print(err.Error())
+		log.Println("EventsKHL:", err)
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Print(err.Error())
+		log.Println("EventsKHL:", err)
 	}
 	defer res.Body.Close()
 	decoder := json.NewDecoder(res.Body)
@@ -138,7 +138,7 @@ func (api *Api) EventsKHL(ctx *gin.Context) {
 
 	err = decoder.Decode(&eventKHL)
 	if err != nil {
-		fmt.Println("Error decoding JSON:", err)
+		log.Println("Error decoding JSON:", err)
 		return
 	}
 
@@ -169,12 +169,12 @@ func (api *Api) EventsNHL(ctx *gin.Context) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Print(err.Error())
+		log.Println("EventsNHL:", err)
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Print(err.Error())
+		log.Println("EventsNHL:", err)
 	}
 	defer res.Body.Close()
 	decoder := json.NewDecoder(res.Body)
@@ -183,7 +183,7 @@ func (api *Api) EventsNHL(ctx *gin.Context) {
 
 	err = decoder.Decode(&eventNHL)
 	if err != nil {
-		fmt.Println("Error decoding JSON:", err)
+		log.Println("Error decoding JSON:", err)
 		return
 	}
 
@@ -198,7 +198,7 @@ func (api *Api) EventsNHL(ctx *gin.Context) {
 }
 
 // GetMatches godoc
-// @Summary Получение матчей на текущий день
+// @Summary Получение матчей на следующий день
 // @Schemes
 // @Description Дата берётся автоматически
 // @Tags tournament
@@ -206,12 +206,29 @@ func (api *Api) EventsNHL(ctx *gin.Context) {
 // @Success 200 {object} []tournaments.Matches
 // @Failure 400 {object} Error
 // @Failure 401 {object} Error
-// @Router /tournament/get_matches [get]
+// @Param league path string true "league" Enums(NHL, KHL)
+// @Router /tournament/get_matches/{league} [get]
 func (api *Api) GetMatches(ctx *gin.Context) {
+	//var leagueName tournaments.League
+	//var leagueName string
+	leagueName := ctx.Param("league")
+	if leagueName == "" {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(errors.New("empty league name")))
+		return
+	}
 
-	//var matches []tournaments.Matches
+	//if err := ctx.BindUri(&leagueName); err != nil {
+	//	ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+	//	return
+	//}
+	//if err := ctx.ShouldBindUri(&leagueName); err != nil {
+	//	ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+	//	return
+	//}
 
-	matches, err := api.services.Teams.GetMatchesDay(ctx, tournaments.KHL)
+	league := new(tournaments.League)
+	*league = league.GetLeagueId(leagueName)
+	matches, err := api.services.Teams.GetMatchesDay(ctx, *league)
 	if errors.Is(err, tournaments2.NotFoundMatches) {
 		ctx.JSON(http.StatusBadRequest, getNotFoundError())
 		return
@@ -222,12 +239,24 @@ func (api *Api) GetMatches(ctx *gin.Context) {
 		return
 	}
 
-	err = api.services.Teams.CreateTournaments(ctx)
+	ctx.JSON(http.StatusOK, matches)
+}
+
+// CreateTournaments godoc
+// @Summary Создание турниров на следующий день
+// @Schemes
+// @Description Дата берётся автоматически
+// @Description Создаётся 4 турника 2 НХЛ и 2 КХЛ платный и бесплатный
+// @Tags tournament
+// @Produce json
+// @Success 200
+// @Failure 400 {object} Error
+// @Router /tournament/create_tournaments [get]
+func (api *Api) CreateTournaments(ctx *gin.Context) {
+	err := api.services.Teams.CreateTournaments(ctx)
 	if err != nil {
 		log.Printf("CreateTournaments: %v", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
 		return
 	}
-
-	ctx.JSON(http.StatusOK, matches)
 }
