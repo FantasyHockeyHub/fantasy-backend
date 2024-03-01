@@ -50,7 +50,7 @@ func (api *Api) CreateTeamsNHL(ctx *gin.Context) {
 
 	err = api.services.Teams.CreateTeamsNHL(ctx, standings.Standings)
 	if err != nil {
-		log.Printf("CreateTeamsNHL: %w", err)
+		log.Printf("CreateTeamsNHL: %v", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
 		return
 	}
@@ -97,7 +97,7 @@ func (api *Api) CreateTeamsKHL(ctx *gin.Context) {
 
 	err = api.services.Teams.CreateTeamsKHL(ctx, teamKHL)
 	if err != nil {
-		log.Printf("CreateTeamKHL: %w", err)
+		log.Printf("CreateTeamKHL: %v", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
 		return
 	}
@@ -144,7 +144,7 @@ func (api *Api) EventsKHL(ctx *gin.Context) {
 
 	err = api.services.Teams.AddEventsKHL(ctx, eventKHL)
 	if err != nil {
-		log.Printf("EventsKHL: %w", err)
+		log.Printf("EventsKHL: %v", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
 		return
 	}
@@ -189,7 +189,7 @@ func (api *Api) EventsNHL(ctx *gin.Context) {
 
 	err = api.services.Teams.AddEventsNHL(ctx, eventNHL.GameWeeks[0].Games)
 	if err != nil {
-		log.Printf("EventsNHL: %w", err)
+		log.Printf("EventsNHL: %v", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
 		return
 	}
@@ -217,7 +217,7 @@ func (api *Api) GetMatches(ctx *gin.Context) {
 		return
 	}
 	if err != nil {
-		log.Printf("GetMatches: %w", err)
+		log.Printf("GetMatches: %v", err)
 		ctx.JSON(http.StatusBadRequest, getInternalServerError())
 		return
 	}
