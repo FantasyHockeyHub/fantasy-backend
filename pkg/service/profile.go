@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *Service) GetUserInfo(userID uuid.UUID) (user.UserInfoModel, error) {
+func (s *UserService) GetUserInfo(userID uuid.UUID) (user.UserInfoModel, error) {
 	userInfo, err := s.storage.GetUserInfo(userID)
 	if err != nil {
 		return userInfo, err

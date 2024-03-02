@@ -399,8 +399,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/pkg_api.Error"
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }
@@ -453,7 +453,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/pkg_api.StatusResponse"
+                            "$ref": "#/definitions/pkg_api.Error"
                         }
                     },
                     "500": {

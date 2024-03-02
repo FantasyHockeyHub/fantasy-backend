@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"fmt"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/config"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -18,7 +18,7 @@ var (
 
 const startBalance = 1000
 
-type Storage interface {
+type UserStorage interface {
 	SignUp(u user.SignUpModel) error
 	CreateUserProfile(tx *sqlx.Tx, u user.SignUpModel) error
 	CreateUserData(tx *sqlx.Tx, u user.SignUpModel) error
@@ -34,28 +34,30 @@ type Storage interface {
 	ChangePassword(inp user.ChangePasswordModel) error
 }
 
-type RStorage interface {
+type UserRStorage interface {
 	CreateVerificationCode(email string) (int, error)
 	GetVerificationCode(email string) (int, error)
 	CreateResetPasswordHash(email string) (string, error)
 	GetEmailByResetPasswordHash(resetHash string) (string, error)
 }
 
-func NewUserService(storage Storage, rStorage RStorage, jwt *Manager) *Service {
-	return &Service{
+func NewUserService(storage UserStorage, rStorage UserRStorage, jwt *Manager, cfg config.ServiceConfiguration) *UserService {
+	return &UserService{
 		storage:  storage,
 		rStorage: rStorage,
 		Jwt:      jwt,
+		cfg:      cfg,
 	}
 }
 
-type Service struct {
-	storage  Storage
-	rStorage RStorage
+type UserService struct {
+	storage  UserStorage
+	rStorage UserRStorage
 	Jwt      *Manager
+	cfg      config.ServiceConfiguration
 }
 
-func (s *Service) SignUp(input user.SignUpInput) error {
+func (s *UserService) SignUp(input user.SignUpInput) error {
 	exists, err := s.CheckEmailExists(input.Email)
 	if err != nil {
 		return err
@@ -112,7 +114,7 @@ func (s *Service) SignUp(input user.SignUpInput) error {
 	return nil
 }
 
-func (s *Service) SignIn(input user.SignInInput) (user.Tokens, error) {
+func (s *UserService) SignIn(input user.SignInInput) (user.Tokens, error) {
 	var tokens user.Tokens
 
 	profileID, err := s.storage.GetProfileIDByEmail(input.Email)
@@ -138,7 +140,7 @@ func (s *Service) SignIn(input user.SignInInput) (user.Tokens, error) {
 	return tokens, nil
 }
 
-func (s *Service) RefreshTokens(refreshTokenID string) (user.Tokens, error) {
+func (s *UserService) RefreshTokens(refreshTokenID string) (user.Tokens, error) {
 	var tokens user.Tokens
 
 	session, err := s.storage.GetSessionByRefreshToken(refreshTokenID)
@@ -163,13 +165,12 @@ func (s *Service) RefreshTokens(refreshTokenID string) (user.Tokens, error) {
 	return tokens, nil
 }
 
-func (s *Service) CreateSession(userID uuid.UUID) (user.Tokens, error) {
+func (s *UserService) CreateSession(userID uuid.UUID) (user.Tokens, error) {
 	var (
 		pair user.Tokens
 		err  error
 	)
-	fmt.Println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\")
-	fmt.Println(s.Jwt.RefreshTokenLifetime)
+
 	pair.ExpiresIn, pair.AccessToken, err = s.Jwt.CreateJWT(userID.String())
 	if err != nil {
 		return pair, err
@@ -191,7 +192,7 @@ func (s *Service) CreateSession(userID uuid.UUID) (user.Tokens, error) {
 	return pair, err
 }
 
-func (s *Service) Logout(refreshTokenID string) error {
+func (s *UserService) Logout(refreshTokenID string) error {
 	err := s.storage.DeleteSessionByRefreshToken(refreshTokenID)
 	if err != nil {
 		return err

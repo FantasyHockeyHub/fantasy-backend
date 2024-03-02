@@ -95,11 +95,11 @@ func (s *TeamsService) GetMatchesDay(ctx context.Context, league tournaments.Lea
 	endDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 23, 59, 59, 0, time.UTC)
 
 	matches, err := s.storage.GetMatchesByDate(ctx, startDay.UnixMilli(), endDay.UnixMilli(), league)
-	if err != nil {
-		return matches, fmt.Errorf("GetMatchesDay: %v", err)
-	}
 	if len(matches) == 0 {
 		return matches, NotFoundMatches
+	}
+	if err != nil {
+		return matches, fmt.Errorf("GetMatchesDay: %v", err)
 	}
 
 	return matches, nil

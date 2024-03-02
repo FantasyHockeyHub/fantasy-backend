@@ -2,12 +2,9 @@ version: '3.9'
 
 services:
   app:
-    image: fantasy_backend:v1
+    image: danponyavin/fantasy_backend:v1
     container_name: fantasy_backend
     restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     depends_on:
@@ -42,6 +39,9 @@ services:
     restart: always
     env_file:
       - .env
+    volumes:
+      - /path/to/local/dаta:/root/redis
+      - /path/to/local/redis.conf:/usr/local/etc/redis/redis.conf
     networks:
       - fantasy
     ports:
