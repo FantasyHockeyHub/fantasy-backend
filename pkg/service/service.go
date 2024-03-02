@@ -56,7 +56,7 @@ type Deps struct {
 }
 
 func NewServices(deps Deps) *Services {
-	userService := NewUserService(deps.Storage, deps.RStorage, deps.Jwt)
+	userService := NewUserService(deps.Storage, deps.RStorage, deps.Jwt, deps.Cfg)
 	teamsService := NewTeamsService(deps.Storage)
 	return &Services{
 		User:         userService,

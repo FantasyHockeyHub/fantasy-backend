@@ -83,7 +83,7 @@ func ValidatePassword(password string) error {
 	return PasswordValidationError
 }
 
-func (s *Service) ChangePassword(inp user.ChangePasswordModel) error {
+func (s *UserService) ChangePassword(inp user.ChangePasswordModel) error {
 	err := ValidatePassword(inp.NewPassword)
 	if err != nil {
 		return err
@@ -119,7 +119,7 @@ func (s *Service) ChangePassword(inp user.ChangePasswordModel) error {
 	return nil
 }
 
-func (s *Service) ForgotPassword(email string) error {
+func (s *UserService) ForgotPassword(email string) error {
 	email = strings.ToLower(email)
 
 	exists, err := s.storage.CheckEmailExists(email)
@@ -151,7 +151,7 @@ func (s *Service) ForgotPassword(email string) error {
 	return nil
 }
 
-func (s *Service) ResetPassword(inp user.ResetPasswordInput) error {
+func (s *UserService) ResetPassword(inp user.ResetPasswordInput) error {
 	err := ValidatePassword(inp.NewPassword)
 	if err != nil {
 		return err

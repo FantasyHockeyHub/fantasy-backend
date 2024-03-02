@@ -243,7 +243,7 @@ func (p *PostgresStorage) GetMatchesByDate(ctx context.Context, startUnixDate in
 		err = nil
 	}
 
-	return matches, nil
+	return matches, err
 }
 
 func (p *PostgresStorage) CreateTournaments(ctx context.Context, tournaments []tournaments.Tournament) error {

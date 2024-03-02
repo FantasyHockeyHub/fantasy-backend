@@ -202,7 +202,7 @@ func (api Api) logout(ctx *gin.Context) {
 // @Param nickname query string false "Nickname пользователя" Example(Qwerty1)
 // @Success 200 {object} StatusResponse
 // @Failure 400 {object} Error
-// @Failure 404 {object} StatusResponse
+// @Failure 404 {object} Error
 // @Failure 500 {object} Error
 // @Router /user/exists [get]
 func (api Api) checkUserDataExists(ctx *gin.Context) {
@@ -225,7 +225,7 @@ func (api Api) checkUserDataExists(ctx *gin.Context) {
 			return
 		}
 
-		ctx.JSON(http.StatusNotFound, StatusResponse{"email is not taken"})
+		ctx.JSON(http.StatusNotFound, getNotFoundError())
 	} else if inp.Nickname != "" {
 		exists, err := api.services.User.CheckNicknameExists(inp.Nickname)
 		if err != nil {
@@ -244,7 +244,7 @@ func (api Api) checkUserDataExists(ctx *gin.Context) {
 			return
 		}
 
-		ctx.JSON(http.StatusNotFound, StatusResponse{"nickname is not taken"})
+		ctx.JSON(http.StatusNotFound, getNotFoundError())
 	}
 }
 

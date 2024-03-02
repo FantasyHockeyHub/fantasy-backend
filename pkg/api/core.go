@@ -93,8 +93,7 @@ const (
 	UnauthorizedErrorTitle     = "Ошибка авторизации"
 	InternalServerErrorTitle   = "Ошибка произошла на стороне сервера"
 	InternalServerErrorMessage = "Ошибка на сервере. Зайдите позже :("
-	NotFoundErrorTitle         = "Ошибка произошла на стороне сервера"
-	NotFoundErrorMessage       = "Ошибка на сервере. Зайдите позже :("
+	NotFoundErrorMessage       = "Записей не найдено"
 	BadRequestErrorTitle       = "Программная ошибка"
 )
 
@@ -119,7 +118,7 @@ func getInternalServerError() Error {
 
 func getNotFoundError() Error {
 	return Error{
-		Error:   NotFoundErrorTitle,
+		Error:   BadRequestErrorTitle,
 		Message: NotFoundErrorMessage,
 	}
 }

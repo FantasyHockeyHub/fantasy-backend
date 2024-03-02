@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
-	tournaments2 "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -205,7 +205,7 @@ func (api *Api) EventsNHL(ctx *gin.Context) {
 // @Produce json
 // @Success 200 {object} []tournaments.Matches
 // @Failure 400 {object} Error
-// @Failure 401 {object} Error
+// @Failure 404 {object} Error
 // @Param league path string true "league" Enums(NHL, KHL)
 // @Router /tournament/get_matches/{league} [get]
 func (api *Api) GetMatches(ctx *gin.Context) {
@@ -229,14 +229,16 @@ func (api *Api) GetMatches(ctx *gin.Context) {
 	league := new(tournaments.League)
 	*league = league.GetLeagueId(leagueName)
 	matches, err := api.services.Teams.GetMatchesDay(ctx, *league)
-	if errors.Is(err, tournaments2.NotFoundMatches) {
-		ctx.JSON(http.StatusBadRequest, getNotFoundError())
-		return
-	}
 	if err != nil {
-		log.Printf("GetMatches: %v", err)
-		ctx.JSON(http.StatusBadRequest, getInternalServerError())
-		return
+		log.Println("GetMatches:", err)
+		switch err {
+		case service.NotFoundMatches:
+			ctx.JSON(http.StatusNotFound, getNotFoundError())
+			return
+		default:
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+			return
+		}
 	}
 
 	ctx.JSON(http.StatusOK, matches)

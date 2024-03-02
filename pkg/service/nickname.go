@@ -22,7 +22,7 @@ func ValidateNickname(nickname string) error {
 	return nil
 }
 
-func (s *Service) CheckNicknameExists(nickname string) (bool, error) {
+func (s *UserService) CheckNicknameExists(nickname string) (bool, error) {
 	err := ValidateNickname(nickname)
 	if err != nil {
 		return false, err

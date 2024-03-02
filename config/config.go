@@ -11,6 +11,7 @@ type ServiceConfiguration struct {
 	RedisDB    `yaml:"redis_db" json:"redisDB"`
 	Api        `yaml:"api" json:"api"`
 	User       `yaml:"user" json:"user"`
+	Email      `json:"email"`
 }
 
 type Api struct {
@@ -36,6 +37,11 @@ type PostgresDB struct {
 type RedisDB struct {
 	Host     string
 	Port     string `yaml:"port"`
+	Password string
+}
+
+type Email struct {
+	Login    string
 	Password string
 }
 
@@ -70,6 +76,8 @@ func Load() ServiceConfiguration {
 	cfg.RedisDB.Host = getEnv("REDIS_HOST")
 	cfg.PostgresDB.Host = getEnv("POSTGRES_HOST")
 	cfg.Api.HOST = getEnv("API_HOST")
+	cfg.Email.Login = getEnv("EMAIL_LOGIN")
+	cfg.Email.Password = getEnv("EMAIL_PASSWORD")
 
 	return cfg
 }
