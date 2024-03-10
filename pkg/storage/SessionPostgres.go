@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	RefreshTokenNotFoundError = errors.New("refresh token not found")
+	RefreshTokenNotFoundError = errors.New("refresh токен не найден")
 )
 
 func (p *PostgresStorage) CreateSession(session user.RefreshSession) error {

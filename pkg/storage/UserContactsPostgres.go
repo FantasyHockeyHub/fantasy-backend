@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	UserDoesNotExistError = errors.New("user does not exist")
+	UserDoesNotExistError = errors.New("пользователь не найден")
 )
 
 func (p *PostgresStorage) CreateUserContacts(tx *sqlx.Tx, u user.SignUpModel) error {

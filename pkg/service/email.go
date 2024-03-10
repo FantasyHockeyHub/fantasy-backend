@@ -4,12 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"gopkg.in/gomail.v2"
+	"log"
 	"strings"
 )
 
 var (
-	UserAlreadyExistsError       = errors.New("user already exists")
-	InvalidVerificationCodeError = errors.New("invalid verification code")
+	UserAlreadyExistsError       = errors.New("пользователь уже существует")
+	InvalidVerificationCodeError = errors.New("неверный код верификации")
 )
 
 func (s *UserService) SendVerificationCode(email string) error {
@@ -17,6 +18,7 @@ func (s *UserService) SendVerificationCode(email string) error {
 
 	exists, err := s.CheckEmailExists(email)
 	if err != nil {
+		log.Println("Service. CheckEmailExists:", err)
 		return err
 	}
 	if exists == true {
@@ -25,6 +27,7 @@ func (s *UserService) SendVerificationCode(email string) error {
 
 	code, err := s.rStorage.CreateVerificationCode(email)
 	if err != nil {
+		log.Println("Service. CreateVerificationCode:", err)
 		return err
 	}
 
@@ -37,6 +40,7 @@ func (s *UserService) SendVerificationCode(email string) error {
 	d := gomail.NewDialer("smtp.mail.ru", 465, s.cfg.Email.Login, s.cfg.Email.Password)
 
 	if err = d.DialAndSend(m); err != nil {
+		log.Println("Service. DialAndSend:", err)
 		return err
 	}
 
@@ -46,6 +50,7 @@ func (s *UserService) SendVerificationCode(email string) error {
 func (s *UserService) CheckEmailVerification(email string, inputCode int) error {
 	code, err := s.rStorage.GetVerificationCode(email)
 	if err != nil {
+		log.Println("Service. GetVerificationCode:", err)
 		return err
 	}
 
@@ -59,6 +64,7 @@ func (s *UserService) CheckEmailVerification(email string, inputCode int) error 
 func (s *UserService) CheckEmailExists(email string) (bool, error) {
 	exists, err := s.storage.CheckEmailExists(email)
 	if err != nil {
+		log.Println("Service. CheckEmailExists:", err)
 		return exists, err
 	}
 

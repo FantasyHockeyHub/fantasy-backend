@@ -133,8 +133,3 @@ func getBadRequestError(err error) Error {
 type StatusResponse struct {
 	Status string `json:"status"`
 }
-
-type CheckEntityExistsResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-}

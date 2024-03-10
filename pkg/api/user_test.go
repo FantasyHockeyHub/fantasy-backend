@@ -42,7 +42,7 @@ func TestHandler_signUp(t *testing.T) {
 				s.EXPECT().SignUp(inp).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"ok"}`,
+			expectedResponseBody: `{"status":"ок"}`,
 		},
 		{
 			name:      "Wrong input",
@@ -333,7 +333,7 @@ func TestHandler_sendVerificationCode(t *testing.T) {
 				s.EXPECT().SendVerificationCode(inp.Email).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"ok"}`,
+			expectedResponseBody: `{"status":"ок"}`,
 		},
 		{
 			name:      "Wrong input",
@@ -530,7 +530,7 @@ func TestHandler_logout(t *testing.T) {
 				s.EXPECT().Logout(inp.RefreshToken).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"ok"}`,
+			expectedResponseBody: `{"status":"ок"}`,
 		},
 		{
 			name:      "Wrong input",
@@ -614,10 +614,10 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Email: "test@test.test",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckEmailExists(inp.Email).Return(true, nil)
+				s.EXPECT().CheckUserDataExists(inp).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"email is already taken"}`,
+			expectedResponseBody: `{"status":"Пользователь с указанными параметрами уже существует"}`,
 		},
 		{
 			name: "OK. Nickname is already taken",
@@ -625,10 +625,10 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Nickname: "testNickname1",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckNicknameExists(inp.Nickname).Return(true, nil)
+				s.EXPECT().CheckUserDataExists(inp).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"nickname is already taken"}`,
+			expectedResponseBody: `{"status":"Пользователь с указанными параметрами уже существует"}`,
 		},
 		{
 			name: "Email. Wrong input",
@@ -656,7 +656,7 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Nickname: "testNickname1#$",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckNicknameExists(inp.Nickname).Return(true, service.InvalidNicknameError)
+				s.EXPECT().CheckUserDataExists(inp).Return(service.InvalidNicknameError)
 			},
 			expectedStatusCode: 400,
 			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
@@ -668,10 +668,11 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Email: "test@test.test",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckEmailExists(inp.Email).Return(false, nil)
+				s.EXPECT().CheckUserDataExists(inp).Return(service.UserDoesNotExistError)
 			},
-			expectedStatusCode:   404,
-			expectedResponseBody: `{"status":"email is not taken"}`,
+			expectedStatusCode: 404,
+			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
+				BadRequestErrorTitle, service.UserDoesNotExistError),
 		},
 		{
 			name: "404. Nickname is not taken",
@@ -679,10 +680,11 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Nickname: "testNickname1",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckNicknameExists(inp.Nickname).Return(false, nil)
+				s.EXPECT().CheckUserDataExists(inp).Return(service.UserDoesNotExistError)
 			},
-			expectedStatusCode:   404,
-			expectedResponseBody: `{"status":"nickname is not taken"}`,
+			expectedStatusCode: 404,
+			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
+				BadRequestErrorTitle, service.UserDoesNotExistError),
 		},
 		{
 			name: "Email. Service error",
@@ -690,7 +692,7 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Email: "test@test.test",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckEmailExists(inp.Email).Return(false, errors.New("something went wrong"))
+				s.EXPECT().CheckUserDataExists(inp).Return(errors.New("something went wrong"))
 			},
 			expectedStatusCode: 500,
 			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
@@ -702,7 +704,7 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Nickname: "testNickname1",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckNicknameExists(inp.Nickname).Return(false, errors.New("something went wrong"))
+				s.EXPECT().CheckUserDataExists(inp).Return(errors.New("something went wrong"))
 			},
 			expectedStatusCode: 500,
 			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
@@ -853,7 +855,7 @@ func TestHandler_changePassword(t *testing.T) {
 				}).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"ok"}`,
+			expectedResponseBody: `{"status":"ок"}`,
 		},
 		{
 			name:      "Wrong input",
@@ -995,7 +997,7 @@ func TestHandler_forgotPassword(t *testing.T) {
 				s.EXPECT().ForgotPassword(inp.Email).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"ok"}`,
+			expectedResponseBody: `{"status":"ок"}`,
 		},
 		{
 			name:      "Wrong input",
@@ -1085,7 +1087,7 @@ func TestHandler_resetPassword(t *testing.T) {
 				s.EXPECT().ResetPassword(inp).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"ok"}`,
+			expectedResponseBody: `{"status":"ок"}`,
 		},
 		{
 			name:      "Wrong input",
