@@ -2,6 +2,7 @@ package storage
 
 import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"time"
 )
@@ -35,4 +36,19 @@ func (p *PostgresStorage) CheckNicknameExists(nickname string) (bool, error) {
 	}
 
 	return exists, nil
+}
+
+func (p *PostgresStorage) DeleteProfile(profileID uuid.UUID) error {
+
+	query := "DELETE FROM user_profile WHERE id = $1"
+	result, err := p.db.Exec(query, profileID)
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected, _ := result.RowsAffected(); rowsAffected == 0 {
+		return UserDoesNotExistError
+	}
+
+	return nil
 }

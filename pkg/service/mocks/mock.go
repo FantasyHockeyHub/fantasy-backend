@@ -5,8 +5,10 @@
 package mock_service
 
 import (
+	context "context"
 	reflect "reflect"
 
+	tournaments "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	user "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
@@ -93,6 +95,20 @@ func (mr *MockUserMockRecorder) CheckNicknameExists(nickname interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckNicknameExists", reflect.TypeOf((*MockUser)(nil).CheckNicknameExists), nickname)
 }
 
+// CheckUserDataExists mocks base method.
+func (m *MockUser) CheckUserDataExists(inp user.UserExistsDataInput) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckUserDataExists", inp)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CheckUserDataExists indicates an expected call of CheckUserDataExists.
+func (mr *MockUserMockRecorder) CheckUserDataExists(inp interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckUserDataExists", reflect.TypeOf((*MockUser)(nil).CheckUserDataExists), inp)
+}
+
 // CreateSession mocks base method.
 func (m *MockUser) CreateSession(userID uuid.UUID) (user.Tokens, error) {
 	m.ctrl.T.Helper()
@@ -106,6 +122,20 @@ func (m *MockUser) CreateSession(userID uuid.UUID) (user.Tokens, error) {
 func (mr *MockUserMockRecorder) CreateSession(userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockUser)(nil).CreateSession), userID)
+}
+
+// DeleteProfile mocks base method.
+func (m *MockUser) DeleteProfile(userID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteProfile", userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteProfile indicates an expected call of DeleteProfile.
+func (mr *MockUserMockRecorder) DeleteProfile(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProfile", reflect.TypeOf((*MockUser)(nil).DeleteProfile), userID)
 }
 
 // ForgotPassword mocks base method.
@@ -290,4 +320,112 @@ func (m *MockTokenManager) ParseJWT(accessToken string) (string, error) {
 func (mr *MockTokenManagerMockRecorder) ParseJWT(accessToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParseJWT", reflect.TypeOf((*MockTokenManager)(nil).ParseJWT), accessToken)
+}
+
+// MockTeams is a mock of Teams interface.
+type MockTeams struct {
+	ctrl     *gomock.Controller
+	recorder *MockTeamsMockRecorder
+}
+
+// MockTeamsMockRecorder is the mock recorder for MockTeams.
+type MockTeamsMockRecorder struct {
+	mock *MockTeams
+}
+
+// NewMockTeams creates a new mock instance.
+func NewMockTeams(ctrl *gomock.Controller) *MockTeams {
+	mock := &MockTeams{ctrl: ctrl}
+	mock.recorder = &MockTeamsMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTeams) EXPECT() *MockTeamsMockRecorder {
+	return m.recorder
+}
+
+// AddEventsKHL mocks base method.
+func (m *MockTeams) AddEventsKHL(ctx context.Context, events []tournaments.EventDataKHL) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddEventsKHL", ctx, events)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddEventsKHL indicates an expected call of AddEventsKHL.
+func (mr *MockTeamsMockRecorder) AddEventsKHL(ctx, events interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddEventsKHL", reflect.TypeOf((*MockTeams)(nil).AddEventsKHL), ctx, events)
+}
+
+// AddEventsNHL mocks base method.
+func (m *MockTeams) AddEventsNHL(ctx context.Context, events []tournaments.Game) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddEventsNHL", ctx, events)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddEventsNHL indicates an expected call of AddEventsNHL.
+func (mr *MockTeamsMockRecorder) AddEventsNHL(ctx, events interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddEventsNHL", reflect.TypeOf((*MockTeams)(nil).AddEventsNHL), ctx, events)
+}
+
+// CreateTeamsKHL mocks base method.
+func (m *MockTeams) CreateTeamsKHL(ctx context.Context, teams []tournaments.TeamKHL) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateTeamsKHL", ctx, teams)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateTeamsKHL indicates an expected call of CreateTeamsKHL.
+func (mr *MockTeamsMockRecorder) CreateTeamsKHL(ctx, teams interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTeamsKHL", reflect.TypeOf((*MockTeams)(nil).CreateTeamsKHL), ctx, teams)
+}
+
+// CreateTeamsNHL mocks base method.
+func (m *MockTeams) CreateTeamsNHL(arg0 context.Context, arg1 []tournaments.Standing) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateTeamsNHL", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateTeamsNHL indicates an expected call of CreateTeamsNHL.
+func (mr *MockTeamsMockRecorder) CreateTeamsNHL(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTeamsNHL", reflect.TypeOf((*MockTeams)(nil).CreateTeamsNHL), arg0, arg1)
+}
+
+// CreateTournaments mocks base method.
+func (m *MockTeams) CreateTournaments(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateTournaments", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateTournaments indicates an expected call of CreateTournaments.
+func (mr *MockTeamsMockRecorder) CreateTournaments(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTournaments", reflect.TypeOf((*MockTeams)(nil).CreateTournaments), ctx)
+}
+
+// GetMatchesDay mocks base method.
+func (m *MockTeams) GetMatchesDay(ctx context.Context, league tournaments.League) ([]tournaments.Matches, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMatchesDay", ctx, league)
+	ret0, _ := ret[0].([]tournaments.Matches)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMatchesDay indicates an expected call of GetMatchesDay.
+func (mr *MockTeamsMockRecorder) GetMatchesDay(ctx, league interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMatchesDay", reflect.TypeOf((*MockTeams)(nil).GetMatchesDay), ctx, league)
 }

@@ -66,7 +66,8 @@ func (api *Api) registerRoutes() {
 		userAuthenticated := user.Group("/", api.userIdentity)
 		{
 			userAuthenticated.GET("/info", api.userInfo)
-			userAuthenticated.PATCH("password/change", api.changePassword)
+			userAuthenticated.PATCH("/password/change", api.changePassword)
+			userAuthenticated.DELETE("/delete", api.deleteProfile)
 		}
 		password := user.Group("/password")
 		{
@@ -98,8 +99,8 @@ const (
 )
 
 var (
-	InvalidInputBodyError       = errors.New("invalid input body")
-	InvalidInputParametersError = errors.New("invalid input parameters")
+	InvalidInputBodyError       = errors.New("невалидное тело запроса")
+	InvalidInputParametersError = errors.New("невалидные параметры запроса")
 )
 
 func getUnauthorizedError(err error) Error {
@@ -132,9 +133,4 @@ func getBadRequestError(err error) Error {
 
 type StatusResponse struct {
 	Status string `json:"status"`
-}
-
-type CheckEntityExistsResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
 }

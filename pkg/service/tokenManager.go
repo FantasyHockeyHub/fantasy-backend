@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	ParseTokenError         = errors.New("unable to get token parameters")
-	InvalidAccessTokenError = errors.New("invalid access token")
+	ParseTokenError         = errors.New("невозможно получить параметры токена")
+	InvalidAccessTokenError = errors.New("невалидный access токен")
 )
 
 type Manager struct {
