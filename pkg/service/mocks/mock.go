@@ -124,6 +124,20 @@ func (mr *MockUserMockRecorder) CreateSession(userID interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockUser)(nil).CreateSession), userID)
 }
 
+// DeleteProfile mocks base method.
+func (m *MockUser) DeleteProfile(userID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteProfile", userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteProfile indicates an expected call of DeleteProfile.
+func (mr *MockUserMockRecorder) DeleteProfile(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProfile", reflect.TypeOf((*MockUser)(nil).DeleteProfile), userID)
+}
+
 // ForgotPassword mocks base method.
 func (m *MockUser) ForgotPassword(email string) error {
 	m.ctrl.T.Helper()

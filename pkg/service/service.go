@@ -26,6 +26,7 @@ type User interface {
 	ResetPassword(inp user.ResetPasswordInput) error
 	GetUserInfo(userID uuid.UUID) (user.UserInfoModel, error)
 	CheckUserDataExists(inp user.UserExistsDataInput) error
+	DeleteProfile(userID uuid.UUID) error
 }
 
 type TokenManager interface {

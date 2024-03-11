@@ -410,6 +410,35 @@ paths:
       summary: Получение матчей на следующий день
       tags:
       - tournament
+  /user/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Удаление профиля пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Удаление профиля
+      tags:
+      - user
   /user/exists:
     get:
       consumes:

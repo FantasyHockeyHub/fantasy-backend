@@ -1185,3 +1185,73 @@ func TestHandler_resetPassword(t *testing.T) {
 		})
 	}
 }
+
+func TestHandler_deleteProfile(t *testing.T) {
+	type mockBehavior func(s *mock_service.MockUser, inp uuid.UUID)
+	userID, _ := uuid.Parse("6bc57ea9-c881-47d3-a293-b925ff1ddf72")
+
+	testTable := []struct {
+		name                 string
+		inputData            uuid.UUID
+		mockBehavior         mockBehavior
+		expectedStatusCode   int
+		expectedResponseBody string
+	}{
+		{
+			name:      "OK",
+			inputData: userID,
+			mockBehavior: func(s *mock_service.MockUser, inp uuid.UUID) {
+				s.EXPECT().DeleteProfile(inp).Return(nil)
+			},
+			expectedStatusCode:   200,
+			expectedResponseBody: `{"status":"ок"}`,
+		},
+		{
+			name:      "User does not exist",
+			inputData: userID,
+			mockBehavior: func(s *mock_service.MockUser, inp uuid.UUID) {
+				s.EXPECT().DeleteProfile(inp).Return(storage.UserDoesNotExistError)
+			},
+			expectedStatusCode: 400,
+			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
+				BadRequestErrorTitle, storage.UserDoesNotExistError),
+		},
+		{
+			name:      "Service error",
+			inputData: userID,
+			mockBehavior: func(s *mock_service.MockUser, inp uuid.UUID) {
+				s.EXPECT().DeleteProfile(inp).Return(errors.New("something went wrong"))
+			},
+			expectedStatusCode: 500,
+			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
+				InternalServerErrorTitle, InternalServerErrorMessage),
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			user := mock_service.NewMockUser(c)
+			testCase.mockBehavior(user, testCase.inputData)
+
+			services := &service.Services{User: user}
+			handler := Api{services: services}
+
+			r := gin.New()
+			r.DELETE("/user/delete", func(ctx *gin.Context) {
+				ctx.Set("userID", userID.String())
+			}, handler.deleteProfile)
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest("DELETE", "/user/delete", nil)
+
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, w.Code, testCase.expectedStatusCode)
+			assert.Equal(t, w.Body.String(), testCase.expectedResponseBody)
+		})
+	}
+}

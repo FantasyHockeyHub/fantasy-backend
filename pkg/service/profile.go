@@ -40,3 +40,14 @@ func (s *UserService) CheckUserDataExists(inp user.UserExistsDataInput) error {
 
 	return UserDoesNotExistError
 }
+
+func (s *UserService) DeleteProfile(userID uuid.UUID) error {
+
+	err := s.storage.DeleteProfile(userID)
+	if err != nil {
+		log.Println("Service. DeleteProfile:", err)
+		return err
+	}
+
+	return nil
+}

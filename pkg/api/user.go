@@ -388,3 +388,38 @@ func (api Api) resetPassword(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
 }
+
+// DeleteProfile godoc
+// @Summary Удаление профиля
+// @Security ApiKeyAuth
+// @Schemes
+// @Description Удаление профиля пользователя
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 200 {object} StatusResponse
+// @Failure 400,401 {object} Error
+// @Failure 500 {object} Error
+// @Router /user/delete [delete]
+func (api Api) deleteProfile(ctx *gin.Context) {
+	userID, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("DeleteProfile:", err)
+		return
+	}
+
+	err = api.services.User.DeleteProfile(userID)
+	if err != nil {
+		log.Println("DeleteProfile:", err)
+		switch err {
+		case storage.UserDoesNotExistError:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+			return
+		default:
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
+}
