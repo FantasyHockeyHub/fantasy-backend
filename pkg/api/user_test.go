@@ -1255,3 +1255,84 @@ func TestHandler_deleteProfile(t *testing.T) {
 		})
 	}
 }
+
+func TestHandler_getCoinTransactions(t *testing.T) {
+	type mockBehavior func(s *mock_service.MockUser, inp uuid.UUID, coinTransactionsResponse []user.CoinTransactionsModel)
+	userID, _ := uuid.Parse("6bc57ea9-c881-47d3-a293-b925ff1ddf72")
+	transactionDate, _ := time.Parse("2006-01-02T15:04:05.999999Z", "2024-02-07T15:33:13.414997Z")
+
+	testTable := []struct {
+		name                     string
+		inputData                uuid.UUID
+		coinTransactionsResponse []user.CoinTransactionsModel
+		mockBehavior             mockBehavior
+		expectedStatusCode       int
+		expectedResponseBody     string
+	}{
+		{
+			name:      "OK",
+			inputData: userID,
+			coinTransactionsResponse: []user.CoinTransactionsModel{
+				{
+					ProfileID:          userID,
+					TransactionDetails: "Бонус за создание аккаунта",
+					Amount:             1000,
+					TransactionDate:    transactionDate,
+					Status:             user.SuccessTransaction,
+				},
+			},
+			mockBehavior: func(s *mock_service.MockUser, inp uuid.UUID, coinTransactionsResponse []user.CoinTransactionsModel) {
+				s.EXPECT().GetCoinTransactions(inp).Return(coinTransactionsResponse, nil)
+			},
+			expectedStatusCode:   200,
+			expectedResponseBody: `[{"id":0,"profileID":"6bc57ea9-c881-47d3-a293-b925ff1ddf72","transactionDetails":"Бонус за создание аккаунта","amount":1000,"transactionDate":"2024-02-07T15:33:13.414997Z","status":"Выполнено"}]`,
+		},
+		{
+			name:      "User does not exist",
+			inputData: userID,
+			mockBehavior: func(s *mock_service.MockUser, inp uuid.UUID, coinTransactionsResponse []user.CoinTransactionsModel) {
+				s.EXPECT().GetCoinTransactions(inp).Return([]user.CoinTransactionsModel{}, storage.UserDoesNotExistError)
+			},
+			expectedStatusCode: 400,
+			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
+				BadRequestErrorTitle, storage.UserDoesNotExistError),
+		},
+		{
+			name:      "Service error",
+			inputData: userID,
+			mockBehavior: func(s *mock_service.MockUser, inp uuid.UUID, coinTransactionsResponse []user.CoinTransactionsModel) {
+				s.EXPECT().GetCoinTransactions(inp).Return([]user.CoinTransactionsModel{}, errors.New("something went wrong"))
+			},
+			expectedStatusCode: 500,
+			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
+				InternalServerErrorTitle, InternalServerErrorMessage),
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			user := mock_service.NewMockUser(c)
+			testCase.mockBehavior(user, testCase.inputData, testCase.coinTransactionsResponse)
+
+			services := &service.Services{User: user}
+			handler := Api{services: services}
+
+			r := gin.New()
+			r.GET("/user/transactions", func(ctx *gin.Context) {
+				ctx.Set("userID", userID.String())
+			}, handler.getCoinTransactions)
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest("GET", "/user/transactions", nil)
+
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, w.Code, testCase.expectedStatusCode)
+			assert.Equal(t, w.Body.String(), testCase.expectedResponseBody)
+		})
+	}
+}

@@ -36,6 +36,8 @@ type UserStorage interface {
 	UpdatePassword(tx *sqlx.Tx, inp user.ChangePasswordModel) error
 	DeleteProfile(profileID uuid.UUID) error
 	DeleteAllSessionsByProfileID(tx *sqlx.Tx, profileID uuid.UUID) error
+	CreateCoinTransaction(tx *sqlx.Tx, u user.CoinTransactionsModel) error
+	GetCoinTransactionsByProfileID(profileID uuid.UUID) ([]user.CoinTransactionsModel, error)
 }
 
 type UserRStorage interface {

@@ -27,6 +27,7 @@ type User interface {
 	GetUserInfo(userID uuid.UUID) (user.UserInfoModel, error)
 	CheckUserDataExists(inp user.UserExistsDataInput) error
 	DeleteProfile(userID uuid.UUID) error
+	GetCoinTransactions(profileID uuid.UUID) ([]user.CoinTransactionsModel, error)
 }
 
 type TokenManager interface {
