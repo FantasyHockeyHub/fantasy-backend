@@ -423,3 +423,38 @@ func (api Api) deleteProfile(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
 }
+
+// getCoinTransactions godoc
+// @Summary Получение истории транзакций пользователя
+// @Security ApiKeyAuth
+// @Schemes
+// @Description Получение истории транзакций пользователя по access токену
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 200 {array} user.CoinTransactionsModel
+// @Failure 400,401 {object} Error
+// @Failure 500 {object} Error
+// @Router /user/transactions [get]
+func (api Api) getCoinTransactions(ctx *gin.Context) {
+	userID, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("GetCoinTransactions:", err)
+		return
+	}
+
+	transactions, err := api.services.User.GetCoinTransactions(userID)
+	if err != nil {
+		log.Println("GetCoinTransactions:", err)
+		switch err {
+		case storage.UserDoesNotExistError:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+			return
+		default:
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, transactions)
+}

@@ -33,7 +33,11 @@ type UserStorage interface {
 	DeleteSessionByRefreshToken(refreshTokenID string) error
 	GetUserInfo(userID uuid.UUID) (user.UserInfoModel, error)
 	ChangePassword(inp user.ChangePasswordModel) error
+	UpdatePassword(tx *sqlx.Tx, inp user.ChangePasswordModel) error
 	DeleteProfile(profileID uuid.UUID) error
+	DeleteAllSessionsByProfileID(tx *sqlx.Tx, profileID uuid.UUID) error
+	CreateCoinTransaction(tx *sqlx.Tx, u user.CoinTransactionsModel) error
+	GetCoinTransactionsByProfileID(profileID uuid.UUID) ([]user.CoinTransactionsModel, error)
 }
 
 type UserRStorage interface {

@@ -68,6 +68,7 @@ func (api *Api) registerRoutes() {
 			userAuthenticated.GET("/info", api.userInfo)
 			userAuthenticated.PATCH("/password/change", api.changePassword)
 			userAuthenticated.DELETE("/delete", api.deleteProfile)
+			userAuthenticated.GET("/transactions", api.getCoinTransactions)
 		}
 		password := user.Group("/password")
 		{

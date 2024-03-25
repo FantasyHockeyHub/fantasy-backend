@@ -8,6 +8,13 @@ import (
 
 func (p *PostgresStorage) SignUp(u user.SignUpModel) error {
 	u.ID = uuid.New()
+	coinTr := user.CoinTransactionsModel{
+		ProfileID:          u.ID,
+		TransactionDetails: "Бонус за создание аккаунта",
+		Amount:             u.Coins,
+		Status:             user.SuccessTransaction,
+	}
+
 	tx, err := p.db.Beginx()
 	if err != nil {
 		return err
@@ -21,6 +28,10 @@ func (p *PostgresStorage) SignUp(u user.SignUpModel) error {
 		return err
 	}
 	err = p.CreateUserContacts(tx, u)
+	if err != nil {
+		return err
+	}
+	err = p.CreateCoinTransaction(tx, coinTr)
 	if err != nil {
 		return err
 	}

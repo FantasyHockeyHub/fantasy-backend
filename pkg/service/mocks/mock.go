@@ -152,6 +152,21 @@ func (mr *MockUserMockRecorder) ForgotPassword(email interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ForgotPassword", reflect.TypeOf((*MockUser)(nil).ForgotPassword), email)
 }
 
+// GetCoinTransactions mocks base method.
+func (m *MockUser) GetCoinTransactions(profileID uuid.UUID) ([]user.CoinTransactionsModel, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoinTransactions", profileID)
+	ret0, _ := ret[0].([]user.CoinTransactionsModel)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoinTransactions indicates an expected call of GetCoinTransactions.
+func (mr *MockUserMockRecorder) GetCoinTransactions(profileID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoinTransactions", reflect.TypeOf((*MockUser)(nil).GetCoinTransactions), profileID)
+}
+
 // GetUserInfo mocks base method.
 func (m *MockUser) GetUserInfo(userID uuid.UUID) (user.UserInfoModel, error) {
 	m.ctrl.T.Helper()
