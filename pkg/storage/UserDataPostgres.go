@@ -44,7 +44,21 @@ func (p *PostgresStorage) ChangePassword(inp user.ChangePasswordModel) error {
 		return err
 	}
 
-	_, err = tx.Exec(`UPDATE user_data SET password_encoded = $1, password_salt = $2 WHERE profile_id = $3;`,
+	err = p.UpdatePassword(tx, inp)
+	if err != nil {
+		return err
+	}
+
+	err = p.DeleteAllSessionsByProfileID(tx, inp.ProfileID)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (p *PostgresStorage) UpdatePassword(tx *sqlx.Tx, inp user.ChangePasswordModel) error {
+	_, err := tx.Exec(`UPDATE user_data SET password_encoded = $1, password_salt = $2 WHERE profile_id = $3;`,
 		inp.NewPassword,
 		inp.PasswordSalt,
 		inp.ProfileID,
@@ -54,5 +68,5 @@ func (p *PostgresStorage) ChangePassword(inp user.ChangePasswordModel) error {
 		return err
 	}
 
-	return tx.Commit()
+	return nil
 }

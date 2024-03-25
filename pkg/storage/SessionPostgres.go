@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
+	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 )
 
 var (
@@ -58,6 +60,15 @@ func (p *PostgresStorage) DeleteSessionByRefreshToken(refreshTokenID string) err
 
 	if rowsAffected == 0 {
 		return RefreshTokenNotFoundError
+	}
+
+	return nil
+}
+
+func (p *PostgresStorage) DeleteAllSessionsByProfileID(tx *sqlx.Tx, profileID uuid.UUID) error {
+	_, err := tx.Exec(`DELETE FROM refresh_sessions WHERE profile_id = $1;`, profileID)
+	if err != nil {
+		return err
 	}
 
 	return nil
