@@ -32,6 +32,31 @@ definitions:
       statusEvent:
         type: string
     type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Tournament:
+    properties:
+      TimeStart:
+        type: integer
+      deposit:
+        type: integer
+      league:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League'
+      matchesIds:
+        items:
+          type: integer
+        type: array
+      playersAmount:
+        type: integer
+      prizeFond:
+        type: integer
+      statusTournament:
+        type: string
+      timeEnd:
+        type: integer
+      title:
+        type: string
+      tournamentId:
+        type: integer
+    type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.ChangePasswordInput:
     properties:
       newPassword:
@@ -408,6 +433,39 @@ paths:
           schema:
             $ref: '#/definitions/pkg_api.Error'
       summary: Получение матчей на следующий день
+      tags:
+      - tournament
+  /tournament/get_tournaments/{league}:
+    get:
+      description: Дата берётся автоматически
+      parameters:
+      - description: league
+        enum:
+        - NHL
+        - KHL
+        - Both
+        in: path
+        name: league
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Tournament'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Получение турниров на ближайшие 2 дня
       tags:
       - tournament
   /user/exists:
