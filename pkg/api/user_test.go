@@ -42,7 +42,7 @@ func TestHandler_signUp(t *testing.T) {
 				s.EXPECT().SignUp(inp).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"ok"}`,
+			expectedResponseBody: `{"status":"ок"}`,
 		},
 		{
 			name:      "Wrong input",
@@ -333,7 +333,7 @@ func TestHandler_sendVerificationCode(t *testing.T) {
 				s.EXPECT().SendVerificationCode(inp.Email).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"ok"}`,
+			expectedResponseBody: `{"status":"ок"}`,
 		},
 		{
 			name:      "Wrong input",
@@ -530,7 +530,7 @@ func TestHandler_logout(t *testing.T) {
 				s.EXPECT().Logout(inp.RefreshToken).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"ok"}`,
+			expectedResponseBody: `{"status":"ок"}`,
 		},
 		{
 			name:      "Wrong input",
@@ -614,10 +614,10 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Email: "test@test.test",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckEmailExists(inp.Email).Return(true, nil)
+				s.EXPECT().CheckUserDataExists(inp).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"email is already taken"}`,
+			expectedResponseBody: `{"status":"Пользователь с указанными параметрами уже существует"}`,
 		},
 		{
 			name: "OK. Nickname is already taken",
@@ -625,10 +625,10 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Nickname: "testNickname1",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckNicknameExists(inp.Nickname).Return(true, nil)
+				s.EXPECT().CheckUserDataExists(inp).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"nickname is already taken"}`,
+			expectedResponseBody: `{"status":"Пользователь с указанными параметрами уже существует"}`,
 		},
 		{
 			name: "Email. Wrong input",
@@ -656,7 +656,7 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Nickname: "testNickname1#$",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckNicknameExists(inp.Nickname).Return(true, service.InvalidNicknameError)
+				s.EXPECT().CheckUserDataExists(inp).Return(service.InvalidNicknameError)
 			},
 			expectedStatusCode: 400,
 			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
@@ -668,10 +668,11 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Email: "test@test.test",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckEmailExists(inp.Email).Return(false, nil)
+				s.EXPECT().CheckUserDataExists(inp).Return(service.UserDoesNotExistError)
 			},
-			expectedStatusCode:   404,
-			expectedResponseBody: `{"status":"email is not taken"}`,
+			expectedStatusCode: 404,
+			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
+				BadRequestErrorTitle, service.UserDoesNotExistError),
 		},
 		{
 			name: "404. Nickname is not taken",
@@ -679,10 +680,11 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Nickname: "testNickname1",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckNicknameExists(inp.Nickname).Return(false, nil)
+				s.EXPECT().CheckUserDataExists(inp).Return(service.UserDoesNotExistError)
 			},
-			expectedStatusCode:   404,
-			expectedResponseBody: `{"status":"nickname is not taken"}`,
+			expectedStatusCode: 404,
+			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
+				BadRequestErrorTitle, service.UserDoesNotExistError),
 		},
 		{
 			name: "Email. Service error",
@@ -690,7 +692,7 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Email: "test@test.test",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckEmailExists(inp.Email).Return(false, errors.New("something went wrong"))
+				s.EXPECT().CheckUserDataExists(inp).Return(errors.New("something went wrong"))
 			},
 			expectedStatusCode: 500,
 			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
@@ -702,7 +704,7 @@ func TestHandler_checkUserDataExists(t *testing.T) {
 				Nickname: "testNickname1",
 			},
 			mockBehavior: func(s *mock_service.MockUser, inp user.UserExistsDataInput) {
-				s.EXPECT().CheckNicknameExists(inp.Nickname).Return(false, errors.New("something went wrong"))
+				s.EXPECT().CheckUserDataExists(inp).Return(errors.New("something went wrong"))
 			},
 			expectedStatusCode: 500,
 			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
@@ -853,7 +855,7 @@ func TestHandler_changePassword(t *testing.T) {
 				}).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"ok"}`,
+			expectedResponseBody: `{"status":"ок"}`,
 		},
 		{
 			name:      "Wrong input",
@@ -995,7 +997,7 @@ func TestHandler_forgotPassword(t *testing.T) {
 				s.EXPECT().ForgotPassword(inp.Email).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"ok"}`,
+			expectedResponseBody: `{"status":"ок"}`,
 		},
 		{
 			name:      "Wrong input",
@@ -1085,7 +1087,7 @@ func TestHandler_resetPassword(t *testing.T) {
 				s.EXPECT().ResetPassword(inp).Return(nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"status":"ok"}`,
+			expectedResponseBody: `{"status":"ок"}`,
 		},
 		{
 			name:      "Wrong input",
@@ -1175,6 +1177,157 @@ func TestHandler_resetPassword(t *testing.T) {
 
 			req := httptest.NewRequest("PATCH", "/user/password/reset",
 				bytes.NewBufferString(testCase.inputBody))
+
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, w.Code, testCase.expectedStatusCode)
+			assert.Equal(t, w.Body.String(), testCase.expectedResponseBody)
+		})
+	}
+}
+
+func TestHandler_deleteProfile(t *testing.T) {
+	type mockBehavior func(s *mock_service.MockUser, inp uuid.UUID)
+	userID, _ := uuid.Parse("6bc57ea9-c881-47d3-a293-b925ff1ddf72")
+
+	testTable := []struct {
+		name                 string
+		inputData            uuid.UUID
+		mockBehavior         mockBehavior
+		expectedStatusCode   int
+		expectedResponseBody string
+	}{
+		{
+			name:      "OK",
+			inputData: userID,
+			mockBehavior: func(s *mock_service.MockUser, inp uuid.UUID) {
+				s.EXPECT().DeleteProfile(inp).Return(nil)
+			},
+			expectedStatusCode:   200,
+			expectedResponseBody: `{"status":"ок"}`,
+		},
+		{
+			name:      "User does not exist",
+			inputData: userID,
+			mockBehavior: func(s *mock_service.MockUser, inp uuid.UUID) {
+				s.EXPECT().DeleteProfile(inp).Return(storage.UserDoesNotExistError)
+			},
+			expectedStatusCode: 400,
+			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
+				BadRequestErrorTitle, storage.UserDoesNotExistError),
+		},
+		{
+			name:      "Service error",
+			inputData: userID,
+			mockBehavior: func(s *mock_service.MockUser, inp uuid.UUID) {
+				s.EXPECT().DeleteProfile(inp).Return(errors.New("something went wrong"))
+			},
+			expectedStatusCode: 500,
+			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
+				InternalServerErrorTitle, InternalServerErrorMessage),
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			user := mock_service.NewMockUser(c)
+			testCase.mockBehavior(user, testCase.inputData)
+
+			services := &service.Services{User: user}
+			handler := Api{services: services}
+
+			r := gin.New()
+			r.DELETE("/user/delete", func(ctx *gin.Context) {
+				ctx.Set("userID", userID.String())
+			}, handler.deleteProfile)
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest("DELETE", "/user/delete", nil)
+
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, w.Code, testCase.expectedStatusCode)
+			assert.Equal(t, w.Body.String(), testCase.expectedResponseBody)
+		})
+	}
+}
+
+func TestHandler_getCoinTransactions(t *testing.T) {
+	type mockBehavior func(s *mock_service.MockUser, inp uuid.UUID, coinTransactionsResponse []user.CoinTransactionsModel)
+	userID, _ := uuid.Parse("6bc57ea9-c881-47d3-a293-b925ff1ddf72")
+	transactionDate, _ := time.Parse("2006-01-02T15:04:05.999999Z", "2024-02-07T15:33:13.414997Z")
+
+	testTable := []struct {
+		name                     string
+		inputData                uuid.UUID
+		coinTransactionsResponse []user.CoinTransactionsModel
+		mockBehavior             mockBehavior
+		expectedStatusCode       int
+		expectedResponseBody     string
+	}{
+		{
+			name:      "OK",
+			inputData: userID,
+			coinTransactionsResponse: []user.CoinTransactionsModel{
+				{
+					ProfileID:          userID,
+					TransactionDetails: "Бонус за создание аккаунта",
+					Amount:             1000,
+					TransactionDate:    transactionDate,
+					Status:             user.SuccessTransaction,
+				},
+			},
+			mockBehavior: func(s *mock_service.MockUser, inp uuid.UUID, coinTransactionsResponse []user.CoinTransactionsModel) {
+				s.EXPECT().GetCoinTransactions(inp).Return(coinTransactionsResponse, nil)
+			},
+			expectedStatusCode:   200,
+			expectedResponseBody: `[{"id":0,"profileID":"6bc57ea9-c881-47d3-a293-b925ff1ddf72","transactionDetails":"Бонус за создание аккаунта","amount":1000,"transactionDate":"2024-02-07T15:33:13.414997Z","status":"Выполнено"}]`,
+		},
+		{
+			name:      "User does not exist",
+			inputData: userID,
+			mockBehavior: func(s *mock_service.MockUser, inp uuid.UUID, coinTransactionsResponse []user.CoinTransactionsModel) {
+				s.EXPECT().GetCoinTransactions(inp).Return([]user.CoinTransactionsModel{}, storage.UserDoesNotExistError)
+			},
+			expectedStatusCode: 400,
+			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
+				BadRequestErrorTitle, storage.UserDoesNotExistError),
+		},
+		{
+			name:      "Service error",
+			inputData: userID,
+			mockBehavior: func(s *mock_service.MockUser, inp uuid.UUID, coinTransactionsResponse []user.CoinTransactionsModel) {
+				s.EXPECT().GetCoinTransactions(inp).Return([]user.CoinTransactionsModel{}, errors.New("something went wrong"))
+			},
+			expectedStatusCode: 500,
+			expectedResponseBody: fmt.Sprintf(`{"error":"%s","message":"%s"}`,
+				InternalServerErrorTitle, InternalServerErrorMessage),
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			user := mock_service.NewMockUser(c)
+			testCase.mockBehavior(user, testCase.inputData, testCase.coinTransactionsResponse)
+
+			services := &service.Services{User: user}
+			handler := Api{services: services}
+
+			r := gin.New()
+			r.GET("/user/transactions", func(ctx *gin.Context) {
+				ctx.Set("userID", userID.String())
+			}, handler.getCoinTransactions)
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest("GET", "/user/transactions", nil)
 
 			r.ServeHTTP(w, req)
 

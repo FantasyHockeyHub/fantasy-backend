@@ -66,7 +66,9 @@ func (api *Api) registerRoutes() {
 		userAuthenticated := user.Group("/", api.userIdentity)
 		{
 			userAuthenticated.GET("/info", api.userInfo)
-			userAuthenticated.PATCH("password/change", api.changePassword)
+			userAuthenticated.PATCH("/password/change", api.changePassword)
+			userAuthenticated.DELETE("/delete", api.deleteProfile)
+			userAuthenticated.GET("/transactions", api.getCoinTransactions)
 		}
 		password := user.Group("/password")
 		{
@@ -94,14 +96,13 @@ const (
 	UnauthorizedErrorTitle     = "Ошибка авторизации"
 	InternalServerErrorTitle   = "Ошибка произошла на стороне сервера"
 	InternalServerErrorMessage = "Ошибка на сервере. Зайдите позже :("
-	NotFoundErrorTitle         = "Ошибка произошла на стороне сервера"
-	NotFoundErrorMessage       = "Ошибка на сервере. Зайдите позже :("
+	NotFoundErrorMessage       = "Записей не найдено"
 	BadRequestErrorTitle       = "Программная ошибка"
 )
 
 var (
-	InvalidInputBodyError       = errors.New("invalid input body")
-	InvalidInputParametersError = errors.New("invalid input parameters")
+	InvalidInputBodyError       = errors.New("невалидное тело запроса")
+	InvalidInputParametersError = errors.New("невалидные параметры запроса")
 )
 
 func getUnauthorizedError(err error) Error {
@@ -120,7 +121,7 @@ func getInternalServerError() Error {
 
 func getNotFoundError() Error {
 	return Error{
-		Error:   NotFoundErrorTitle,
+		Error:   BadRequestErrorTitle,
 		Message: NotFoundErrorMessage,
 	}
 }
@@ -134,9 +135,4 @@ func getBadRequestError(err error) Error {
 
 type StatusResponse struct {
 	Status string `json:"status"`
-}
-
-type CheckEntityExistsResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
 }

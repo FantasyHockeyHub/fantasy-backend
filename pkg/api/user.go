@@ -46,7 +46,7 @@ func (api Api) signUp(ctx *gin.Context) {
 		}
 	}
 
-	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
+	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
 }
 
 // SignIn godoc
@@ -117,7 +117,7 @@ func (api Api) sendVerificationCode(ctx *gin.Context) {
 		}
 	}
 
-	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
+	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
 }
 
 // RefreshTokens godoc
@@ -188,7 +188,7 @@ func (api Api) logout(ctx *gin.Context) {
 		}
 	}
 
-	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
+	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
 }
 
 // CheckUserDataExists godoc
@@ -202,7 +202,7 @@ func (api Api) logout(ctx *gin.Context) {
 // @Param nickname query string false "Nickname пользователя" Example(Qwerty1)
 // @Success 200 {object} StatusResponse
 // @Failure 400 {object} Error
-// @Failure 404 {object} StatusResponse
+// @Failure 404 {object} Error
 // @Failure 500 {object} Error
 // @Router /user/exists [get]
 func (api Api) checkUserDataExists(ctx *gin.Context) {
@@ -213,39 +213,23 @@ func (api Api) checkUserDataExists(ctx *gin.Context) {
 		return
 	}
 
-	if inp.Email != "" {
-		exists, err := api.services.User.CheckEmailExists(inp.Email)
-		if err != nil {
-			log.Println("CheckEmailExists:", err)
+	err := api.services.User.CheckUserDataExists(inp)
+	if err != nil {
+		log.Println("CheckUserDataExists:", err)
+		switch err {
+		case service.InvalidNicknameError:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+			return
+		case service.UserDoesNotExistError:
+			ctx.JSON(http.StatusNotFound, getBadRequestError(err))
+			return
+		default:
 			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
 			return
 		}
-		if exists == true {
-			ctx.JSON(http.StatusOK, StatusResponse{"email is already taken"})
-			return
-		}
-
-		ctx.JSON(http.StatusNotFound, StatusResponse{"email is not taken"})
-	} else if inp.Nickname != "" {
-		exists, err := api.services.User.CheckNicknameExists(inp.Nickname)
-		if err != nil {
-			log.Println("CheckNicknameExists:", err)
-			switch err {
-			case service.InvalidNicknameError:
-				ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
-				return
-			default:
-				ctx.JSON(http.StatusInternalServerError, getInternalServerError())
-				return
-			}
-		}
-		if exists == true {
-			ctx.JSON(http.StatusOK, StatusResponse{"nickname is already taken"})
-			return
-		}
-
-		ctx.JSON(http.StatusNotFound, StatusResponse{"nickname is not taken"})
 	}
+
+	ctx.JSON(http.StatusOK, StatusResponse{"Пользователь с указанными параметрами уже существует"})
 }
 
 // UserInfo godoc
@@ -330,7 +314,7 @@ func (api Api) changePassword(ctx *gin.Context) {
 		}
 	}
 
-	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
+	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
 }
 
 // ForgotPassword godoc
@@ -365,7 +349,7 @@ func (api Api) forgotPassword(ctx *gin.Context) {
 		}
 	}
 
-	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
+	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
 }
 
 // ResetPassword godoc
@@ -402,5 +386,75 @@ func (api Api) resetPassword(ctx *gin.Context) {
 		}
 	}
 
-	ctx.JSON(http.StatusOK, StatusResponse{"ok"})
+	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
+}
+
+// DeleteProfile godoc
+// @Summary Удаление профиля
+// @Security ApiKeyAuth
+// @Schemes
+// @Description Удаление профиля пользователя
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 200 {object} StatusResponse
+// @Failure 400,401 {object} Error
+// @Failure 500 {object} Error
+// @Router /user/delete [delete]
+func (api Api) deleteProfile(ctx *gin.Context) {
+	userID, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("DeleteProfile:", err)
+		return
+	}
+
+	err = api.services.User.DeleteProfile(userID)
+	if err != nil {
+		log.Println("DeleteProfile:", err)
+		switch err {
+		case storage.UserDoesNotExistError:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+			return
+		default:
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
+}
+
+// getCoinTransactions godoc
+// @Summary Получение истории транзакций пользователя
+// @Security ApiKeyAuth
+// @Schemes
+// @Description Получение истории транзакций пользователя по access токену
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 200 {array} user.CoinTransactionsModel
+// @Failure 400,401 {object} Error
+// @Failure 500 {object} Error
+// @Router /user/transactions [get]
+func (api Api) getCoinTransactions(ctx *gin.Context) {
+	userID, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("GetCoinTransactions:", err)
+		return
+	}
+
+	transactions, err := api.services.User.GetCoinTransactions(userID)
+	if err != nil {
+		log.Println("GetCoinTransactions:", err)
+		switch err {
+		case storage.UserDoesNotExistError:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+			return
+		default:
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, transactions)
 }

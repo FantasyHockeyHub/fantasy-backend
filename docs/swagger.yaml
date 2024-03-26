@@ -71,6 +71,21 @@ definitions:
     - newPassword
     - oldPassword
     type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.CoinTransactionsModel:
+    properties:
+      amount:
+        type: integer
+      id:
+        type: integer
+      profileID:
+        type: string
+      status:
+        type: string
+      transactionDate:
+        type: string
+      transactionDetails:
+        type: string
+    type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.EmailInput:
     properties:
       email:
@@ -428,8 +443,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/pkg_api.Error'
-        "401":
-          description: Unauthorized
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/pkg_api.Error'
       summary: Получение матчей на следующий день
@@ -465,9 +480,42 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/pkg_api.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
       summary: Получение турниров на ближайшие 2 дня
       tags:
       - tournament
+  /user/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Удаление профиля пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Удаление профиля
+      tags:
+      - user
   /user/exists:
     get:
       consumes:
@@ -500,7 +548,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/pkg_api.StatusResponse'
+            $ref: '#/definitions/pkg_api.Error'
         "500":
           description: Internal Server Error
           schema:
@@ -631,6 +679,37 @@ paths:
           schema:
             $ref: '#/definitions/pkg_api.Error'
       summary: Восстановление пароля
+      tags:
+      - user
+  /user/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Получение истории транзакций пользователя по access токену
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.CoinTransactionsModel'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Получение истории транзакций пользователя
       tags:
       - user
 securityDefinitions:

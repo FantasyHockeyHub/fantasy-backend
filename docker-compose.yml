@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  app:
+    image: danponyavin/fantasy_backend:v1
+    container_name: fantasy_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - .env
+    environment:
+      API_HOST: fantasy_backend
+      POSTGRES_HOST: fantasy_postgres_db
+      POSTGRES_PORT: 5432
+      REDIS_HOST: fantasy_redis_db
+    networks:
+      - fantasy
+
+  postgres:
+    container_name: fantasy_postgres_db
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./.database/postgres/data:/var/lib/postgresql/data
+    networks:
+      - fantasy
+    ports:
+      - "5420:5432"
+
+  redis:
+    container_name: fantasy_redis_db
+    image: redis
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - /path/to/local/dаta:/root/redis
+      - /path/to/local/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - fantasy
+    ports:
+      - "6379:6379"
+
+networks:
+  fantasy:
+    external: true

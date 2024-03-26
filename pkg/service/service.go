@@ -25,6 +25,9 @@ type User interface {
 	ForgotPassword(email string) error
 	ResetPassword(inp user.ResetPasswordInput) error
 	GetUserInfo(userID uuid.UUID) (user.UserInfoModel, error)
+	CheckUserDataExists(inp user.UserExistsDataInput) error
+	DeleteProfile(userID uuid.UUID) error
+	GetCoinTransactions(profileID uuid.UUID) ([]user.CoinTransactionsModel, error)
 }
 
 type TokenManager interface {
@@ -57,7 +60,7 @@ type Deps struct {
 }
 
 func NewServices(deps Deps) *Services {
-	userService := NewUserService(deps.Storage, deps.RStorage, deps.Jwt)
+	userService := NewUserService(deps.Storage, deps.RStorage, deps.Jwt, deps.Cfg)
 	teamsService := NewTeamsService(deps.Storage)
 	return &Services{
 		User:         userService,

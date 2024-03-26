@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	VerificationCodeError = errors.New("authorization code not found or expired")
-	ResetHashError        = errors.New("password reset hash was not found or expired")
+	VerificationCodeError = errors.New("код регистрации не найден или истек")
+	ResetHashError        = errors.New("hash для восстановления пароля не найден или истек")
 	codeTTL               = 10 * time.Minute
 	resetHashTTl          = 1 * time.Hour
 )

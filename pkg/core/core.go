@@ -13,8 +13,8 @@ import (
 func Core() fx.Option {
 	return fx.Options(
 		fx.Provide(
-			fx.Annotate(storage.NewPostgresStorage, fx.As(new(service.Storage))),
-			fx.Annotate(storage.NewRedisStorage, fx.As(new(service.RStorage))),
+			fx.Annotate(storage.NewPostgresStorage, fx.As(new(service.UserStorage))),
+			fx.Annotate(storage.NewRedisStorage, fx.As(new(service.UserRStorage))),
 		),
 		fx.Provide(
 			context.Background,
