@@ -290,3 +290,51 @@ func (p *PostgresStorage) CreateTournaments(ctx context.Context, tournaments []t
 	}
 	return err
 }
+
+func CreateMapForTournaments(startUnixDate int64, endUnixDate int64, league tournaments.League) sq.And {
+	var eqParams sq.And
+	if league == 1 || league == 2 {
+		eqParams = sq.And{
+			sq.Eq{
+				League: league,
+			},
+			sq.GtOrEq{TimeStartTour: startUnixDate},
+			sq.LtOrEq{TimeStartTour: endUnixDate},
+		}
+		return eqParams
+	} else {
+		eqParams = sq.And{
+			sq.GtOrEq{TimeStartTour: startUnixDate},
+			sq.LtOrEq{TimeStartTour: endUnixDate},
+		}
+		return eqParams
+	}
+
+}
+
+func (p *PostgresStorage) GetTournamentsByDate(ctx context.Context, startUnixDate int64, endUnixDate int64, league tournaments.League) ([]tournaments.Tournament, error) {
+
+	//joinMatches := fmt.Sprintf("%s mt on %s.%s = mt.%s", MatchesTable, TournamentsTable, MatchesIds, MatchId)
+	eqParams := CreateMapForTournaments(startUnixDate, endUnixDate, league)
+	query, args, err := sq.
+		Select(TournamentsId, League, TournTitle, MatchesIds, TimeStartTour, EndTime, PlayersAmount, Deposit, PrizeFond, TourStatus).
+		From(TournamentsTable).
+		Where(
+			eqParams,
+		).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	var tournaments []tournaments.Tournament
+	if err != nil {
+		return tournaments, err
+	}
+
+	err = p.db.SelectContext(ctx, &tournaments, query, args...)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = nil
+	}
+
+	return tournaments, err
+}

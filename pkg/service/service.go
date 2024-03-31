@@ -43,6 +43,7 @@ type Teams interface {
 	AddEventsNHL(ctx context.Context, events []tournaments.Game) error
 	GetMatchesDay(ctx context.Context, league tournaments.League) ([]tournaments.Matches, error)
 	CreateTournaments(ctx context.Context) error
+	GetTournaments(ctx context.Context, league tournaments.League) ([]tournaments.Tournament, error)
 }
 
 type Services struct {
