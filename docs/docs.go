@@ -408,6 +408,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/tournament/get_tournaments/{league}": {
+            "get": {
+                "description": "Дата берётся автоматически",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Получение турниров на ближайшие 2 дня",
+                "parameters": [
+                    {
+                        "enum": [
+                            "NHL",
+                            "KHL",
+                            "Both"
+                        ],
+                        "type": "string",
+                        "description": "league",
+                        "name": "league",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Tournament"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/user/delete": {
             "delete": {
                 "security": [
@@ -805,6 +860,44 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Tournament": {
+            "type": "object",
+            "properties": {
+                "TimeStart": {
+                    "type": "integer"
+                },
+                "deposit": {
+                    "type": "integer"
+                },
+                "league": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League"
+                },
+                "matchesIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "playersAmount": {
+                    "type": "integer"
+                },
+                "prizeFond": {
+                    "type": "integer"
+                },
+                "statusTournament": {
+                    "type": "string"
+                },
+                "timeEnd": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "tournamentId": {
+                    "type": "integer"
+                }
+            }
+        },
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.ChangePasswordInput": {
             "type": "object",
             "required": [
@@ -827,10 +920,10 @@ const docTemplate = `{
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.CoinTransactionsModel": {
             "type": "object",
             "properties": {
-                "ID": {
+                "amount": {
                     "type": "integer"
                 },
-                "amount": {
+                "id": {
                     "type": "integer"
                 },
                 "profileID": {
