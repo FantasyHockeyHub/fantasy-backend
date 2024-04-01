@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
+	"log"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -54,7 +57,34 @@ func (s *TeamsService) CreateTeamsKHL(ctx context.Context, teams []tournaments.T
 	return nil
 }
 
-func (s *TeamsService) AddEventsKHL(ctx context.Context, events []tournaments.EventDataKHL) error {
+//func (s *TeamsService) AddEventsKHL(ctx context.Context, events []tournaments.EventDataKHL) error {
+
+func (s *TeamsService) AddEventsKHL(ctx context.Context) error {
+	curTime := time.Now()
+	curTime = curTime.Add(24 * time.Hour)
+	startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 0, 0, 0, 0, time.UTC)
+	endDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 23, 59, 59, 0, time.UTC)
+
+	url := fmt.Sprint("https://khl.api.webcaster.pro/api/khl_mobile/events_v2?q[start_at_lt_time_from_unixtime]=", endDay.Unix(), "&order_direction=desc&q[start_at_gt_time_from_unixtime]=", startDay.Unix())
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Println("EventsKHL:", err)
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Println("EventsKHL:", err)
+	}
+	defer res.Body.Close()
+	decoder := json.NewDecoder(res.Body)
+
+	var events []tournaments.EventDataKHL
+
+	err = decoder.Decode(&events)
+	if err != nil {
+		log.Println("Error decoding JSON:", err)
+		return err
+	}
 
 	for id, _ := range events {
 		var err error
@@ -65,7 +95,7 @@ func (s *TeamsService) AddEventsKHL(ctx context.Context, events []tournaments.Ev
 			return fmt.Errorf("AddEventsKHL: %v", err)
 		}
 	}
-	err := s.storage.AddKHLEvents(ctx, events)
+	err = s.storage.AddKHLEvents(ctx, events)
 	if err != nil {
 		return fmt.Errorf("AddEventsKHL: %v", err)
 	}

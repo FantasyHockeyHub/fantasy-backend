@@ -142,12 +142,12 @@ func (api *Api) EventsKHL(ctx *gin.Context) {
 		return
 	}
 
-	err = api.services.Teams.AddEventsKHL(ctx, eventKHL)
-	if err != nil {
-		log.Printf("EventsKHL: %v", err)
-		ctx.JSON(http.StatusBadRequest, getInternalServerError())
-		return
-	}
+	//err = api.services.Teams.AddEventsKHL(ctx, eventKHL)
+	//if err != nil {
+	//	log.Printf("EventsKHL: %v", err)
+	//	ctx.JSON(http.StatusBadRequest, getInternalServerError())
+	//	return
+	//}
 
 	ctx.AbortWithStatus(http.StatusOK)
 }

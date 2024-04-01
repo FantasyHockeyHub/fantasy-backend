@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/config"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/api"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/jobs/get_events"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/gin-gonic/gin"
@@ -25,6 +26,7 @@ func Core() fx.Option {
 			api.NewApi,
 			service.NewTokenManager,
 			service.NewServices,
+			get_events.NewGetHokeyEvents,
 		),
 		fx.Invoke(restAPIHook),
 	)
