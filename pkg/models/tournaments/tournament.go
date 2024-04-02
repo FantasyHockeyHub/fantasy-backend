@@ -126,8 +126,8 @@ func NewTournamentHandle(info []Matches) []Tournament {
 	return []Tournament{
 		{
 			TournamentId:     NewTourID(),
-			League:           info[1].League,
-			Title:            fmt.Sprintf("%s Daily tournament", info[1].League.GetLeagueString()),
+			League:           info[0].League,
+			Title:            fmt.Sprintf("%s Daily tournament", info[0].League.GetLeagueString()),
 			MatchesIds:       GetMatchesID(info),
 			TimeStart:        startAt,
 			TimeEnd:          endAt,
@@ -138,8 +138,8 @@ func NewTournamentHandle(info []Matches) []Tournament {
 		},
 		{
 			TournamentId:     NewTourID(),
-			League:           info[1].League,
-			Title:            fmt.Sprintf("%s Daily battle", info[1].League.GetLeagueString()),
+			League:           info[0].League,
+			Title:            fmt.Sprintf("%s Daily battle", info[0].League.GetLeagueString()),
 			MatchesIds:       GetMatchesID(info),
 			TimeStart:        startAt,
 			TimeEnd:          endAt,
