@@ -245,6 +245,87 @@ const docTemplate = `{
                 }
             }
         },
+        "/store/products": {
+            "get": {
+                "description": "Получение списка товаров из fantasy магазина",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "store"
+                ],
+                "summary": "Получение товаров из fantasy магазина",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.Product"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/store/products/buy": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Покупка товара в магазине по id товара",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "store"
+                ],
+                "summary": "Покупка товара в магазине",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "example": 1,
+                        "description": "id товара",
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/tournament/create_team_khl": {
             "get": {
                 "description": "Добавлят информацию о команде KHL",
@@ -757,6 +838,51 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "ErrCardRarity",
+                "Silver",
+                "Gold"
+            ]
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.Product": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "league": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League"
+                },
+                "leagueName": {
+                    "type": "string"
+                },
+                "photoLink": {
+                    "type": "string"
+                },
+                "playerCardsCount": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "rarity": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity"
+                },
+                "rarityName": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League": {
             "type": "integer",
             "enum": [
@@ -827,10 +953,10 @@ const docTemplate = `{
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.CoinTransactionsModel": {
             "type": "object",
             "properties": {
-                "ID": {
+                "amount": {
                     "type": "integer"
                 },
-                "amount": {
+                "id": {
                     "type": "integer"
                 },
                 "profileID": {
