@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/config"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
@@ -43,10 +44,16 @@ type Teams interface {
 	GetTournaments(ctx context.Context, league tournaments.League) ([]tournaments.Tournament, error)
 }
 
+type Store interface {
+	GetAllProducts() ([]store.Product, error)
+	BuyProduct(buy store.BuyProductModel) error
+}
+
 type Services struct {
 	User
 	TokenManager
 	Teams
+	Store
 }
 
 type Deps struct {
@@ -59,9 +66,11 @@ type Deps struct {
 func NewServices(deps Deps) *Services {
 	userService := NewUserService(deps.Storage, deps.RStorage, deps.Jwt, deps.Cfg)
 	teamsService := NewTeamsService(deps.Storage)
+	storeService := NewStoreService(deps.Storage)
 	return &Services{
 		User:         userService,
 		TokenManager: deps.Jwt,
 		Teams:        teamsService,
+		Store:        storeService,
 	}
 }
