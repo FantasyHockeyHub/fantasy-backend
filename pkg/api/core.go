@@ -80,10 +80,10 @@ func (api *Api) registerRoutes() {
 	team := base.Group("/tournament")
 	team.GET("/create_team_nhl", api.CreateTeamsNHL)
 	team.GET("/create_team_khl", api.CreateTeamsKHL)
-	team.GET("/events_day_khl", api.EventsKHL)
-	team.GET("/events_day_nhl", api.EventsNHL)
+	//team.GET("/events_day_khl", api.EventsKHL)
+	//team.GET("/events_day_nhl", api.EventsNHL)
 	team.GET("/get_matches/:league", api.GetMatches)
-	team.GET("/create_tournaments", api.CreateTournaments)
+	//team.GET("/create_tournaments", api.CreateTournaments)
 	team.GET("/get_tournaments/:league", api.GetTournaments)
 
 	store := base.Group("/store")
