@@ -371,53 +371,6 @@ paths:
       summary: Создание команд NHL
       tags:
       - tournament
-  /tournament/create_tournaments:
-    get:
-      description: |-
-        Дата берётся автоматически
-        Создаётся 4 турника 2 НХЛ и 2 КХЛ платный и бесплатный
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/pkg_api.Error'
-      summary: Создание турниров на следующий день
-      tags:
-      - tournament
-  /tournament/events_day_khl:
-    get:
-      description: Добавляет в бд матчи за день
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/pkg_api.Error'
-      summary: Получение событий на следующий день KHL
-      tags:
-      - tournament
-  /tournament/events_day_nhl:
-    get:
-      description: Добавляет в бд матчи за день
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/pkg_api.Error'
-      summary: Получение событий на следующий день NHL
-      tags:
-      - tournament
   /tournament/get_matches/{league}:
     get:
       description: Дата берётся автоматически

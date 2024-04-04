@@ -39,11 +39,7 @@ type TokenManager interface {
 type Teams interface {
 	CreateTeamsNHL(context.Context, []tournaments.Standing) error
 	CreateTeamsKHL(ctx context.Context, teams []tournaments.TeamKHL) error
-	//AddEventsKHL(ctx context.Context, events []tournaments.EventDataKHL) error
-	AddEventsKHL(ctx context.Context) error
-	AddEventsNHL(ctx context.Context, events []tournaments.Game) error
 	GetMatchesDay(ctx context.Context, league tournaments.League) ([]tournaments.Matches, error)
-	CreateTournaments(ctx context.Context) error
 	GetTournaments(ctx context.Context, league tournaments.League) ([]tournaments.Tournament, error)
 }
 
