@@ -262,3 +262,41 @@ func (api *Api) CreateTournaments(ctx *gin.Context) {
 		return
 	}
 }
+
+// GetTournaments godoc
+// @Summary Получение турниров на ближайшие 2 дня
+// @Schemes
+// @Description Дата берётся автоматически
+// @Tags tournament
+// @Produce json
+// @Success 200 {object} []tournaments.Tournament
+// @Failure 400 {object} Error
+// @Failure 401 {object} Error
+// @Failure 404 {object} Error
+// @Param league path string true "league" Enums(NHL, KHL, Both)
+// @Router /tournament/get_tournaments/{league} [get]
+func (api *Api) GetTournaments(ctx *gin.Context) {
+	//var leagueName tournaments.League
+	//var leagueName string
+	leagueName := ctx.Param("league")
+	if leagueName == "" {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(errors.New("empty league name")))
+		return
+	}
+
+	league := new(tournaments.League)
+	*league = league.GetLeagueId(leagueName)
+	tournaments, err := api.services.Teams.GetTournaments(ctx, *league)
+	if errors.Is(err, service.NotFoundTournaments) {
+		log.Printf("GetTournaments: %v", err)
+		ctx.JSON(http.StatusNotFound, getNotFoundError())
+		return
+	}
+	if err != nil {
+		log.Printf("GetTournaments: %v", err)
+		ctx.JSON(http.StatusBadRequest, getInternalServerError())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, tournaments)
+}
