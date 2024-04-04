@@ -8,6 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	store "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
 	tournaments "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	user "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
 	gomock "github.com/golang/mock/gomock"
@@ -443,4 +444,56 @@ func (m *MockTeams) GetMatchesDay(ctx context.Context, league tournaments.League
 func (mr *MockTeamsMockRecorder) GetMatchesDay(ctx, league interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMatchesDay", reflect.TypeOf((*MockTeams)(nil).GetMatchesDay), ctx, league)
+}
+
+// MockStore is a mock of Store interface.
+type MockStore struct {
+	ctrl     *gomock.Controller
+	recorder *MockStoreMockRecorder
+}
+
+// MockStoreMockRecorder is the mock recorder for MockStore.
+type MockStoreMockRecorder struct {
+	mock *MockStore
+}
+
+// NewMockStore creates a new mock instance.
+func NewMockStore(ctrl *gomock.Controller) *MockStore {
+	mock := &MockStore{ctrl: ctrl}
+	mock.recorder = &MockStoreMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockStore) EXPECT() *MockStoreMockRecorder {
+	return m.recorder
+}
+
+// BuyProduct mocks base method.
+func (m *MockStore) BuyProduct(buy store.BuyProductModel) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BuyProduct", buy)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BuyProduct indicates an expected call of BuyProduct.
+func (mr *MockStoreMockRecorder) BuyProduct(buy interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuyProduct", reflect.TypeOf((*MockStore)(nil).BuyProduct), buy)
+}
+
+// GetAllProducts mocks base method.
+func (m *MockStore) GetAllProducts() ([]store.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllProducts")
+	ret0, _ := ret[0].([]store.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllProducts indicates an expected call of GetAllProducts.
+func (mr *MockStoreMockRecorder) GetAllProducts() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllProducts", reflect.TypeOf((*MockStore)(nil).GetAllProducts))
 }

@@ -85,6 +85,16 @@ func (api *Api) registerRoutes() {
 	team.GET("/get_matches/:league", api.GetMatches)
 	team.GET("/create_tournaments", api.CreateTournaments)
 	team.GET("/get_tournaments/:league", api.GetTournaments)
+
+	store := base.Group("/store")
+	{
+		store.GET("/products", api.getAllProducts)
+		storeAuthenticated := store.Group("/", api.userIdentity)
+		{
+			storeAuthenticated.POST("/products/buy", api.buyProduct)
+		}
+	}
+
 }
 
 type Error struct {
