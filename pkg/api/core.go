@@ -95,6 +95,11 @@ func (api *Api) registerRoutes() {
 		}
 	}
 
+	players := base.Group("/players")
+	{
+		players.POST("/khl/create", api.createKHLPlayers)
+		players.POST("/nhl/create", api.createNHLPlayers)
+	}
 }
 
 type Error struct {

@@ -372,6 +372,44 @@ paths:
       summary: Регистрация
       tags:
       - auth
+  /players/khl/create:
+    post:
+      consumes:
+      - application/json
+      description: Добавление игроков КХЛ в базу данных
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Добавление игроков КХЛ
+      tags:
+      - players
+  /players/nhl/create:
+    post:
+      consumes:
+      - application/json
+      description: Добавление игроков НХЛ в базу данных
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Добавление игроков НХЛ
+      tags:
+      - players
   /store/products:
     get:
       consumes:
