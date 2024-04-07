@@ -44,7 +44,7 @@ func (api Api) createKHLPlayers(ctx *gin.Context) {
 		var playerInfoList []players.KHLPlayerInfo
 		err = decoder.Decode(&playerInfoList)
 		if err != nil {
-			log.Println("Error decoding response:", err)
+			log.Println("CreateKHLPlayers:", err)
 			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
 			return
 		}
@@ -78,6 +78,13 @@ func (api Api) createKHLPlayers(ctx *gin.Context) {
 		page++
 	}
 
+	err := api.services.Players.CreatePlayers(allPlayersData)
+	if err != nil {
+		log.Println("CreateKHLPlayers:", err)
+		ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+		return
+	}
+
 	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
 }
 
@@ -92,7 +99,7 @@ func (api Api) createKHLPlayers(ctx *gin.Context) {
 // @Failure 500 {object} Error
 // @Router /players/nhl/create [post]
 func (api Api) createNHLPlayers(ctx *gin.Context) {
-	var nhlPlayers []players.Player
+	var allPlayersData []players.Player
 	teams := make([]string, 0, len(tournaments.NHLId))
 	for key := range tournaments.NHLId {
 		teams = append(teams, key)
@@ -103,22 +110,22 @@ func (api Api) createNHLPlayers(ctx *gin.Context) {
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			log.Println("CreateNHLPlayers:", err)
-			ctx.JSON(http.StatusInternalServerError, StatusResponse{"error"})
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
 			return
 		}
 
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
 			log.Println("CreateNHLPlayers:", err)
-			ctx.JSON(http.StatusInternalServerError, StatusResponse{"error"})
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
 			return
 		}
 		defer res.Body.Close()
 
 		var response players.NHLRosterResponse
 		if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
-			log.Println("CreateNHLPlayers: Error decoding response body:", err)
-			ctx.JSON(http.StatusInternalServerError, StatusResponse{"error"})
+			log.Println("CreateNHLPlayers:", err)
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
 			return
 		}
 
@@ -141,8 +148,15 @@ func (api Api) createNHLPlayers(ctx *gin.Context) {
 				player.Position = players.PlayerPosition["Forward"]
 			}
 
-			nhlPlayers = append(nhlPlayers, player)
+			allPlayersData = append(allPlayersData, player)
 		}
+	}
+
+	err := api.services.Players.CreatePlayers(allPlayersData)
+	if err != nil {
+		log.Println("CreateNHLPlayers:", err)
+		ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+		return
 	}
 
 	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
