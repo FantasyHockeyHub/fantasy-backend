@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
@@ -10,6 +12,12 @@ import (
 	"math/rand"
 	"strings"
 	"time"
+)
+
+var (
+	PlayerCardNotFoundError     = errors.New("карточка с указанным id не найдена")
+	IncorrectPlayerCardUserID   = errors.New("userID владельца карточки не совпадает с текущим")
+	PlayerCardIsAlreadyUnpacked = errors.New("карточка уже была распакована")
 )
 
 func (p *PostgresStorage) CreatePlayers(playersData []players.Player) error {
@@ -122,6 +130,8 @@ func (p *PostgresStorage) GetPlayerCards(filter players.PlayerCardsFilter) ([]pl
 		}
 	}
 
+	query += " ORDER BY pc.id"
+
 	err := p.db.Select(&res, query)
 	if err != nil {
 		return res, err
@@ -131,6 +141,7 @@ func (p *PostgresStorage) GetPlayerCards(filter players.PlayerCardsFilter) ([]pl
 		res = []players.PlayerCardResponse{}
 	} else {
 		for i := range res {
+			res[i].RarityName = store.PlayerCardsRarityTitles[res[i].Rarity]
 			res[i].LeagueName = tournaments.LeagueTitles[res[i].League]
 			res[i].PositionName = players.PlayerPositionTitles[res[i].Position]
 			res[i].BonusMetricName = store.BonusMetricTitles[res[i].BonusMetric]
@@ -205,6 +216,32 @@ func (p *PostgresStorage) AddPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel)
 	_, err = tx.Exec(query, valueArgs...)
 	if err != nil {
 		tx.Rollback()
+		return err
+	}
+
+	return nil
+}
+
+func (p *PostgresStorage) CardUnpacking(id int, userID uuid.UUID) error {
+	card := players.PlayerCardsFilter{}
+
+	err := p.db.QueryRow("SELECT profile_id, unpacked FROM player_cards WHERE id = $1", id).Scan(&card.ProfileID, &card.Unpacked)
+	if err == sql.ErrNoRows {
+		return PlayerCardNotFoundError
+	} else if err != nil {
+		return err
+	}
+
+	if card.ProfileID != userID {
+		return IncorrectPlayerCardUserID
+	}
+
+	if card.Unpacked {
+		return PlayerCardIsAlreadyUnpacked
+	}
+
+	_, err = p.db.Exec("UPDATE player_cards SET unpacked = true WHERE id = $1", id)
+	if err != nil {
 		return err
 	}
 

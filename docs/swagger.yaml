@@ -551,6 +551,42 @@ paths:
       summary: Получение списка карточек игроков
       tags:
       - players
+  /players/cards/unpack:
+    post:
+      consumes:
+      - application/json
+      description: Распаковка карточки игрока
+      parameters:
+      - description: id карточки
+        example: 1
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Распаковка карточки игрока
+      tags:
+      - players
   /players/khl/create:
     post:
       consumes:
@@ -620,6 +656,7 @@ paths:
         example: 1
         in: query
         name: id
+        required: true
         type: integer
       produces:
       - application/json

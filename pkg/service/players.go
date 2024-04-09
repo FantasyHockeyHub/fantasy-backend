@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"log"
 )
@@ -19,6 +20,7 @@ type PlayersStorage interface {
 	GetPlayerByID(playerID int) (players.PlayerResponse, error)
 	GetPlayerCards(filter players.PlayerCardsFilter) ([]players.PlayerCardResponse, error)
 	AddPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel) error
+	CardUnpacking(id int, userID uuid.UUID) error
 }
 
 type PlayersService struct {
@@ -56,4 +58,15 @@ func (s *PlayersService) GetPlayerCards(filter players.PlayerCardsFilter) ([]pla
 	}
 
 	return res, nil
+}
+
+func (s *PlayersService) CardUnpacking(id int, userID uuid.UUID) error {
+
+	err := s.storage.CardUnpacking(id, userID)
+	if err != nil {
+		log.Println("Service. CardUnpacking:", err)
+		return err
+	}
+
+	return nil
 }

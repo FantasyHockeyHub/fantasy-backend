@@ -111,6 +111,7 @@ type PlayerCardResponse struct {
 	ProfileID       uuid.UUID          `json:"profileID" db:"profile_id"`
 	PlayerID        int                `json:"playerID" db:"player_id"`
 	Rarity          store.CardRarity   `json:"rarity" db:"rarity"`
+	RarityName      string             `json:"rarityName"`
 	BonusMetric     store.BonusMetric  `json:"bonusMetric" db:"bonus_metric"`
 	BonusMetricName string             `json:"bonusMetricName"`
 	Multiply        float32            `json:"multiply" db:"multiply"`

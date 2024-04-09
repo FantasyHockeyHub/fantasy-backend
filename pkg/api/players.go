@@ -6,6 +6,7 @@ import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"log"
@@ -311,4 +312,52 @@ func (api Api) getPlayerCards(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, res)
+}
+
+// createNHLPlayers godoc
+// @Summary Распаковка карточки игрока
+// @Security ApiKeyAuth
+// @Schemes
+// @Description Распаковка карточки игрока
+// @Tags players
+// @Accept json
+// @Produce json
+// @Param id query int true "id карточки" Example(1)
+// @Success 200 {object} StatusResponse
+// @Failure 400,401 {object} Error
+// @Failure 500 {object} Error
+// @Router /players/cards/unpack [post]
+func (api Api) cardUnpacking(ctx *gin.Context) {
+	userID, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("CardUnpacking:", err)
+		return
+	}
+
+	var id int
+	query := ctx.Request.URL.Query()
+	if query.Has("id") {
+		id, err = strconv.Atoi(query.Get("id"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+	}
+
+	err = api.services.Players.CardUnpacking(id, userID)
+	if err != nil {
+		log.Println("CardUnpacking:", err)
+		switch err {
+		case storage.PlayerCardNotFoundError,
+			storage.IncorrectPlayerCardUserID,
+			storage.PlayerCardIsAlreadyUnpacked:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+			return
+		default:
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
 }
