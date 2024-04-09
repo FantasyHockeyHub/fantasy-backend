@@ -1,6 +1,10 @@
 package players
 
-import "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
+import (
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
+	"github.com/google/uuid"
+)
 
 type Position int8
 
@@ -92,4 +96,32 @@ type PlayerResponse struct {
 	League        tournaments.League `json:"league"  db:"league"`
 	LeagueName    string             `json:"leagueName"`
 	PlayerCost    int                `json:"playerCost" db:"player_cost"`
+}
+
+type PlayerCardsFilter struct {
+	ProfileID        uuid.UUID          `json:"profileID" db:"profile_id"`
+	League           tournaments.League `json:"league"`
+	Rarity           store.CardRarity   `json:"rarity" db:"rarity"`
+	Unpacked         bool               `json:"unpacked" db:"unpacked"`
+	HasUnpackedParam bool
+}
+
+type PlayerCardResponse struct {
+	ID              int                `json:"id" db:"id"`
+	ProfileID       uuid.UUID          `json:"profileID" db:"profile_id"`
+	PlayerID        int                `json:"playerID" db:"player_id"`
+	Rarity          store.CardRarity   `json:"rarity" db:"rarity"`
+	BonusMetric     store.BonusMetric  `json:"bonusMetric" db:"bonus_metric"`
+	BonusMetricName string             `json:"bonusMetricName"`
+	Multiply        float32            `json:"multiply" db:"multiply"`
+	Unpacked        bool               `json:"unpacked" db:"unpacked"`
+	Name            string             `json:"name" db:"name"`
+	SweaterNumber   int                `json:"sweaterNumber" db:"sweater_number"`
+	Photo           string             `json:"photo"  db:"photo_link"`
+	TeamID          int                `json:"teamID"  db:"team_id"`
+	TeamName        string             `json:"teamName" db:"team_name"`
+	Position        Position           `json:"position"  db:"position"`
+	PositionName    string             `json:"positionName"`
+	League          tournaments.League `json:"league"  db:"league"`
+	LeagueName      string             `json:"leagueName"`
 }

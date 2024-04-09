@@ -2,6 +2,8 @@ package service
 
 import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
+	"github.com/jmoiron/sqlx"
 	"log"
 )
 
@@ -14,6 +16,9 @@ func NewPlayersService(storage PlayersStorage) *PlayersService {
 type PlayersStorage interface {
 	CreatePlayers(playersData []players.Player) error
 	GetPlayers(playersFilter players.PlayersFilter) ([]players.PlayerResponse, error)
+	GetPlayerByID(playerID int) (players.PlayerResponse, error)
+	GetPlayerCards(filter players.PlayerCardsFilter) ([]players.PlayerCardResponse, error)
+	AddPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel) error
 }
 
 type PlayersService struct {
@@ -36,6 +41,17 @@ func (s *PlayersService) GetPlayers(playersFilter players.PlayersFilter) ([]play
 	res, err := s.storage.GetPlayers(playersFilter)
 	if err != nil {
 		log.Println("Service. GetPlayers:", err)
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (s *PlayersService) GetPlayerCards(filter players.PlayerCardsFilter) ([]players.PlayerCardResponse, error) {
+
+	res, err := s.storage.GetPlayerCards(filter)
+	if err != nil {
+		log.Println("Service. GetPlayerCards:", err)
 		return res, err
 	}
 

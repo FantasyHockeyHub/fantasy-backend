@@ -1,4 +1,41 @@
 definitions:
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerCardResponse:
+    properties:
+      bonusMetric:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.BonusMetric'
+      bonusMetricName:
+        type: string
+      id:
+        type: integer
+      league:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League'
+      leagueName:
+        type: string
+      multiply:
+        type: number
+      name:
+        type: string
+      photo:
+        type: string
+      playerID:
+        type: integer
+      position:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position'
+      positionName:
+        type: string
+      profileID:
+        type: string
+      rarity:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity'
+      sweaterNumber:
+        type: integer
+      teamID:
+        type: integer
+      teamName:
+        type: string
+      unpacked:
+        type: boolean
+    type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse:
     properties:
       id:
@@ -25,6 +62,18 @@ definitions:
         type: string
     type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ErrPlayerPosition
+    - Goalie
+    - Defensemen
+    - Forward
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.BonusMetric:
     enum:
     - 0
     - 1
@@ -452,6 +501,54 @@ paths:
           schema:
             $ref: '#/definitions/pkg_api.Error'
       summary: Получение списка игроков
+      tags:
+      - players
+  /players/cards:
+    get:
+      consumes:
+      - application/json
+      description: Получение списка карточек игроков
+      parameters:
+      - description: profileID
+        in: query
+        name: profileID
+        type: string
+      - description: rarity
+        enum:
+        - Silver
+        - Gold
+        in: query
+        name: rarity
+        type: string
+      - description: league
+        enum:
+        - NHL
+        - KHL
+        in: query
+        name: league
+        type: string
+      - description: unpacked
+        in: query
+        name: unpacked
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerCardResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Получение списка карточек игроков
       tags:
       - players
   /players/khl/create:

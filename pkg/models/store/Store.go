@@ -44,8 +44,35 @@ type Product struct {
 }
 
 type BuyProductModel struct {
-	ID        int `db:"id"`
-	ProfileID uuid.UUID
-	Coins     int
-	Details   string
+	ID               int `db:"id"`
+	ProfileID        uuid.UUID
+	Coins            int
+	Details          string
+	League           tournaments.League `db:"league"`
+	Rarity           CardRarity         `db:"rarity"`
+	PlayerCardsCount int                `db:"player_cards_count"`
+}
+
+type BonusMetric int8
+
+const (
+	ErrPlayerPosition BonusMetric = iota
+	Goalie
+	Defensemen
+	Forward
+)
+
+var BonusMetricTitles = map[BonusMetric]string{
+	Goalie:     "Сейвы",
+	Defensemen: "Передачи",
+	Forward:    "Голы",
+}
+
+func (t *BonusMetric) GetBonusMetricString() string {
+	return BonusMetricTitles[*t]
+}
+
+var CardMultiply = map[CardRarity]float32{
+	Silver: 1.25,
+	Gold:   1.5,
 }

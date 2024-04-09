@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"strconv"
@@ -226,6 +228,84 @@ func (api Api) getPlayers(ctx *gin.Context) {
 	res, err := api.services.Players.GetPlayers(filterPlayers)
 	if err != nil {
 		log.Println("GetPlayers:", err)
+		ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, res)
+}
+
+// getPlayerPlayerCards godoc
+// @Summary Получение списка карточек игроков
+// @Schemes
+// @Description Получение списка карточек игроков
+// @Tags players
+// @Accept json
+// @Produce json
+// @Param profileID query string false "profileID"
+// @Param rarity query string false "rarity" Enums(Silver, Gold)
+// @Param league query string false "league" Enums(NHL, KHL)
+// @Param unpacked query boolean false "unpacked"
+// @Success 200 {array} players.PlayerCardResponse
+// @Failure 400 {object} Error
+// @Failure 500 {object} Error
+// @Router /players/cards [get]
+func (api Api) getPlayerCards(ctx *gin.Context) {
+	var filterPlayers players.PlayerCardsFilter
+	profileFilter := ctx.Query("profileID")
+	rarityFilter := ctx.Query("rarity")
+	leagueFilter := ctx.Query("league")
+	unpackedFilter := ctx.Query("unpacked")
+
+	if profileFilter != "" {
+		parsedUserID, err := uuid.Parse(profileFilter)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+		filterPlayers.ProfileID = parsedUserID
+	}
+
+	if rarityFilter != "" {
+		switch rarityFilter {
+		case "Silver":
+			filterPlayers.Rarity = store.Silver
+		case "Gold":
+			filterPlayers.Rarity = store.Gold
+		default:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+	}
+
+	if leagueFilter != "" {
+		switch leagueFilter {
+		case "NHL":
+			filterPlayers.League = tournaments.NHL
+		case "KHL":
+			filterPlayers.League = tournaments.KHL
+		default:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+	}
+
+	if unpackedFilter != "" {
+		switch unpackedFilter {
+		case "true":
+			filterPlayers.Unpacked = true
+		case "false":
+			filterPlayers.Unpacked = false
+		default:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+		filterPlayers.HasUnpackedParam = true
+	}
+
+	res, err := api.services.Players.GetPlayerCards(filterPlayers)
+	if err != nil {
+		log.Println("GetPlayerCards:", err)
 		ctx.JSON(http.StatusInternalServerError, getInternalServerError())
 		return
 	}

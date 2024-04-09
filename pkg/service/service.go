@@ -56,6 +56,7 @@ type Store interface {
 type Players interface {
 	CreatePlayers(playersData []players.Player) error
 	GetPlayers(playersFilter players.PlayersFilter) ([]players.PlayerResponse, error)
+	GetPlayerCards(filter players.PlayerCardsFilter) ([]players.PlayerCardResponse, error)
 }
 
 type Services struct {
