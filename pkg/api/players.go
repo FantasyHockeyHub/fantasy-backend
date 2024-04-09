@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 // createKHLPlayers godoc
@@ -65,11 +67,11 @@ func (api Api) createKHLPlayers(ctx *gin.Context) {
 
 			switch playerInfo.Player.Role {
 			case "вратарь":
-				player.Position = players.PlayerPosition["Goalie"]
+				player.Position = players.Goalie
 			case "защитник":
-				player.Position = players.PlayerPosition["Defensemen"]
+				player.Position = players.Defensemen
 			case "нападающий":
-				player.Position = players.PlayerPosition["Forward"]
+				player.Position = players.Forward
 			}
 
 			allPlayersData = append(allPlayersData, player)
@@ -141,11 +143,11 @@ func (api Api) createNHLPlayers(ctx *gin.Context) {
 
 			switch playerInfo.Position {
 			case "G":
-				player.Position = players.PlayerPosition["Goalie"]
+				player.Position = players.Goalie
 			case "D":
-				player.Position = players.PlayerPosition["Defensemen"]
+				player.Position = players.Defensemen
 			default:
-				player.Position = players.PlayerPosition["Forward"]
+				player.Position = players.Forward
 			}
 
 			allPlayersData = append(allPlayersData, player)
@@ -160,4 +162,73 @@ func (api Api) createNHLPlayers(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
+}
+
+// getPlayers godoc
+// @Summary Получение списка игроков
+// @Schemes
+// @Description Получение списка игроков
+// @Tags players
+// @Accept json
+// @Produce json
+// @Param teams query array false "teams"
+// @Param position query string false "position" Enums(G, D, F)
+// @Param league query string false "league" Enums(NHL, KHL)
+// @Success 200 {array} players.PlayerResponse
+// @Failure 400 {object} Error
+// @Failure 500 {object} Error
+// @Router /players [get]
+func (api Api) getPlayers(ctx *gin.Context) {
+	var filterPlayers players.PlayersFilter
+	teamsFilter := ctx.Query("teams")
+	leagueFilter := ctx.Query("league")
+	positionFilter := ctx.Query("position")
+
+	if teamsFilter != "" {
+		teamIds := strings.Split(teamsFilter, ",")
+		for _, teamId := range teamIds {
+			id, err := strconv.Atoi(strings.TrimSpace(teamId))
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+				return
+			}
+			filterPlayers.Teams = append(filterPlayers.Teams, id)
+		}
+	}
+
+	if leagueFilter != "" {
+		switch leagueFilter {
+		case "NHL":
+			filterPlayers.League = tournaments.NHL
+		case "KHL":
+			filterPlayers.League = tournaments.KHL
+		default:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+	}
+
+	if positionFilter != "" {
+		switch positionFilter {
+		case "G":
+			filterPlayers.Position = players.Goalie
+		case "D":
+			filterPlayers.Position = players.Defensemen
+		case "F":
+			filterPlayers.Position = players.Forward
+		default:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+
+	}
+
+	res, err := api.services.Players.GetPlayers(filterPlayers)
+	if err != nil {
+		log.Println("GetPlayers:", err)
+		ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, res)
 }

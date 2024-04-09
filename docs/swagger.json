@@ -235,6 +235,73 @@
                 }
             }
         },
+        "/players": {
+            "get": {
+                "description": "Получение списка игроков",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Получение списка игроков",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "description": "teams",
+                        "name": "teams",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "G",
+                            "D",
+                            "F"
+                        ],
+                        "type": "string",
+                        "description": "position",
+                        "name": "position",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "NHL",
+                            "KHL"
+                        ],
+                        "type": "string",
+                        "description": "league",
+                        "name": "league",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/players/khl/create": {
             "post": {
                 "description": "Добавление игроков КХЛ в базу данных",
@@ -941,6 +1008,59 @@
         }
     },
     "definitions": {
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "league": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League"
+                },
+                "leagueName": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "photo": {
+                    "type": "string"
+                },
+                "playerCost": {
+                    "type": "integer"
+                },
+                "position": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position"
+                },
+                "positionName": {
+                    "type": "string"
+                },
+                "sweaterNumber": {
+                    "type": "integer"
+                },
+                "teamID": {
+                    "type": "integer"
+                },
+                "teamName": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ErrPlayerPosition",
+                "Goalie",
+                "Defensemen",
+                "Forward"
+            ]
+        },
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity": {
             "type": "integer",
             "enum": [

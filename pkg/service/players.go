@@ -13,6 +13,7 @@ func NewPlayersService(storage PlayersStorage) *PlayersService {
 
 type PlayersStorage interface {
 	CreatePlayers(playersData []players.Player) error
+	GetPlayers(playersFilter players.PlayersFilter) ([]players.PlayerResponse, error)
 }
 
 type PlayersService struct {
@@ -28,4 +29,15 @@ func (s *PlayersService) CreatePlayers(playersData []players.Player) error {
 	}
 
 	return nil
+}
+
+func (s *PlayersService) GetPlayers(playersFilter players.PlayersFilter) ([]players.PlayerResponse, error) {
+
+	res, err := s.storage.GetPlayers(playersFilter)
+	if err != nil {
+		log.Println("Service. GetPlayers:", err)
+		return res, err
+	}
+
+	return res, nil
 }

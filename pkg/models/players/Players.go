@@ -12,15 +12,15 @@ const (
 )
 
 var PlayerPosition = map[string]Position{
-	"Goalie":     Goalie,
-	"Defensemen": Defensemen,
-	"Forward":    Forward,
+	"Вратарь":    Goalie,
+	"Защитник":   Defensemen,
+	"Нападающий": Forward,
 }
 
 var PlayerPositionTitles = map[Position]string{
-	Goalie:     "Goalie",
-	Defensemen: "Defensemen",
-	Forward:    "Forward",
+	Goalie:     "Вратарь",
+	Defensemen: "Защитник",
+	Forward:    "Нападающий",
 }
 
 func (t *Position) GetPlayerPositionString() string {
@@ -72,4 +72,24 @@ type NHLRosterResponse struct {
 	Forwards   []NHLPlayerInfo `json:"forwards"`
 	Defensemen []NHLPlayerInfo `json:"defensemen"`
 	Goalies    []NHLPlayerInfo `json:"goalies"`
+}
+
+type PlayersFilter struct {
+	Teams    []int              `json:"teams"`
+	Position Position           `json:"position"`
+	League   tournaments.League `json:"league"`
+}
+
+type PlayerResponse struct {
+	ID            int                `json:"id" db:"id"`
+	Name          string             `json:"name" db:"name"`
+	SweaterNumber int                `json:"sweaterNumber" db:"sweater_number"`
+	Photo         string             `json:"photo"  db:"photo_link"`
+	TeamID        int                `json:"teamID"  db:"team_id"`
+	TeamName      string             `json:"teamName" db:"team_name"`
+	Position      Position           `json:"position"  db:"position"`
+	PositionName  string             `json:"positionName"`
+	League        tournaments.League `json:"league"  db:"league"`
+	LeagueName    string             `json:"leagueName"`
+	PlayerCost    int                `json:"playerCost" db:"player_cost"`
 }
