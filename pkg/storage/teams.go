@@ -314,6 +314,7 @@ func CreateMapForTournaments(startUnixDate int64, endUnixDate int64, league tour
 
 func (p *PostgresStorage) GetTournamentsByDate(ctx context.Context, startUnixDate int64, endUnixDate int64, league tournaments.League) ([]tournaments.Tournament, error) {
 
+	log.Println(startUnixDate, endUnixDate)
 	//joinMatches := fmt.Sprintf("%s mt on %s.%s = mt.%s", MatchesTable, TournamentsTable, MatchesIds, MatchId)
 	eqParams := CreateMapForTournaments(startUnixDate, endUnixDate, league)
 	query, args, err := sq.
@@ -337,4 +338,25 @@ func (p *PostgresStorage) GetTournamentsByDate(ctx context.Context, startUnixDat
 	}
 
 	return tournaments, err
+}
+
+func (p *PostgresStorage) UpdateStatusTournamentsByIds(ctx context.Context, tourID []tournaments.ID) error {
+
+	query, args, err := sq.
+		Update(TournamentsTable).
+		Set(TourStatus, "started").
+		Where(
+			sq.Eq{
+				TournamentsId: tourID,
+			},
+		).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = p.db.ExecContext(ctx, query, args...)
+	return err
 }
