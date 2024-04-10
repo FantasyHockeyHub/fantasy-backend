@@ -3,6 +3,7 @@ package events
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"log"
@@ -10,6 +11,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+)
+
+var (
+	NotFoundTour = errors.New("not found tournaments")
 )
 
 func NewEventsService(storage EventsStorage) *EventsService {
@@ -23,6 +28,8 @@ type EventsStorage interface {
 	AddNHLEvents(context.Context, []tournaments.Game) error
 	GetMatchesByDate(context.Context, int64, int64, tournaments.League) ([]tournaments.Matches, error)
 	CreateTournaments(context.Context, []tournaments.Tournament) error
+	GetTournamentsByDate(context.Context, int64, int64, tournaments.League) ([]tournaments.Tournament, error)
+	UpdateStatusTournamentsByIds(context.Context, []tournaments.ID) error
 }
 
 type EventsService struct {
@@ -148,5 +155,39 @@ func (s *EventsService) CreateTournaments(ctx context.Context) error {
 		return fmt.Errorf("CreateTournaments: %v", err)
 	}
 
+	return nil
+}
+
+func (s *EventsService) GetTournamentsByNextDay(ctx context.Context, league tournaments.League) ([]tournaments.Tournament, error) {
+	curTime := time.Now()
+	tomorrowTime := curTime.Add(24 * time.Hour)
+	//startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 21, 0, 0, 0, time.UTC)
+	startDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 0, 0, 0, 0, time.UTC)
+	endDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 23, 59, 59, 0, time.UTC)
+
+	//tomorrowTime := time.Now()
+	////tomorrowTime := curTime.Add(24 * time.Hour)
+	//startDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 0, 0, 0, 0, time.UTC)
+	//endDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 23, 59, 59, 0, time.UTC)
+
+	tourn, err := s.storage.GetTournamentsByDate(ctx, startDay.UnixMilli(), endDay.UnixMilli(), league)
+	if len(tourn) == 0 {
+		return tourn, NotFoundTour
+	}
+	if err != nil {
+		return tourn, fmt.Errorf("GetMatchesDay: %v", err)
+	}
+	log.Println(len(tourn))
+
+	return tourn, nil
+}
+
+func (s *EventsService) UpdateStatusTournaments(ctx context.Context, tourID []tournaments.ID) error {
+
+	log.Printf("Start UpdateStatusTournaments")
+	err := s.storage.UpdateStatusTournamentsByIds(ctx, tourID)
+	if err != nil {
+		return fmt.Errorf("UpdateStatusTournamentsByIds: %v", err)
+	}
 	return nil
 }
