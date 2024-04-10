@@ -235,6 +235,259 @@
                 }
             }
         },
+        "/players": {
+            "get": {
+                "description": "Получение списка игроков",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Получение списка игроков",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "description": "teams",
+                        "name": "teams",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "G",
+                            "D",
+                            "F"
+                        ],
+                        "type": "string",
+                        "description": "position",
+                        "name": "position",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "NHL",
+                            "KHL"
+                        ],
+                        "type": "string",
+                        "description": "league",
+                        "name": "league",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/players/cards": {
+            "get": {
+                "description": "Получение списка карточек игроков",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Получение списка карточек игроков",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profileID",
+                        "name": "profileID",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "Silver",
+                            "Gold"
+                        ],
+                        "type": "string",
+                        "description": "rarity",
+                        "name": "rarity",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "NHL",
+                            "KHL"
+                        ],
+                        "type": "string",
+                        "description": "league",
+                        "name": "league",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "unpacked",
+                        "name": "unpacked",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerCardResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/players/cards/unpack": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Распаковка карточки игрока",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Распаковка карточки игрока",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "example": 1,
+                        "description": "id карточки",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/players/khl/create": {
+            "post": {
+                "description": "Добавление игроков КХЛ в базу данных",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Добавление игроков КХЛ",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.StatusResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/players/nhl/create": {
+            "post": {
+                "description": "Добавление игроков НХЛ в базу данных",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Добавление игроков НХЛ",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.StatusResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/store/products": {
             "get": {
                 "description": "Получение списка товаров из fantasy магазина",
@@ -291,7 +544,8 @@
                         "example": 1,
                         "description": "id товара",
                         "name": "id",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -814,6 +1068,130 @@
         }
     },
     "definitions": {
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerCardResponse": {
+            "type": "object",
+            "properties": {
+                "bonusMetric": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.BonusMetric"
+                },
+                "bonusMetricName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "league": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League"
+                },
+                "leagueName": {
+                    "type": "string"
+                },
+                "multiply": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "photo": {
+                    "type": "string"
+                },
+                "playerID": {
+                    "type": "integer"
+                },
+                "position": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position"
+                },
+                "positionName": {
+                    "type": "string"
+                },
+                "profileID": {
+                    "type": "string"
+                },
+                "rarity": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity"
+                },
+                "sweaterNumber": {
+                    "type": "integer"
+                },
+                "teamID": {
+                    "type": "integer"
+                },
+                "teamName": {
+                    "type": "string"
+                },
+                "unpacked": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "league": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League"
+                },
+                "leagueName": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "photo": {
+                    "type": "string"
+                },
+                "playerCost": {
+                    "type": "integer"
+                },
+                "position": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position"
+                },
+                "positionName": {
+                    "type": "string"
+                },
+                "sweaterNumber": {
+                    "type": "integer"
+                },
+                "teamID": {
+                    "type": "integer"
+                },
+                "teamName": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ErrPlayerPosition",
+                "Goalie",
+                "Defensemen",
+                "Forward"
+            ]
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.BonusMetric": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "ErrPlayerPosition",
+                "Goalie",
+                "Defensemen",
+                "Forward"
+            ]
+        },
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity": {
             "type": "integer",
             "enum": [

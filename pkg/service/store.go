@@ -41,6 +41,9 @@ func (s *StoreService) BuyProduct(buy store.BuyProductModel) error {
 	}
 	buy.Coins = -product.Price
 	buy.Details = "Покупка: " + product.ProductName
+	buy.League = product.League
+	buy.Rarity = product.Rarity
+	buy.PlayerCardsCount = product.PlayerCardsCount
 
 	err = s.storage.BuyProduct(buy)
 	if err != nil {

@@ -1,4 +1,90 @@
 definitions:
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerCardResponse:
+    properties:
+      bonusMetric:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.BonusMetric'
+      bonusMetricName:
+        type: string
+      id:
+        type: integer
+      league:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League'
+      leagueName:
+        type: string
+      multiply:
+        type: number
+      name:
+        type: string
+      photo:
+        type: string
+      playerID:
+        type: integer
+      position:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position'
+      positionName:
+        type: string
+      profileID:
+        type: string
+      rarity:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity'
+      sweaterNumber:
+        type: integer
+      teamID:
+        type: integer
+      teamName:
+        type: string
+      unpacked:
+        type: boolean
+    type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse:
+    properties:
+      id:
+        type: integer
+      league:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League'
+      leagueName:
+        type: string
+      name:
+        type: string
+      photo:
+        type: string
+      playerCost:
+        type: integer
+      position:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position'
+      positionName:
+        type: string
+      sweaterNumber:
+        type: integer
+      teamID:
+        type: integer
+      teamName:
+        type: string
+    type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ErrPlayerPosition
+    - Goalie
+    - Defensemen
+    - Forward
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.BonusMetric:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ErrPlayerPosition
+    - Goalie
+    - Defensemen
+    - Forward
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity:
     enum:
     - 0
@@ -372,6 +458,173 @@ paths:
       summary: Регистрация
       tags:
       - auth
+  /players:
+    get:
+      consumes:
+      - application/json
+      description: Получение списка игроков
+      parameters:
+      - description: teams
+        in: query
+        name: teams
+        type: array
+      - description: position
+        enum:
+        - G
+        - D
+        - F
+        in: query
+        name: position
+        type: string
+      - description: league
+        enum:
+        - NHL
+        - KHL
+        in: query
+        name: league
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Получение списка игроков
+      tags:
+      - players
+  /players/cards:
+    get:
+      consumes:
+      - application/json
+      description: Получение списка карточек игроков
+      parameters:
+      - description: profileID
+        in: query
+        name: profileID
+        type: string
+      - description: rarity
+        enum:
+        - Silver
+        - Gold
+        in: query
+        name: rarity
+        type: string
+      - description: league
+        enum:
+        - NHL
+        - KHL
+        in: query
+        name: league
+        type: string
+      - description: unpacked
+        in: query
+        name: unpacked
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerCardResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Получение списка карточек игроков
+      tags:
+      - players
+  /players/cards/unpack:
+    post:
+      consumes:
+      - application/json
+      description: Распаковка карточки игрока
+      parameters:
+      - description: id карточки
+        example: 1
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Распаковка карточки игрока
+      tags:
+      - players
+  /players/khl/create:
+    post:
+      consumes:
+      - application/json
+      description: Добавление игроков КХЛ в базу данных
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Добавление игроков КХЛ
+      tags:
+      - players
+  /players/nhl/create:
+    post:
+      consumes:
+      - application/json
+      description: Добавление игроков НХЛ в базу данных
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Добавление игроков НХЛ
+      tags:
+      - players
   /store/products:
     get:
       consumes:
@@ -403,6 +656,7 @@ paths:
         example: 1
         in: query
         name: id
+        required: true
         type: integer
       produces:
       - application/json
