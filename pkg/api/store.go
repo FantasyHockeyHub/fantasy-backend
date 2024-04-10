@@ -44,7 +44,7 @@ func (api Api) getAllProducts(ctx *gin.Context) {
 // @Tags store
 // @Accept json
 // @Produce json
-// @Param id query int false "id товара" Example(1)
+// @Param id query int true "id товара" Example(1)
 // @Success 200 {object} StatusResponse
 // @Failure 400 {object} Error
 // @Failure 500 {object} Error
@@ -76,7 +76,8 @@ func (api Api) buyProduct(ctx *gin.Context) {
 		log.Println("BuyProduct:", err)
 		switch err {
 		case storage.IncorrectProductID,
-			storage.NotEnoughCoinsError:
+			storage.NotEnoughCoinsError,
+			storage.GetAllCardsError:
 			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 			return
 		default:

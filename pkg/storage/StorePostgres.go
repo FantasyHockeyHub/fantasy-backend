@@ -8,6 +8,7 @@ import (
 
 var (
 	IncorrectProductID = errors.New("некорректный id товара")
+	GetAllCardsError   = errors.New("Вы получили все карточки этого набора")
 )
 
 func (p *PostgresStorage) GetAllProducts() ([]store.Product, error) {
@@ -68,6 +69,10 @@ func (p *PostgresStorage) BuyProduct(buy store.BuyProductModel) error {
 		return err
 	}
 	err = p.CreateCoinTransaction(tx, coinTr)
+	if err != nil {
+		return err
+	}
+	err = p.AddPlayerCards(tx, buy)
 	if err != nil {
 		return err
 	}
