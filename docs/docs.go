@@ -729,6 +729,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/tournament/roster": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Получение составов на турнир",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Получение составов на турнир",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "tournamentID",
+                        "name": "tournamentID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.TournamentRosterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/user/delete": {
             "delete": {
                 "security": [
@@ -1120,6 +1175,9 @@ const docTemplate = `{
                 "rarity": {
                     "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity"
                 },
+                "rarityName": {
+                    "type": "string"
+                },
                 "sweaterNumber": {
                     "type": "integer"
                 },
@@ -1196,10 +1254,10 @@ const docTemplate = `{
                 3
             ],
             "x-enum-varnames": [
-                "ErrPlayerPosition",
-                "Goalie",
-                "Defensemen",
-                "Forward"
+                "ErrPlayerMetric",
+                "GoalieMetric",
+                "DefensemenMetric",
+                "ForwardMetric"
             ]
         },
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity": {
@@ -1295,6 +1353,31 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.PositionData": {
+            "type": "object",
+            "properties": {
+                "positionAbbrev": {
+                    "type": "string"
+                },
+                "positionName": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.TeamData": {
+            "type": "object",
+            "properties": {
+                "teamAbbrev": {
+                    "type": "string"
+                },
+                "teamID": {
+                    "type": "integer"
+                },
+                "teamName": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Tournament": {
             "type": "object",
             "properties": {
@@ -1330,6 +1413,32 @@ const docTemplate = `{
                 },
                 "tournamentId": {
                     "type": "integer"
+                }
+            }
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.TournamentRosterResponse": {
+            "type": "object",
+            "properties": {
+                "players": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse"
+                    }
+                },
+                "positions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.PositionData"
+                    }
+                },
+                "teams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.TeamData"
+                    }
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },

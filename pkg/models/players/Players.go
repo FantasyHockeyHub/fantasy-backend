@@ -126,3 +126,21 @@ type PlayerCardResponse struct {
 	League          tournaments.League `json:"league"  db:"league"`
 	LeagueName      string             `json:"leagueName"`
 }
+
+type TournamentRosterResponse struct {
+	Url       string           `json:"url"`
+	Teams     []TeamData       `json:"teams"`
+	Positions []PositionData   `json:"positions"`
+	Players   []PlayerResponse `json:"players"`
+}
+
+type TeamData struct {
+	TeamID     int    `db:"team_id" json:"teamID"`
+	TeamName   string `db:"team_name" json:"teamName"`
+	TeamAbbrev string `db:"team_abbrev" json:"teamAbbrev"`
+}
+
+type PositionData struct {
+	PositionName   string `json:"positionName"`
+	PositionAbbrev string `json:"positionAbbrev"`
+}

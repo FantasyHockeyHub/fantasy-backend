@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"time"
 )
@@ -13,9 +14,10 @@ var (
 	NotFoundTournaments = errors.New("not found tournaments by this date")
 )
 
-func NewTeamsService(storage TeamsStorage) *TeamsService {
+func NewTeamsService(storage TeamsStorage, playersService Players) *TeamsService {
 	return &TeamsService{
-		storage: storage,
+		storage:        storage,
+		playersService: playersService,
 	}
 }
 
@@ -27,10 +29,14 @@ type TeamsStorage interface {
 	GetMatchesByDate(context.Context, int64, int64, tournaments.League) ([]tournaments.Matches, error)
 	CreateTournaments(context.Context, []tournaments.Tournament) error
 	GetTournamentsByDate(context.Context, int64, int64, tournaments.League) ([]tournaments.Tournament, error)
+	GetMatchesByTournamentID(tournamentID int) ([]int, error)
+	GetTeamsByMatches(matchesIDs []int) ([]int, error)
+	GetTeamDataByID(teamID int) (players.TeamData, error)
 }
 
 type TeamsService struct {
-	storage TeamsStorage
+	storage        TeamsStorage
+	playersService Players
 }
 
 func (s *TeamsService) CreateTeamsNHL(ctx context.Context, teams []tournaments.Standing) error {

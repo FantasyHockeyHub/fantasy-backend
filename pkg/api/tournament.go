@@ -5,9 +5,11 @@ import (
 	"errors"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 // CreateTeamsNHL godoc
@@ -297,4 +299,55 @@ func (api *Api) GetTournaments(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, tournaments)
+}
+
+// getTournamentRoster godoc
+// @Summary Получение составов на турнир
+// @Security ApiKeyAuth
+// @Schemes
+// @Description Получение составов на турнир
+// @Tags tournament
+// @Accept json
+// @Produce json
+// @Param tournamentID query int true "tournamentID"
+// @Success 200 {object} players.TournamentRosterResponse
+// @Failure 400,401 {object} Error
+// @Failure 500 {object} Error
+// @Router /tournament/roster [get]
+func (api Api) getTournamentRoster(ctx *gin.Context) {
+	_, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("GetTournamentRoster:", err)
+		return
+	}
+
+	var tournamentID int
+
+	query := ctx.Request.URL.Query()
+	if query.Has("tournamentID") {
+		id := query.Get("tournamentID")
+		tournamentID, err = strconv.Atoi(id)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+	} else {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+		return
+	}
+
+	res, err := api.services.Teams.GetRosterByTournamentID(tournamentID)
+	if err != nil {
+		log.Println("GetTournamentRoster:", err)
+		switch err {
+		case storage.IncorrectTournamentID:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+			return
+		default:
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, res)
 }
