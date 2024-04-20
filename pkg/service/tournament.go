@@ -35,7 +35,7 @@ func (s *TeamsService) GetRosterByTournamentID(userID uuid.UUID, tournamentID in
 	}
 	res.Teams = teamsData
 
-	res.Players, err = s.playersService.GetPlayers(players.PlayersFilter{Teams: teams})
+	res.Players, err = s.playersService.GetPlayers(players.PlayersFilter{ProfileID: userID, Teams: teams})
 	if err != nil {
 		log.Println("Service. GetPlayers:", err)
 		return res, err

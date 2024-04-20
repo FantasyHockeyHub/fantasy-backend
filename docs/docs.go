@@ -267,6 +267,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "array",
+                        "description": "players",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
                         "description": "teams",
                         "name": "teams",
                         "in": "query"

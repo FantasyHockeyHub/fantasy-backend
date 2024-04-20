@@ -175,6 +175,7 @@ func (api Api) createNHLPlayers(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param profileID query string false "profileID"
+// @Param id query array false "players"
 // @Param teams query array false "teams"
 // @Param position query string false "position" Enums(G, D, F)
 // @Param league query string false "league" Enums(NHL, KHL)
@@ -186,6 +187,7 @@ func (api Api) getPlayers(ctx *gin.Context) {
 	var filterPlayers players.PlayersFilter
 
 	profileFilter := ctx.Query("profileID")
+	playersFilter := ctx.Query("id")
 	teamsFilter := ctx.Query("teams")
 	leagueFilter := ctx.Query("league")
 	positionFilter := ctx.Query("position")
@@ -199,10 +201,22 @@ func (api Api) getPlayers(ctx *gin.Context) {
 		filterPlayers.ProfileID = parsedUserID
 	}
 
+	if playersFilter != "" {
+		playerIDs := strings.Split(playersFilter, ",")
+		for _, playerID := range playerIDs {
+			id, err := strconv.Atoi(strings.TrimSpace(playerID))
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+				return
+			}
+			filterPlayers.Players = append(filterPlayers.Players, id)
+		}
+	}
+
 	if teamsFilter != "" {
-		teamIds := strings.Split(teamsFilter, ",")
-		for _, teamId := range teamIds {
-			id, err := strconv.Atoi(strings.TrimSpace(teamId))
+		teamIDs := strings.Split(teamsFilter, ",")
+		for _, teamID := range teamIDs {
+			id, err := strconv.Atoi(strings.TrimSpace(teamID))
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
 				return
@@ -326,7 +340,7 @@ func (api Api) getPlayerCards(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-// createNHLPlayers godoc
+// cardUnpacking godoc
 // @Summary Распаковка карточки игрока
 // @Security ApiKeyAuth
 // @Schemes

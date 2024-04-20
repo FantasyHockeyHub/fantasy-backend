@@ -53,6 +53,17 @@ func (p *PostgresStorage) GetPlayers(playersFilter players.PlayersFilter) ([]pla
 
 	query := "SELECT p.id, p.position, p.name, p.team_id, p.sweater_number, p.photo_link, p.league, p.player_cost, t.team_name FROM players p INNER JOIN teams t ON p.team_id = t.team_id WHERE 1=1"
 
+	if len(playersFilter.Players) > 0 {
+		query += " AND p.id IN ("
+		for i := range playersFilter.Players {
+			if i > 0 {
+				query += ","
+			}
+			query += fmt.Sprintf("%d", playersFilter.Players[i])
+		}
+		query += ")"
+	}
+
 	if len(playersFilter.Teams) > 0 {
 		query += " AND p.team_id IN ("
 		for i := range playersFilter.Teams {
@@ -63,9 +74,11 @@ func (p *PostgresStorage) GetPlayers(playersFilter players.PlayersFilter) ([]pla
 		}
 		query += ")"
 	}
+
 	if playersFilter.Position != 0 {
 		query += fmt.Sprintf(" AND p.position = %d", playersFilter.Position)
 	}
+
 	if playersFilter.League != 0 {
 		query += fmt.Sprintf(" AND p.league = %d", playersFilter.League)
 	}

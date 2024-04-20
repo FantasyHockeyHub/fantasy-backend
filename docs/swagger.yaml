@@ -508,6 +508,10 @@ paths:
         in: query
         name: profileID
         type: string
+      - description: players
+        in: query
+        name: id
+        type: array
       - description: teams
         in: query
         name: teams

@@ -80,6 +80,7 @@ type NHLRosterResponse struct {
 
 type PlayersFilter struct {
 	ProfileID uuid.UUID          `json:"profileID"`
+	Players   []int              `json:"players"`
 	Teams     []int              `json:"teams"`
 	Position  Position           `json:"position"`
 	League    tournaments.League `json:"league"`
