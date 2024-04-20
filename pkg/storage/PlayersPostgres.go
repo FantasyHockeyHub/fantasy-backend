@@ -152,18 +152,40 @@ func (p *PostgresStorage) GetPlayerCards(filter players.PlayerCardsFilter) ([]pl
 }
 
 func (p *PostgresStorage) AddPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel) error {
-	var selectedPlayerIDs []int
-
 	allPlayers, err := p.GetPlayers(players.PlayersFilter{League: buy.League})
 	if err != nil {
 		return err
 	}
 
-	userCards, err := p.GetPlayerCards(players.PlayerCardsFilter{ProfileID: buy.ProfileID, League: buy.League})
+	userCards, err := p.GetPlayerCards(players.PlayerCardsFilter{ProfileID: buy.ProfileID, League: buy.League, Rarity: buy.Rarity})
 	if err != nil {
 		return err
 	}
 
+	allPlayerIDs := getUniquePlayers(allPlayers, userCards)
+
+	if len(allPlayerIDs) == 0 {
+		return GetAllCardsError
+	}
+
+	selectedPlayerIDs := generateCards(allPlayerIDs)
+
+	cardsCount := buy.PlayerCardsCount
+	if len(selectedPlayerIDs) < buy.PlayerCardsCount {
+		cardsCount = len(selectedPlayerIDs)
+	}
+
+	selectedPlayerIDs = selectedPlayerIDs[:cardsCount]
+
+	err = p.InsertPlayerCards(tx, buy, selectedPlayerIDs)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func getUniquePlayers(allPlayers []players.PlayerResponse, userCards []players.PlayerCardResponse) map[int]struct{} {
 	allPlayerIDs := make(map[int]struct{})
 	for _, player := range allPlayers {
 		allPlayerIDs[player.ID] = struct{}{}
@@ -178,26 +200,25 @@ func (p *PostgresStorage) AddPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel)
 		delete(allPlayerIDs, playerID)
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	for playerID := range allPlayerIDs {
-		selectedPlayerIDs = append(selectedPlayerIDs, playerID)
-	}
+	return allPlayerIDs
+}
 
-	if len(selectedPlayerIDs) == 0 {
-		return GetAllCardsError
+func generateCards(allPlayers map[int]struct{}) []int {
+	var selectedPlayerIDs []int
+
+	rand.Seed(time.Now().UnixNano())
+	for playerID := range allPlayers {
+		selectedPlayerIDs = append(selectedPlayerIDs, playerID)
 	}
 
 	rand.Shuffle(len(selectedPlayerIDs), func(i, j int) {
 		selectedPlayerIDs[i], selectedPlayerIDs[j] = selectedPlayerIDs[j], selectedPlayerIDs[i]
 	})
 
-	cardsCount := buy.PlayerCardsCount
-	if len(selectedPlayerIDs) < buy.PlayerCardsCount {
-		cardsCount = len(selectedPlayerIDs)
-	}
+	return selectedPlayerIDs
+}
 
-	selectedPlayerIDs = selectedPlayerIDs[:cardsCount]
-
+func (p *PostgresStorage) InsertPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel, selectedPlayerIDs []int) error {
 	query := `INSERT INTO player_cards (profile_id, player_id, rarity, multiply, bonus_metric, unpacked) VALUES `
 	var valueStrings []string
 	var valueArgs []interface{}
@@ -213,7 +234,7 @@ func (p *PostgresStorage) AddPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel)
 
 	query += strings.Join(valueStrings, ", ")
 
-	_, err = tx.Exec(query, valueArgs...)
+	_, err := tx.Exec(query, valueArgs...)
 	if err != nil {
 		tx.Rollback()
 		return err

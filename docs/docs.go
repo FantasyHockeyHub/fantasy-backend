@@ -260,6 +260,12 @@ const docTemplate = `{
                 "summary": "Получение списка игроков",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "profileID",
+                        "name": "profileID",
+                        "in": "query"
+                    },
+                    {
                         "type": "array",
                         "description": "teams",
                         "name": "teams",
@@ -760,7 +766,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.TournamentRosterResponse"
+                            "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TournamentRosterResponse"
                         }
                     },
                     "400": {
@@ -1195,6 +1201,9 @@ const docTemplate = `{
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse": {
             "type": "object",
             "properties": {
+                "cardRarity": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1218,6 +1227,10 @@ const docTemplate = `{
                 },
                 "positionName": {
                     "type": "string"
+                },
+                "rarityName": {
+                    "type": "string",
+                    "default": "Default"
                 },
                 "sweaterNumber": {
                     "type": "integer"
@@ -1244,6 +1257,57 @@ const docTemplate = `{
                 "Defensemen",
                 "Forward"
             ]
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PositionData": {
+            "type": "object",
+            "properties": {
+                "positionAbbrev": {
+                    "type": "string"
+                },
+                "positionName": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TeamData": {
+            "type": "object",
+            "properties": {
+                "teamAbbrev": {
+                    "type": "string"
+                },
+                "teamID": {
+                    "type": "integer"
+                },
+                "teamName": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TournamentRosterResponse": {
+            "type": "object",
+            "properties": {
+                "players": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse"
+                    }
+                },
+                "positions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PositionData"
+                    }
+                },
+                "teams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TeamData"
+                    }
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
         },
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.BonusMetric": {
             "type": "integer",
@@ -1353,31 +1417,6 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.PositionData": {
-            "type": "object",
-            "properties": {
-                "positionAbbrev": {
-                    "type": "string"
-                },
-                "positionName": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.TeamData": {
-            "type": "object",
-            "properties": {
-                "teamAbbrev": {
-                    "type": "string"
-                },
-                "teamID": {
-                    "type": "integer"
-                },
-                "teamName": {
-                    "type": "string"
-                }
-            }
-        },
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Tournament": {
             "type": "object",
             "properties": {
@@ -1413,32 +1452,6 @@ const docTemplate = `{
                 },
                 "tournamentId": {
                     "type": "integer"
-                }
-            }
-        },
-        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.TournamentRosterResponse": {
-            "type": "object",
-            "properties": {
-                "players": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse"
-                    }
-                },
-                "positions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.PositionData"
-                    }
-                },
-                "teams": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.TeamData"
-                    }
-                },
-                "url": {
-                    "type": "string"
                 }
             }
         },

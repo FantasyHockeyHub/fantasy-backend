@@ -79,9 +79,10 @@ type NHLRosterResponse struct {
 }
 
 type PlayersFilter struct {
-	Teams    []int              `json:"teams"`
-	Position Position           `json:"position"`
-	League   tournaments.League `json:"league"`
+	ProfileID uuid.UUID          `json:"profileID"`
+	Teams     []int              `json:"teams"`
+	Position  Position           `json:"position"`
+	League    tournaments.League `json:"league"`
 }
 
 type PlayerResponse struct {
@@ -96,6 +97,8 @@ type PlayerResponse struct {
 	League        tournaments.League `json:"league"  db:"league"`
 	LeagueName    string             `json:"leagueName"`
 	PlayerCost    int                `json:"playerCost" db:"player_cost"`
+	CardRarity    store.CardRarity   `json:"cardRarity" db:"rarity"`
+	RarityName    string             `json:"rarityName" default:"Default"`
 }
 
 type PlayerCardsFilter struct {

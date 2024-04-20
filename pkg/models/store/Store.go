@@ -19,8 +19,9 @@ var PlayerCardsRarity = map[string]CardRarity{
 }
 
 var PlayerCardsRarityTitles = map[CardRarity]string{
-	Silver: "Silver",
-	Gold:   "Gold",
+	ErrCardRarity: "Default",
+	Silver:        "Silver",
+	Gold:          "Gold",
 }
 
 func (t *CardRarity) GetCardRarityString() string {

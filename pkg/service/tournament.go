@@ -3,12 +3,13 @@ package service
 import (
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
+	"github.com/google/uuid"
 	"log"
 	"strconv"
 	"strings"
 )
 
-func (s *TeamsService) GetRosterByTournamentID(tournamentID int) (players.TournamentRosterResponse, error) {
+func (s *TeamsService) GetRosterByTournamentID(userID uuid.UUID, tournamentID int) (players.TournamentRosterResponse, error) {
 	var res players.TournamentRosterResponse
 
 	matches, err := s.storage.GetMatchesByTournamentID(tournamentID)
@@ -40,7 +41,7 @@ func (s *TeamsService) GetRosterByTournamentID(tournamentID int) (players.Tourna
 		return res, err
 	}
 
-	res.Url = createGetPlayersUrl(res.Teams)
+	res.Url = createGetPlayersUrl(userID, res.Teams)
 
 	res.Positions = []players.PositionData{
 		{players.PlayerPositionTitles[players.Forward], "F"},
@@ -51,7 +52,7 @@ func (s *TeamsService) GetRosterByTournamentID(tournamentID int) (players.Tourna
 	return res, nil
 }
 
-func createGetPlayersUrl(teamsData []players.TeamData) string {
+func createGetPlayersUrl(userID uuid.UUID, teamsData []players.TeamData) string {
 	var teamIDs []string
 
 	for _, team := range teamsData {
@@ -59,5 +60,5 @@ func createGetPlayersUrl(teamsData []players.TeamData) string {
 	}
 	teamsQueryString := strings.Join(teamIDs, ",")
 
-	return fmt.Sprintf("/api/v1/players?teams=%s", teamsQueryString)
+	return fmt.Sprintf("/api/v1/players?profileID=%s&teams=%s", userID.String(), teamsQueryString)
 }

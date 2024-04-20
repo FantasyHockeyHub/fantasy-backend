@@ -174,6 +174,7 @@ func (api Api) createNHLPlayers(ctx *gin.Context) {
 // @Tags players
 // @Accept json
 // @Produce json
+// @Param profileID query string false "profileID"
 // @Param teams query array false "teams"
 // @Param position query string false "position" Enums(G, D, F)
 // @Param league query string false "league" Enums(NHL, KHL)
@@ -183,9 +184,20 @@ func (api Api) createNHLPlayers(ctx *gin.Context) {
 // @Router /players [get]
 func (api Api) getPlayers(ctx *gin.Context) {
 	var filterPlayers players.PlayersFilter
+
+	profileFilter := ctx.Query("profileID")
 	teamsFilter := ctx.Query("teams")
 	leagueFilter := ctx.Query("league")
 	positionFilter := ctx.Query("position")
+
+	if profileFilter != "" {
+		parsedUserID, err := uuid.Parse(profileFilter)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+		filterPlayers.ProfileID = parsedUserID
+	}
 
 	if teamsFilter != "" {
 		teamIds := strings.Split(teamsFilter, ",")

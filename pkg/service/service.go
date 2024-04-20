@@ -43,7 +43,7 @@ type Teams interface {
 	CreateTeamsKHL(ctx context.Context, teams []tournaments.TeamKHL) error
 	GetMatchesDay(ctx context.Context, league tournaments.League) ([]tournaments.Matches, error)
 	GetTournaments(ctx context.Context, league tournaments.League) ([]tournaments.Tournament, error)
-	GetRosterByTournamentID(tournamentID int) (players.TournamentRosterResponse, error)
+	GetRosterByTournamentID(userID uuid.UUID, tournamentID int) (players.TournamentRosterResponse, error)
 }
 
 type Store interface {

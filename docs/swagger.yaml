@@ -40,6 +40,8 @@ definitions:
     type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse:
     properties:
+      cardRarity:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity'
       id:
         type: integer
       league:
@@ -55,6 +57,9 @@ definitions:
       position:
         $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position'
       positionName:
+        type: string
+      rarityName:
+        default: Default
         type: string
       sweaterNumber:
         type: integer
@@ -75,6 +80,39 @@ definitions:
     - Goalie
     - Defensemen
     - Forward
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PositionData:
+    properties:
+      positionAbbrev:
+        type: string
+      positionName:
+        type: string
+    type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TeamData:
+    properties:
+      teamAbbrev:
+        type: string
+      teamID:
+        type: integer
+      teamName:
+        type: string
+    type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TournamentRosterResponse:
+    properties:
+      players:
+        items:
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse'
+        type: array
+      positions:
+        items:
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PositionData'
+        type: array
+      teams:
+        items:
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TeamData'
+        type: array
+      url:
+        type: string
+    type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.BonusMetric:
     enum:
     - 0
@@ -151,22 +189,6 @@ definitions:
       statusEvent:
         type: string
     type: object
-  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.PositionData:
-    properties:
-      positionAbbrev:
-        type: string
-      positionName:
-        type: string
-    type: object
-  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.TeamData:
-    properties:
-      teamAbbrev:
-        type: string
-      teamID:
-        type: integer
-      teamName:
-        type: string
-    type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Tournament:
     properties:
       TimeStart:
@@ -191,23 +213,6 @@ definitions:
         type: string
       tournamentId:
         type: integer
-    type: object
-  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.TournamentRosterResponse:
-    properties:
-      players:
-        items:
-          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse'
-        type: array
-      positions:
-        items:
-          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.PositionData'
-        type: array
-      teams:
-        items:
-          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.TeamData'
-        type: array
-      url:
-        type: string
     type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.ChangePasswordInput:
     properties:
@@ -499,6 +504,10 @@ paths:
       - application/json
       description: Получение списка игроков
       parameters:
+      - description: profileID
+        in: query
+        name: profileID
+        type: string
       - description: teams
         in: query
         name: teams
@@ -829,7 +838,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.TournamentRosterResponse'
+            $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TournamentRosterResponse'
         "400":
           description: Bad Request
           schema:

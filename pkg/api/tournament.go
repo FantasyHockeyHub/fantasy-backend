@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	_ "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
@@ -315,7 +316,7 @@ func (api *Api) GetTournaments(ctx *gin.Context) {
 // @Failure 500 {object} Error
 // @Router /tournament/roster [get]
 func (api Api) getTournamentRoster(ctx *gin.Context) {
-	_, err := parseUserIDFromContext(ctx)
+	userID, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("GetTournamentRoster:", err)
 		return
@@ -336,7 +337,7 @@ func (api Api) getTournamentRoster(ctx *gin.Context) {
 		return
 	}
 
-	res, err := api.services.Teams.GetRosterByTournamentID(tournamentID)
+	res, err := api.services.Teams.GetRosterByTournamentID(userID, tournamentID)
 	if err != nil {
 		log.Println("GetTournamentRoster:", err)
 		switch err {
