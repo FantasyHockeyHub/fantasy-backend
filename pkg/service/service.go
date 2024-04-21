@@ -42,7 +42,11 @@ type Teams interface {
 	CreateTeamsNHL(context.Context, []tournaments.Standing) error
 	CreateTeamsKHL(ctx context.Context, teams []tournaments.TeamKHL) error
 	GetMatchesDay(ctx context.Context, league tournaments.League) ([]tournaments.Matches, error)
-	GetTournaments(ctx context.Context, league tournaments.League) ([]tournaments.Tournament, error)
+}
+
+type Tournaments interface {
+	GetTournaments(context.Context, tournaments.League) ([]tournaments.Tournament, error)
+	GetMatchesByTournamentsId(context.Context, tournaments.ID) ([]tournaments.GetTournamentsTotalInfo, error)
 }
 
 type Store interface {
@@ -61,6 +65,7 @@ type Services struct {
 	User
 	TokenManager
 	Teams
+	Tournaments
 	Store
 	Players
 }
@@ -75,12 +80,14 @@ type Deps struct {
 func NewServices(deps Deps) *Services {
 	userService := NewUserService(deps.Storage, deps.RStorage, deps.Jwt, deps.Cfg)
 	teamsService := NewTeamsService(deps.Storage)
+	tournamentsService := NewTournamentsService(deps.Storage)
 	storeService := NewStoreService(deps.Storage)
 	playersService := NewPlayersService(deps.Storage)
 	return &Services{
 		User:         userService,
 		TokenManager: deps.Jwt,
 		Teams:        teamsService,
+		Tournaments:  tournamentsService,
 		Store:        storeService,
 		Players:      playersService,
 	}

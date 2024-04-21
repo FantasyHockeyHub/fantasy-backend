@@ -85,6 +85,7 @@ func (api *Api) registerRoutes() {
 	team.GET("/get_matches/:league", api.GetMatches)
 	//team.GET("/create_tournaments", api.CreateTournaments)
 	team.GET("/get_tournaments/:league", api.GetTournaments)
+	team.GET("/matches_by_tournament_id/:tournament_id", api.GetMatchesByTournId)
 
 	store := base.Group("/store")
 	{

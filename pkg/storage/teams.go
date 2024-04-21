@@ -20,6 +20,7 @@ const (
 	Conference = "conference_name"
 	Division   = "division"
 	ApiId      = "api_id"
+	TeamsId    = "team_id"
 
 	MatchesTable = "matches"
 	MatchId      = "id"
@@ -359,4 +360,82 @@ func (p *PostgresStorage) UpdateStatusTournamentsByIds(ctx context.Context, tour
 
 	_, err = p.db.ExecContext(ctx, query, args...)
 	return err
+}
+
+func (p *PostgresStorage) GetInfoByTournamentsId(ctx context.Context, tourId tournaments.ID) (tournaments.GetShotTournaments, error) {
+	var tourInfo tournaments.GetShotTournaments
+
+	query, args, err := sq.
+		Select(TournamentsId, League, TournTitle, MatchesIds, TourStatus).
+		From(TournamentsTable).
+		Where(
+			sq.Eq{
+				TournamentsId: tourId,
+			},
+		).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return tourInfo, err
+	}
+
+	err = p.db.GetContext(ctx, &tourInfo, query, args...)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = nil
+	}
+
+	return tourInfo, err
+}
+
+func (p *PostgresStorage) GetMatchesByTournamentsId(ctx context.Context, tournIdArr tournaments.IDArray) ([]tournaments.GetTournamentsTotalInfo, error) {
+	var tournTotalInfo []tournaments.GetTournamentsTotalInfo
+
+	query, args, err := sq.
+		Select(MatchId, HomeTeam, fmt.Sprintf("homeTeam.%s", TeamAbbrev), HomeScore, AwayTeam, fmt.Sprintf("awayTeam.%s", TeamAbbrev),
+			AwayScore, StartTime, EndTime, StatusMatch, fmt.Sprintf("%s.%s", MatchesTable, League)).
+		From(MatchesTable).
+		Join(
+			fmt.Sprintf("%s as homeTeam on homeTeam.%s = %s.%s AND homeTeam.league = %s.%s JOIN %s as awayTeam on awayTeam.%s = %s.%s AND awayTeam.league = %s.%s", TeamsTable, ApiId, MatchesTable, HomeTeam, MatchesTable, League, TeamsTable, ApiId, MatchesTable, AwayTeam, MatchesTable, League)).
+		Where(
+			sq.Eq{
+				MatchId: tournIdArr,
+			},
+		).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return tournTotalInfo, err
+	}
+
+	rows, err := p.db.QueryxContext(ctx, query, args...)
+	if err != nil {
+		return tournTotalInfo, err
+	}
+
+	for rows.Next() {
+		var curTourInfo tournaments.GetTournamentsTotalInfo
+
+		err = rows.Scan(&curTourInfo.MatchId, &curTourInfo.HomeTeamId, &curTourInfo.HomeTeamAbbrev, &curTourInfo.HomeScore, &curTourInfo.AwayTeamId, &curTourInfo.AwayTeamAbbrev, &curTourInfo.AwayScore, &curTourInfo.StartAt, &curTourInfo.EndAt, &curTourInfo.StatusEvent, &curTourInfo.League)
+		if err != nil {
+			log.Printf("GetMatchesByTournamentsId: ScanErr: %v", err)
+		}
+
+		tournTotalInfo = append(tournTotalInfo, curTourInfo)
+
+		//tournTotalInfo = append(tournTotalInfo, applications.ApplicationInfoByFilter{
+		//	ApplicationID: curTourInfo.ApplicationID,
+		//	CarID:         curTourInfo.CarID,
+		//	StatusID:      curTourInfo.StatusID,
+		//	Created:       curTourInfo.Created,
+		//	FilialID:      curTourInfo.FilialID,
+		//	Millage:       curTourInfo.Millage,
+		//	ProblemName:   curTourInfo.ProblemName,
+		//})
+	}
+	rows.Close()
+
+	return tournTotalInfo, err
 }
