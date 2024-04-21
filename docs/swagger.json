@@ -719,6 +719,56 @@
                 }
             }
         },
+        "/tournament/matches_by_tournament_id/{tournament_id}": {
+            "get": {
+                "description": "Возвращается вся необходимая информация о матчах",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Получение матчей по id турнира",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id турнира",
+                        "name": "tournament_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.GetTournamentsTotalInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/user/delete": {
             "delete": {
                 "security": [
@@ -1110,6 +1160,9 @@
                 "rarity": {
                     "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity"
                 },
+                "rarityName": {
+                    "type": "string"
+                },
                 "sweaterNumber": {
                     "type": "integer"
                 },
@@ -1233,6 +1286,47 @@
                     "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity"
                 },
                 "rarityName": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.GetTournamentsTotalInfo": {
+            "type": "object",
+            "properties": {
+                "awayScore": {
+                    "type": "integer"
+                },
+                "awayTeamAbbrev": {
+                    "type": "string"
+                },
+                "awayTeamId": {
+                    "type": "integer"
+                },
+                "endAt": {
+                    "type": "integer"
+                },
+                "eventId": {
+                    "type": "integer"
+                },
+                "homeScore": {
+                    "type": "integer"
+                },
+                "homeTeamId": {
+                    "type": "integer"
+                },
+                "homeTemeAbrev": {
+                    "type": "string"
+                },
+                "league": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League"
+                },
+                "matchId": {
+                    "type": "integer"
+                },
+                "startAt": {
+                    "type": "integer"
+                },
+                "statusEvent": {
                     "type": "string"
                 }
             }
