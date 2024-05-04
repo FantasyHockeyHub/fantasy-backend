@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
+	"github.com/lib/pq"
 	"strconv"
 	"strings"
 )
@@ -64,4 +67,77 @@ func (p *PostgresStorage) GetTeamDataByID(teamID int) (players.TeamData, error) 
 	}
 
 	return teamInfo, nil
+}
+
+func (p *PostgresStorage) GetTournamentDataByID(tournamentID int) (tournaments.Tournament, error) {
+	var tournamentInfo tournaments.Tournament
+
+	err := p.db.QueryRow("SELECT id, league, title, matches_ids, started_at, end_at, players_amount, deposit, "+
+		"prize_fond, status_tournament FROM tournaments WHERE id = $1", tournamentID).Scan(
+		&tournamentInfo.TournamentId,
+		&tournamentInfo.League,
+		&tournamentInfo.Title,
+		&tournamentInfo.MatchesIds,
+		&tournamentInfo.TimeStart,
+		&tournamentInfo.TimeEnd,
+		&tournamentInfo.PlayersAmount,
+		&tournamentInfo.Deposit,
+		&tournamentInfo.PrizeFond,
+		&tournamentInfo.StatusTournament,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return tournamentInfo, IncorrectTournamentID
+		}
+		return tournamentInfo, err
+	}
+
+	return tournamentInfo, nil
+}
+
+func (p *PostgresStorage) CreateTournamentTeam(teamInput tournaments.TournamentTeamModel) error {
+	tx, err := p.db.Beginx()
+	if err != nil {
+		return err
+	}
+
+	if teamInput.Deposit > 0 {
+		coinTr := user.CoinTransactionsModel{
+			ProfileID:          teamInput.ProfileID,
+			TransactionDetails: "Участие в турнире №" + strconv.Itoa(teamInput.TournamentID),
+			Amount:             -teamInput.Deposit,
+			Status:             user.SuccessTransaction,
+		}
+		err = p.UpdateBalance(tx, coinTr.ProfileID, coinTr.Amount)
+		if err != nil {
+			return err
+		}
+		err = p.CreateCoinTransaction(tx, coinTr)
+		if err != nil {
+			return err
+		}
+		prizeFondQuery := `UPDATE tournaments SET prize_fond = prize_fond + $1 WHERE id = $2`
+		_, err = tx.Exec(prizeFondQuery, int(float64(teamInput.Deposit)*1.5), teamInput.TournamentID)
+		if err != nil {
+			tx.Rollback()
+		}
+	}
+
+	teamArray := pq.Array(teamInput.UserTeam)
+	rosterQuery := `INSERT INTO user_roster (tournament_id, user_id, roster, current_balance) 
+              VALUES ($1, $2, $3, $4)`
+
+	_, err = tx.Exec(rosterQuery, teamInput.TournamentID, teamInput.ProfileID, teamArray, 100-teamInput.TeamCost)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	playersAmountQuery := `UPDATE tournaments SET players_amount = players_amount + 1 WHERE id = $1`
+	_, err = tx.Exec(playersAmountQuery, teamInput.TournamentID)
+	if err != nil {
+		tx.Rollback()
+	}
+
+	return tx.Commit()
 }

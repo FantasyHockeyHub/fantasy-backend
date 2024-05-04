@@ -97,7 +97,7 @@ type PlayerResponse struct {
 	PositionName  string             `json:"positionName"`
 	League        tournaments.League `json:"league"  db:"league"`
 	LeagueName    string             `json:"leagueName"`
-	PlayerCost    int                `json:"playerCost" db:"player_cost"`
+	PlayerCost    float32            `json:"playerCost" db:"player_cost"`
 	CardRarity    store.CardRarity   `json:"cardRarity" db:"rarity"`
 	RarityName    string             `json:"rarityName" default:"Default"`
 }
@@ -132,7 +132,6 @@ type PlayerCardResponse struct {
 }
 
 type TournamentRosterResponse struct {
-	Url       string           `json:"url"`
 	Teams     []TeamData       `json:"teams"`
 	Positions []PositionData   `json:"positions"`
 	Players   []PlayerResponse `json:"players"`

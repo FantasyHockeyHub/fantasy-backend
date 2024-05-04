@@ -32,6 +32,8 @@ type TeamsStorage interface {
 	GetMatchesByTournamentID(tournamentID int) ([]int, error)
 	GetTeamsByMatches(matchesIDs []int) ([]int, error)
 	GetTeamDataByID(teamID int) (players.TeamData, error)
+	GetTournamentDataByID(tournamentID int) (tournaments.Tournament, error)
+	CreateTournamentTeam(teamInput tournaments.TournamentTeamModel) error
 }
 
 type TeamsService struct {

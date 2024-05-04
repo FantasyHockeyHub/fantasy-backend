@@ -53,7 +53,7 @@ definitions:
       photo:
         type: string
       playerCost:
-        type: integer
+        type: number
       position:
         $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position'
       positionName:
@@ -110,8 +110,6 @@ definitions:
         items:
           $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TeamData'
         type: array
-      url:
-        type: string
     type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.BonusMetric:
     enum:
@@ -858,6 +856,49 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Получение составов на турнир
+      tags:
+      - tournament
+  /tournament/team/create:
+    post:
+      consumes:
+      - application/json
+      description: Создание команды в турнире
+      parameters:
+      - description: tournamentID
+        in: query
+        name: tournamentID
+        required: true
+        type: integer
+      - description: Список идентификаторов команд
+        in: body
+        name: team
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Создание команды в турнире
       tags:
       - tournament
   /user/delete:

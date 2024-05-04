@@ -260,9 +260,10 @@ func (p *PostgresStorage) CardUnpacking(id int, userID uuid.UUID) error {
 	card := players.PlayerCardsFilter{}
 
 	err := p.db.QueryRow("SELECT profile_id, unpacked FROM player_cards WHERE id = $1", id).Scan(&card.ProfileID, &card.Unpacked)
-	if err == sql.ErrNoRows {
-		return PlayerCardNotFoundError
-	} else if err != nil {
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return PlayerCardNotFoundError
+		}
 		return err
 	}
 

@@ -150,3 +150,11 @@ func NewTournamentHandle(info []Matches) []Tournament {
 		},
 	}
 }
+
+type TournamentTeamModel struct {
+	ProfileID    uuid.UUID
+	TournamentID int   `json:"tournamentID"`
+	UserTeam     []int `json:"userTeam"`
+	TeamCost     float32
+	Deposit      int
+}

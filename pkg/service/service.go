@@ -44,6 +44,9 @@ type Teams interface {
 	GetMatchesDay(ctx context.Context, league tournaments.League) ([]tournaments.Matches, error)
 	GetTournaments(ctx context.Context, league tournaments.League) ([]tournaments.Tournament, error)
 	GetRosterByTournamentID(userID uuid.UUID, tournamentID int) (players.TournamentRosterResponse, error)
+	CreateTournamentTeam(inp tournaments.TournamentTeamModel) error
+	CheckUserTeam(tournamentInfo tournaments.Tournament, userTeam []int) error
+	GetTeamCost(team []int) (float32, error)
 }
 
 type Store interface {

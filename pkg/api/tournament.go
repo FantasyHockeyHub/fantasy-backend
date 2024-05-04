@@ -352,3 +352,67 @@ func (api Api) getTournamentRoster(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, res)
 }
+
+// createTournamentTeam godoc
+// @Summary Создание команды в турнире
+// @Security ApiKeyAuth
+// @Schemes
+// @Description Создание команды в турнире
+// @Tags tournament
+// @Accept json
+// @Produce json
+// @Param tournamentID query int true "tournamentID"
+// @Param team body []int true "Список идентификаторов команд"
+// @Success 200 {object} StatusResponse
+// @Failure 400,401 {object} Error
+// @Failure 500 {object} Error
+// @Router /tournament/team/create [POST]
+func (api Api) createTournamentTeam(ctx *gin.Context) {
+	var inp tournaments.TournamentTeamModel
+
+	userID, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("CreateTournamentTeam:", err)
+		return
+	}
+	inp.ProfileID = userID
+
+	query := ctx.Request.URL.Query()
+	if query.Has("tournamentID") {
+		id := query.Get("tournamentID")
+		inp.TournamentID, err = strconv.Atoi(id)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+	} else {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+		return
+	}
+
+	if err = ctx.BindJSON(&inp.UserTeam); err != nil {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputBodyError))
+		return
+	}
+
+	err = api.services.Teams.CreateTournamentTeam(inp)
+	if err != nil {
+		log.Println("CreateTournamentTeam:", err)
+		switch err {
+		case storage.IncorrectTournamentID,
+			service.TeamExpensiveError,
+			service.InvalidTournamentTeam,
+			service.InvalidTeamPositions,
+			service.JoinTimeExpiredError,
+			storage.NotEnoughCoinsError,
+			service.InvalidPlayersNumber:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+			return
+		default:
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
+}
