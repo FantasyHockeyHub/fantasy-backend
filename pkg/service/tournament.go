@@ -12,10 +12,11 @@ import (
 var (
 	JoinTimeExpiredError    = errors.New("турнир уже начался или завершен")
 	TeamExpensiveError      = errors.New("команда стоит больше лимита")
-	InvalidTeamPositions    = errors.New("неверное количество игроков на позициях")
-	InvalidTournamentTeam   = errors.New("выбранный игрок не может участвовать в турнире или повторяется в составе команды")
+	InvalidTeamPositions    = errors.New("неверное количество игроков на позициях или игрок повторяется в составе команды")
+	InvalidTournamentTeam   = errors.New("выбранный игрок не может участвовать в турнире")
 	InvalidPlayersNumber    = errors.New("некорректное количество игроков в команде")
 	TeamAlreadyCreatedError = errors.New("команда на турнир уже создана")
+	TeamNotCreatedError     = errors.New("команда на турнир еще не создана")
 )
 
 func (s *TeamsService) GetRosterByTournamentID(userID uuid.UUID, tournamentID int) (players.TournamentRosterResponse, error) {
@@ -216,4 +217,52 @@ func (s *TeamsService) GetTournamentTeam(userID uuid.UUID, tournamentID int) (pl
 	res.Balance = userTeamData.Balance
 
 	return res, nil
+}
+
+func (s *TeamsService) EditTournamentTeam(inp tournaments.TournamentTeamModel) error {
+	tournamentInfo, err := s.storage.GetTournamentDataByID(inp.TournamentID)
+	if err != nil {
+		log.Println("Service. GetTournamentDataByID:", err)
+		return err
+	}
+
+	userTeamData, err := s.GetTournamentTeam(inp.ProfileID, inp.TournamentID)
+	if err != nil {
+		log.Println("Service. GetTournamentTeam:", err)
+		return err
+	}
+	if len(userTeamData.Players) == 0 {
+		log.Println("Service. GetTournamentTeam:", TeamNotCreatedError)
+		return TeamNotCreatedError
+	}
+
+	if tournamentInfo.StatusTournament == "not_yet_started" {
+		cost, err := s.GetTeamCost(inp.UserTeam)
+		if err != nil {
+			log.Println("Service. GetTeamCost:", err)
+			return err
+		}
+		if cost > 100 {
+			log.Println("Service. GetTeamCost:", TeamExpensiveError)
+			return TeamExpensiveError
+		}
+		inp.TeamCost = cost
+
+		err = s.CheckUserTeam(tournamentInfo, inp.UserTeam)
+		if err != nil {
+			log.Println("Service. CheckUserTeam:", err)
+			return err
+		}
+
+		err = s.storage.EditTournamentTeam(inp)
+		if err != nil {
+			log.Println("Service. EditTournamentTeam:", err)
+			return err
+		}
+
+	} else {
+		return JoinTimeExpiredError
+	}
+
+	return nil
 }

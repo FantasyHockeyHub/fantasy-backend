@@ -111,6 +111,15 @@ definitions:
           $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TeamData'
         type: array
     type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.UserTeamResponse:
+    properties:
+      balance:
+        type: number
+      players:
+        items:
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse'
+        type: array
+    type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.BonusMetric:
     enum:
     - 0
@@ -876,8 +885,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse'
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.UserTeamResponse'
             type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
         "401":
           description: Unauthorized
           schema:
@@ -895,7 +908,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Создание команды в турнире
+      description: Создание команды пользователя в турнире
       parameters:
       - description: tournamentID
         in: query
@@ -931,7 +944,50 @@ paths:
             $ref: '#/definitions/pkg_api.Error'
       security:
       - ApiKeyAuth: []
-      summary: Создание команды в турнире
+      summary: Создание команды пользователя в турнире
+      tags:
+      - tournament
+  /tournament/team/edit:
+    put:
+      consumes:
+      - application/json
+      description: Редактирование команды пользователя в турнире
+      parameters:
+      - description: tournamentID
+        in: query
+        name: tournamentID
+        required: true
+        type: integer
+      - description: Список идентификаторов команд
+        in: body
+        name: team
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg_api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Редактирование команды пользователя в турнире
       tags:
       - tournament
   /user/delete:

@@ -171,3 +171,15 @@ func (p *PostgresStorage) GetTournamentTeam(userID uuid.UUID, tournamentID int) 
 
 	return res, nil
 }
+
+func (p *PostgresStorage) EditTournamentTeam(teamInput tournaments.TournamentTeamModel) error {
+	teamArray := pq.Array(teamInput.UserTeam)
+	query := `UPDATE user_roster SET roster = $1, current_balance = $2 WHERE tournament_id = $3 AND user_id = $4`
+
+	_, err := p.db.Exec(query, teamArray, 100-teamInput.TeamCost, teamInput.TournamentID, teamInput.ProfileID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

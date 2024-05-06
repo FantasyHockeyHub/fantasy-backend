@@ -36,6 +36,7 @@ type TeamsStorage interface {
 	GetTournamentDataByID(tournamentID int) (tournaments.Tournament, error)
 	CreateTournamentTeam(teamInput tournaments.TournamentTeamModel) error
 	GetTournamentTeam(userID uuid.UUID, tournamentID int) (players.UserTeam, error)
+	EditTournamentTeam(teamInput tournaments.TournamentTeamModel) error
 }
 
 type TeamsService struct {
