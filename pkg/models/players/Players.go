@@ -147,3 +147,13 @@ type PositionData struct {
 	PositionName   string `json:"positionName"`
 	PositionAbbrev string `json:"positionAbbrev"`
 }
+
+type UserTeam struct {
+	Balance   float64 `json:"balance"`
+	PlayerIDs []int   `json:"playerIDs"`
+}
+
+type UserTeamResponse struct {
+	Balance float64          `json:"balance"`
+	Players []PlayerResponse `json:"players"`
+}

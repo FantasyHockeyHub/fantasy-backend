@@ -6,6 +6,7 @@ import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"strconv"
 	"strings"
@@ -140,4 +141,33 @@ func (p *PostgresStorage) CreateTournamentTeam(teamInput tournaments.TournamentT
 	}
 
 	return tx.Commit()
+}
+
+func (p *PostgresStorage) GetTournamentTeam(userID uuid.UUID, tournamentID int) (players.UserTeam, error) {
+	var res players.UserTeam
+	query := "SELECT roster, current_balance FROM user_roster WHERE tournament_id = $1 AND user_id = $2"
+
+	var rosterStr string
+	var currentBalance float64
+	err := p.db.QueryRow(query, tournamentID, userID).Scan(&rosterStr, &currentBalance)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return res, nil
+		}
+		return res, err
+	}
+
+	res.Balance = currentBalance
+	rosterStr = strings.Trim(rosterStr, "{}")
+	rosterStr = strings.ReplaceAll(rosterStr, " ", "")
+	matchesIDsStrArr := strings.Split(rosterStr, ",")
+	for _, idStr := range matchesIDsStrArr {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return res, err
+		}
+		res.PlayerIDs = append(res.PlayerIDs, id)
+	}
+
+	return res, nil
 }

@@ -405,7 +405,8 @@ func (api Api) createTournamentTeam(ctx *gin.Context) {
 			service.InvalidTeamPositions,
 			service.JoinTimeExpiredError,
 			storage.NotEnoughCoinsError,
-			service.InvalidPlayersNumber:
+			service.InvalidPlayersNumber,
+			service.TeamAlreadyCreatedError:
 			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
 			return
 		default:
@@ -415,4 +416,49 @@ func (api Api) createTournamentTeam(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
+}
+
+// getTournamentTeam godoc
+// @Summary Получение команды пользователя в турнире
+// @Security ApiKeyAuth
+// @Schemes
+// @Description Получение команды пользователя в турнире
+// @Tags tournament
+// @Accept json
+// @Produce json
+// @Param tournamentID query int true "tournamentID"
+// @Success 200 {array} players.UserTeamResponse
+// @Failure 401 {object} Error
+// @Failure 500 {object} Error
+// @Router /tournament/team [GET]
+func (api Api) getTournamentTeam(ctx *gin.Context) {
+	userID, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("GetTournamentTeam:", err)
+		return
+	}
+	var tournamentID int
+
+	query := ctx.Request.URL.Query()
+	if query.Has("tournamentID") {
+		id := query.Get("tournamentID")
+		tournamentID, err = strconv.Atoi(id)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+	} else {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+		return
+	}
+
+	res, err := api.services.Teams.GetTournamentTeam(userID, tournamentID)
+	if err != nil {
+		log.Println("GetTournamentTeam:", err)
+		ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+		return
+
+	}
+
+	ctx.JSON(http.StatusOK, res)
 }

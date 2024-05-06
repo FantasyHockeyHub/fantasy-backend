@@ -796,6 +796,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/tournament/team": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Получение команды пользователя в турнире",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournament"
+                ],
+                "summary": "Получение команды пользователя в турнире",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "tournamentID",
+                        "name": "tournamentID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/tournament/team/create": {
             "post": {
                 "security": [

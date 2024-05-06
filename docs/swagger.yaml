@@ -858,6 +858,39 @@ paths:
       summary: Получение составов на турнир
       tags:
       - tournament
+  /tournament/team:
+    get:
+      consumes:
+      - application/json
+      description: Получение команды пользователя в турнире
+      parameters:
+      - description: tournamentID
+        in: query
+        name: tournamentID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Получение команды пользователя в турнире
+      tags:
+      - tournament
   /tournament/team/create:
     post:
       consumes:

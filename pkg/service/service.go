@@ -47,6 +47,7 @@ type Teams interface {
 	CreateTournamentTeam(inp tournaments.TournamentTeamModel) error
 	CheckUserTeam(tournamentInfo tournaments.Tournament, userTeam []int) error
 	GetTeamCost(team []int) (float32, error)
+	GetTournamentTeam(userID uuid.UUID, tournamentID int) (players.UserTeamResponse, error)
 }
 
 type Store interface {

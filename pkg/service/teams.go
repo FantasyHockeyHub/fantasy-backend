@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -34,6 +35,7 @@ type TeamsStorage interface {
 	GetTeamDataByID(teamID int) (players.TeamData, error)
 	GetTournamentDataByID(tournamentID int) (tournaments.Tournament, error)
 	CreateTournamentTeam(teamInput tournaments.TournamentTeamModel) error
+	GetTournamentTeam(userID uuid.UUID, tournamentID int) (players.UserTeam, error)
 }
 
 type TeamsService struct {

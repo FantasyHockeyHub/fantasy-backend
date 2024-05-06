@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"github.com/google/uuid"
@@ -9,11 +10,12 @@ import (
 )
 
 var (
-	JoinTimeExpiredError  = errors.New("турнир уже начался или завершен")
-	TeamExpensiveError    = errors.New("команда стоит больше лимита")
-	InvalidTeamPositions  = errors.New("неверное количество игроков на позициях")
-	InvalidTournamentTeam = errors.New("выбранный игрок не принадлежит ни одной из команд турнира")
-	InvalidPlayersNumber  = errors.New("некорректное количество игроков в команде")
+	JoinTimeExpiredError    = errors.New("турнир уже начался или завершен")
+	TeamExpensiveError      = errors.New("команда стоит больше лимита")
+	InvalidTeamPositions    = errors.New("неверное количество игроков на позициях")
+	InvalidTournamentTeam   = errors.New("выбранный игрок не может участвовать в турнире или повторяется в составе команды")
+	InvalidPlayersNumber    = errors.New("некорректное количество игроков в команде")
+	TeamAlreadyCreatedError = errors.New("команда на турнир уже создана")
 )
 
 func (s *TeamsService) GetRosterByTournamentID(userID uuid.UUID, tournamentID int) (players.TournamentRosterResponse, error) {
@@ -65,6 +67,16 @@ func (s *TeamsService) CreateTournamentTeam(inp tournaments.TournamentTeamModel)
 	}
 	inp.Deposit = tournamentInfo.Deposit
 
+	userTeamData, err := s.GetTournamentTeam(inp.ProfileID, inp.TournamentID)
+	if err != nil {
+		log.Println("Service. GetTournamentTeam:", err)
+		return err
+	}
+	if len(userTeamData.Players) != 0 {
+		log.Println("Service. GetTournamentTeam:", TeamAlreadyCreatedError)
+		return TeamAlreadyCreatedError
+	}
+
 	if tournamentInfo.StatusTournament == "not_yet_started" {
 		cost, err := s.GetTeamCost(inp.UserTeam)
 		if err != nil {
@@ -96,9 +108,11 @@ func (s *TeamsService) CreateTournamentTeam(inp tournaments.TournamentTeamModel)
 }
 
 func (s *TeamsService) CheckUserTeam(tournamentInfo tournaments.Tournament, userTeam []int) error {
-	if len(userTeam) != 6 {
+	fmt.Println(userTeam)
+	if len(userTeam) != 6 || hasDuplicates(userTeam) {
 		return InvalidTeamPositions
 	}
+
 	playersInfo, err := s.playersService.GetPlayers(players.PlayersFilter{Players: userTeam})
 	if err != nil {
 		return err
@@ -162,4 +176,44 @@ func contains(arr []int, val int) bool {
 		}
 	}
 	return false
+}
+
+func hasDuplicates(arr []int) bool {
+	seen := make(map[int]bool)
+	for _, val := range arr {
+		if seen[val] {
+			return true
+		}
+		seen[val] = true
+	}
+	return false
+}
+
+func (s *TeamsService) GetTournamentTeam(userID uuid.UUID, tournamentID int) (players.UserTeamResponse, error) {
+	var res players.UserTeamResponse
+
+	_, err := s.storage.GetTournamentDataByID(tournamentID)
+	if err != nil {
+		log.Println("Service. GetTournamentDataByID:", err)
+		return res, err
+	}
+
+	userTeamData, err := s.storage.GetTournamentTeam(userID, tournamentID)
+	if err != nil {
+		log.Println("Service. GetTournamentTeam:", err)
+		return res, err
+	}
+	if len(userTeamData.PlayerIDs) == 0 {
+		res = players.UserTeamResponse{}
+		return res, nil
+	}
+
+	res.Players, err = s.playersService.GetPlayers(players.PlayersFilter{ProfileID: userID, Players: userTeamData.PlayerIDs})
+	if err != nil {
+		log.Println("Service. GetPlayers:", err)
+		return res, err
+	}
+	res.Balance = userTeamData.Balance
+
+	return res, nil
 }
