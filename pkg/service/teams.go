@@ -11,8 +11,7 @@ import (
 )
 
 var (
-	NotFoundMatches     = errors.New("not found matches by this date")
-	NotFoundTournaments = errors.New("not found tournaments by this date")
+	NotFoundMatches = errors.New("not found matches by this date")
 )
 
 func NewTeamsService(storage TeamsStorage, playersService Players) *TeamsService {
@@ -28,8 +27,6 @@ type TeamsStorage interface {
 	AddKHLEvents(context.Context, []tournaments.EventDataKHL) error
 	AddNHLEvents(context.Context, []tournaments.Game) error
 	GetMatchesByDate(context.Context, int64, int64, tournaments.League) ([]tournaments.Matches, error)
-	CreateTournaments(context.Context, []tournaments.Tournament) error
-	GetTournamentsByDate(context.Context, int64, int64, tournaments.League) ([]tournaments.Tournament, error)
 	GetMatchesByTournamentID(tournamentID int) ([]int, error)
 	GetTeamsByMatches(matchesIDs []int) ([]int, error)
 	GetTeamDataByID(teamID int) (players.TeamData, error)
@@ -78,22 +75,4 @@ func (s *TeamsService) GetMatchesDay(ctx context.Context, league tournaments.Lea
 	}
 
 	return matches, nil
-}
-
-func (s *TeamsService) GetTournaments(ctx context.Context, league tournaments.League) ([]tournaments.Tournament, error) {
-	//var tourn []tournaments.GetTournaments
-	curTime := time.Now()
-	tomorrowTime := curTime.Add(24 * time.Hour)
-	startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 0, 0, 0, 0, time.UTC)
-	endDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 23, 59, 59, 0, time.UTC)
-
-	tournaments, err := s.storage.GetTournamentsByDate(ctx, startDay.UnixMilli(), endDay.UnixMilli(), league)
-	if len(tournaments) == 0 {
-		return tournaments, NotFoundTournaments
-	}
-	if err != nil {
-		return tournaments, fmt.Errorf("GetMatchesDay: %v", err)
-	}
-
-	return tournaments, nil
 }

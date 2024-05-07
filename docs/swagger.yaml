@@ -163,6 +163,33 @@ definitions:
       rarityName:
         type: string
     type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.GetTournamentsTotalInfo:
+    properties:
+      awayScore:
+        type: integer
+      awayTeamAbbrev:
+        type: string
+      awayTeamId:
+        type: integer
+      endAt:
+        type: integer
+      eventId:
+        type: integer
+      homeScore:
+        type: integer
+      homeTeamId:
+        type: integer
+      homeTemeAbrev:
+        type: string
+      league:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League'
+      matchId:
+        type: integer
+      startAt:
+        type: integer
+      statusEvent:
+        type: string
+    type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League:
     enum:
     - 0
@@ -830,6 +857,39 @@ paths:
           schema:
             $ref: '#/definitions/pkg_api.Error'
       summary: Получение турниров на ближайшие 2 дня
+      tags:
+      - tournament
+  /tournament/matches_by_tournament_id/{tournament_id}:
+    get:
+      description: Возвращается вся необходимая информация о матчах
+      parameters:
+      - description: id турнира
+        in: path
+        name: tournament_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.GetTournamentsTotalInfo'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Получение матчей по id турнира
       tags:
       - tournament
   /tournament/roster:

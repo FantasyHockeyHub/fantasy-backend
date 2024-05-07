@@ -287,7 +287,7 @@ func (api *Api) GetTournaments(ctx *gin.Context) {
 
 	league := new(tournaments.League)
 	*league = league.GetLeagueId(leagueName)
-	tournaments, err := api.services.Teams.GetTournaments(ctx, *league)
+	tournaments, err := api.services.Tournaments.GetTournaments(ctx, *league)
 	if errors.Is(err, service.NotFoundTournaments) {
 		log.Printf("GetTournaments: %v", err)
 		ctx.JSON(http.StatusNotFound, getNotFoundError())
@@ -530,4 +530,41 @@ func (api Api) editTournamentTeam(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
+}
+
+type TournamentID struct {
+	ID tournaments.ID `uri:"tournament_id" binding:"required"`
+}
+
+// GetMatchesByTournId godoc
+// @Summary Получение матчей по id турнира
+// @Schemes
+// @Description Возвращается вся необходимая информация о матчах
+// @Tags tournament
+// @Produce json
+// @Success 200 {object} []tournaments.GetTournamentsTotalInfo
+// @Failure 400 {object} Error
+// @Failure 401 {object} Error
+// @Failure 404 {object} Error
+// @Param tournament_id path int64 true  "id турнира"
+// @Router /tournament/matches_by_tournament_id/{tournament_id} [get]
+func (api *Api) GetMatchesByTournId(ctx *gin.Context) {
+	var tourId TournamentID
+	if err := ctx.ShouldBindUri(&tourId); err != nil {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		return
+	}
+
+	tournInfo, err := api.services.Tournaments.GetMatchesByTournamentsId(ctx, tourId.ID)
+	if err != nil {
+		log.Printf("GetMatchesByTournId: %v", err)
+		if errors.Is(err, service.NotFoundTournamentsById) {
+			ctx.JSON(http.StatusNotFound, getNotFoundError())
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+		return
+	}
+	ctx.JSON(http.StatusOK, tournInfo)
+
 }
