@@ -125,11 +125,12 @@ func (s *EventsService) AddEventsNHL(ctx context.Context) error {
 
 func (s *EventsService) CreateTournaments(ctx context.Context) error {
 	log.Printf("Start CreateTournaments")
-	curTime := time.Now()
-	curTime = curTime.Add(24 * time.Hour)
-	startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 0, 0, 0, 0, time.UTC)
-	endDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 23, 59, 59, 0, time.UTC)
-	KhlMatches, err := s.storage.GetMatchesByDate(ctx, startDay.UnixMilli(), endDay.UnixMilli(), tournaments.KHL)
+
+	startDay, endDay, err := GetTimeForNextDay()
+	if err != nil {
+		log.Println("GetTimeForNextDay: ", err)
+	}
+	KhlMatches, err := s.storage.GetMatchesByDate(ctx, startDay, endDay, tournaments.KHL)
 	if err != nil {
 		return fmt.Errorf("CreateTournaments: %v", err)
 	}
@@ -139,7 +140,7 @@ func (s *EventsService) CreateTournaments(ctx context.Context) error {
 		KhlTournaments = tournaments.NewTournamentHandle(KhlMatches)
 	}
 
-	NhlMatches, err := s.storage.GetMatchesByDate(ctx, startDay.UnixMilli(), endDay.UnixMilli(), tournaments.NHL)
+	NhlMatches, err := s.storage.GetMatchesByDate(ctx, startDay, endDay, tournaments.NHL)
 	if err != nil {
 		return fmt.Errorf("CreateTournaments: %v", err)
 	}
@@ -159,18 +160,12 @@ func (s *EventsService) CreateTournaments(ctx context.Context) error {
 }
 
 func (s *EventsService) GetTournamentsByNextDay(ctx context.Context, league tournaments.League) ([]tournaments.Tournament, error) {
-	curTime := time.Now()
-	tomorrowTime := curTime.Add(24 * time.Hour)
-	//startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 21, 0, 0, 0, time.UTC)
-	startDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 0, 0, 0, 0, time.UTC)
-	endDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 23, 59, 59, 0, time.UTC)
-
-	//tomorrowTime := time.Now()
-	////tomorrowTime := curTime.Add(24 * time.Hour)
-	//startDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 0, 0, 0, 0, time.UTC)
-	//endDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 23, 59, 59, 0, time.UTC)
-
-	tourn, err := s.storage.GetTournamentsByDate(ctx, startDay.UnixMilli(), endDay.UnixMilli(), league)
+	startDay, endDay, err := GetTimeForNextDay()
+	if err != nil {
+		log.Println("GetTimeForNextDay: ", err)
+	}
+	
+	tourn, err := s.storage.GetTournamentsByDate(ctx, startDay, endDay, league)
 	if len(tourn) == 0 {
 		return tourn, NotFoundTour
 	}
