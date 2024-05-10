@@ -191,3 +191,8 @@ func (s *EventsService) UpdateStatusTournaments(ctx context.Context, tourID []to
 	}
 	return nil
 }
+
+func (s *EventsService) UpdateMatches(ctx context.Context) error {
+	log.Println("EEEs")
+	return nil
+}
