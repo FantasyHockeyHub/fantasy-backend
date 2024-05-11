@@ -63,7 +63,7 @@ func (job *UpdateHockeyEventsKHL) StartKHL(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-timer.C:
-			err := job.ev.UpdateStatusTournaments(ctx, job.tournamentsID)
+			err := job.ev.UpdateStatusTournaments(ctx, job.tournamentsID, "started")
 			if err != nil {
 				log.Println("Job UpdateStatusTournamentsKHL:", err)
 			}

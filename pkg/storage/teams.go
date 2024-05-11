@@ -315,7 +315,6 @@ func CreateMapForTournaments(startUnixDate int64, endUnixDate int64, league tour
 
 func (p *PostgresStorage) GetTournamentsByDate(ctx context.Context, startUnixDate int64, endUnixDate int64, league tournaments.League) ([]tournaments.Tournament, error) {
 
-	log.Println(startUnixDate, endUnixDate)
 	//joinMatches := fmt.Sprintf("%s mt on %s.%s = mt.%s", MatchesTable, TournamentsTable, MatchesIds, MatchId)
 	eqParams := CreateMapForTournaments(startUnixDate, endUnixDate, league)
 	query, args, err := sq.
@@ -341,11 +340,11 @@ func (p *PostgresStorage) GetTournamentsByDate(ctx context.Context, startUnixDat
 	return tournaments, err
 }
 
-func (p *PostgresStorage) UpdateStatusTournamentsByIds(ctx context.Context, tourID []tournaments.ID) error {
+func (p *PostgresStorage) UpdateStatusTournamentsByIds(ctx context.Context, tourID []tournaments.ID, statusName string) error {
 
 	query, args, err := sq.
 		Update(TournamentsTable).
-		Set(TourStatus, "started").
+		Set(TourStatus, statusName).
 		Where(
 			sq.Eq{
 				TournamentsId: tourID,
@@ -394,7 +393,7 @@ func (p *PostgresStorage) GetMatchesByTournamentsId(ctx context.Context, tournId
 
 	query, args, err := sq.
 		Select(MatchId, HomeTeam, fmt.Sprintf("homeTeam.%s", TeamAbbrev), HomeScore, AwayTeam, fmt.Sprintf("awayTeam.%s", TeamAbbrev),
-			AwayScore, StartTime, EndTime, StatusMatch, fmt.Sprintf("%s.%s", MatchesTable, League)).
+			AwayScore, StartTime, EndTime, EventId, StatusMatch, fmt.Sprintf("%s.%s", MatchesTable, League)).
 		From(MatchesTable).
 		Join(
 			fmt.Sprintf("%s as homeTeam on homeTeam.%s = %s.%s AND homeTeam.league = %s.%s JOIN %s as awayTeam on awayTeam.%s = %s.%s AND awayTeam.league = %s.%s", TeamsTable, ApiId, MatchesTable, HomeTeam, MatchesTable, League, TeamsTable, ApiId, MatchesTable, AwayTeam, MatchesTable, League)).
@@ -418,7 +417,7 @@ func (p *PostgresStorage) GetMatchesByTournamentsId(ctx context.Context, tournId
 	for rows.Next() {
 		var curTourInfo tournaments.GetTournamentsTotalInfo
 
-		err = rows.Scan(&curTourInfo.MatchId, &curTourInfo.HomeTeamId, &curTourInfo.HomeTeamAbbrev, &curTourInfo.HomeScore, &curTourInfo.AwayTeamId, &curTourInfo.AwayTeamAbbrev, &curTourInfo.AwayScore, &curTourInfo.StartAt, &curTourInfo.EndAt, &curTourInfo.StatusEvent, &curTourInfo.League)
+		err = rows.Scan(&curTourInfo.MatchId, &curTourInfo.HomeTeamId, &curTourInfo.HomeTeamAbbrev, &curTourInfo.HomeScore, &curTourInfo.AwayTeamId, &curTourInfo.AwayTeamAbbrev, &curTourInfo.AwayScore, &curTourInfo.StartAt, &curTourInfo.EndAt, &curTourInfo.EventId, &curTourInfo.StatusEvent, &curTourInfo.League)
 		if err != nil {
 			log.Printf("GetMatchesByTournamentsId: ScanErr: %v", err)
 		}
