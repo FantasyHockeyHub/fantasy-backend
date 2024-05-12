@@ -14,9 +14,13 @@ func NewUpdateHockeyEvents(
 ) *UpdateHockeyEvents {
 	curTime := time.Now()
 	tournamentsID := make([]tournaments.ID, 2)
-	location, _ := time.LoadLocation("Europe/Moscow")
+	location, err := time.LoadLocation("Europe/Moscow")
+	if err != nil {
+		log.Println("LoadLocation", err)
+		location = time.UTC
+	}
 	return &UpdateHockeyEvents{
-		dailyGetTime:  time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 22, 0, 0, 0, location),
+		dailyGetTime:  time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 22, 0, 0, 0, location).Add(-3 * time.Hour),
 		dailyEndTime:  curTime,
 		ev:            ev,
 		tournamentsID: tournamentsID,
