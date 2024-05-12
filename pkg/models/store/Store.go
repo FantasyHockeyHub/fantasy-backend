@@ -19,8 +19,9 @@ var PlayerCardsRarity = map[string]CardRarity{
 }
 
 var PlayerCardsRarityTitles = map[CardRarity]string{
-	Silver: "Silver",
-	Gold:   "Gold",
+	ErrCardRarity: "Default",
+	Silver:        "Silver",
+	Gold:          "Gold",
 }
 
 func (t *CardRarity) GetCardRarityString() string {
@@ -56,16 +57,16 @@ type BuyProductModel struct {
 type BonusMetric int8
 
 const (
-	ErrPlayerPosition BonusMetric = iota
-	Goalie
-	Defensemen
-	Forward
+	ErrPlayerMetric BonusMetric = iota
+	GoalieMetric
+	DefensemenMetric
+	ForwardMetric
 )
 
 var BonusMetricTitles = map[BonusMetric]string{
-	Goalie:     "Сейвы",
-	Defensemen: "Передачи",
-	Forward:    "Голы",
+	GoalieMetric:     "Сейвы",
+	DefensemenMetric: "Передачи",
+	ForwardMetric:    "Голы",
 }
 
 func (t *BonusMetric) GetBonusMetricString() string {

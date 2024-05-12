@@ -79,9 +79,11 @@ type NHLRosterResponse struct {
 }
 
 type PlayersFilter struct {
-	Teams    []int              `json:"teams"`
-	Position Position           `json:"position"`
-	League   tournaments.League `json:"league"`
+	ProfileID uuid.UUID          `json:"profileID"`
+	Players   []int              `json:"players"`
+	Teams     []int              `json:"teams"`
+	Position  Position           `json:"position"`
+	League    tournaments.League `json:"league"`
 }
 
 type PlayerResponse struct {
@@ -95,7 +97,9 @@ type PlayerResponse struct {
 	PositionName  string             `json:"positionName"`
 	League        tournaments.League `json:"league"  db:"league"`
 	LeagueName    string             `json:"leagueName"`
-	PlayerCost    int                `json:"playerCost" db:"player_cost"`
+	PlayerCost    float32            `json:"playerCost" db:"player_cost"`
+	CardRarity    store.CardRarity   `json:"cardRarity" db:"rarity"`
+	RarityName    string             `json:"rarityName" default:"Default"`
 }
 
 type PlayerCardsFilter struct {
@@ -125,4 +129,31 @@ type PlayerCardResponse struct {
 	PositionName    string             `json:"positionName"`
 	League          tournaments.League `json:"league"  db:"league"`
 	LeagueName      string             `json:"leagueName"`
+}
+
+type TournamentRosterResponse struct {
+	Teams     []TeamData       `json:"teams"`
+	Positions []PositionData   `json:"positions"`
+	Players   []PlayerResponse `json:"players"`
+}
+
+type TeamData struct {
+	TeamID     int    `db:"team_id" json:"teamID"`
+	TeamName   string `db:"team_name" json:"teamName"`
+	TeamAbbrev string `db:"team_abbrev" json:"teamAbbrev"`
+}
+
+type PositionData struct {
+	PositionName   string `json:"positionName"`
+	PositionAbbrev string `json:"positionAbbrev"`
+}
+
+type UserTeam struct {
+	Balance   float64 `json:"balance"`
+	PlayerIDs []int   `json:"playerIDs"`
+}
+
+type UserTeamResponse struct {
+	Balance float64          `json:"balance"`
+	Players []PlayerResponse `json:"players"`
 }

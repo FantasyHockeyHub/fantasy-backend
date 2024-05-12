@@ -36,7 +36,7 @@ func (api Api) getAllProducts(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, products)
 }
 
-// getAllProducts godoc
+// buyProduct godoc
 // @Summary Покупка товара в магазине
 // @Security ApiKeyAuth
 // @Schemes

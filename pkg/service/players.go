@@ -21,6 +21,7 @@ type PlayersStorage interface {
 	GetPlayerCards(filter players.PlayerCardsFilter) ([]players.PlayerCardResponse, error)
 	AddPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel) error
 	CardUnpacking(id int, userID uuid.UUID) error
+	InsertPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel, selectedPlayerIDs []int) error
 }
 
 type PlayersService struct {
@@ -44,6 +45,42 @@ func (s *PlayersService) GetPlayers(playersFilter players.PlayersFilter) ([]play
 	if err != nil {
 		log.Println("Service. GetPlayers:", err)
 		return res, err
+	}
+	playerCardsMap := make(map[int][]players.PlayerCardResponse)
+
+	userCards, err := s.storage.GetPlayerCards(players.PlayerCardsFilter{
+		ProfileID:        playersFilter.ProfileID,
+		League:           playersFilter.League,
+		HasUnpackedParam: true,
+		Unpacked:         true,
+	})
+	if err != nil {
+		log.Println("Service. GetPlayerCards:", err)
+		return res, err
+	}
+
+	for _, card := range userCards {
+		playerCardsMap[card.PlayerID] = append(playerCardsMap[card.PlayerID], card)
+	}
+
+	for i, player := range res {
+		res[i].RarityName = store.PlayerCardsRarityTitles[store.ErrCardRarity]
+		if cards, ok := playerCardsMap[player.ID]; ok {
+			var hasGoldCard bool
+			for _, card := range cards {
+				if card.Rarity == store.Gold {
+					res[i].CardRarity = store.Gold
+					hasGoldCard = true
+					break
+				}
+			}
+
+			if !hasGoldCard && len(cards) > 0 {
+				res[i].CardRarity = store.Silver
+			}
+
+			res[i].RarityName = store.PlayerCardsRarityTitles[res[i].CardRarity]
+		}
 	}
 
 	return res, nil
