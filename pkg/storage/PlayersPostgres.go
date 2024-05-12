@@ -53,6 +53,17 @@ func (p *PostgresStorage) GetPlayers(playersFilter players.PlayersFilter) ([]pla
 
 	query := "SELECT p.id, p.position, p.name, p.team_id, p.sweater_number, p.photo_link, p.league, p.player_cost, t.team_name FROM players p INNER JOIN teams t ON p.team_id = t.team_id WHERE 1=1"
 
+	if len(playersFilter.Players) > 0 {
+		query += " AND p.id IN ("
+		for i := range playersFilter.Players {
+			if i > 0 {
+				query += ","
+			}
+			query += fmt.Sprintf("%d", playersFilter.Players[i])
+		}
+		query += ")"
+	}
+
 	if len(playersFilter.Teams) > 0 {
 		query += " AND p.team_id IN ("
 		for i := range playersFilter.Teams {
@@ -63,9 +74,11 @@ func (p *PostgresStorage) GetPlayers(playersFilter players.PlayersFilter) ([]pla
 		}
 		query += ")"
 	}
+
 	if playersFilter.Position != 0 {
 		query += fmt.Sprintf(" AND p.position = %d", playersFilter.Position)
 	}
+
 	if playersFilter.League != 0 {
 		query += fmt.Sprintf(" AND p.league = %d", playersFilter.League)
 	}
@@ -152,18 +165,40 @@ func (p *PostgresStorage) GetPlayerCards(filter players.PlayerCardsFilter) ([]pl
 }
 
 func (p *PostgresStorage) AddPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel) error {
-	var selectedPlayerIDs []int
-
 	allPlayers, err := p.GetPlayers(players.PlayersFilter{League: buy.League})
 	if err != nil {
 		return err
 	}
 
-	userCards, err := p.GetPlayerCards(players.PlayerCardsFilter{ProfileID: buy.ProfileID, League: buy.League})
+	userCards, err := p.GetPlayerCards(players.PlayerCardsFilter{ProfileID: buy.ProfileID, League: buy.League, Rarity: buy.Rarity})
 	if err != nil {
 		return err
 	}
 
+	allPlayerIDs := getUniquePlayers(allPlayers, userCards)
+
+	if len(allPlayerIDs) == 0 {
+		return GetAllCardsError
+	}
+
+	selectedPlayerIDs := generateCards(allPlayerIDs)
+
+	cardsCount := buy.PlayerCardsCount
+	if len(selectedPlayerIDs) < buy.PlayerCardsCount {
+		cardsCount = len(selectedPlayerIDs)
+	}
+
+	selectedPlayerIDs = selectedPlayerIDs[:cardsCount]
+
+	err = p.InsertPlayerCards(tx, buy, selectedPlayerIDs)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func getUniquePlayers(allPlayers []players.PlayerResponse, userCards []players.PlayerCardResponse) map[int]struct{} {
 	allPlayerIDs := make(map[int]struct{})
 	for _, player := range allPlayers {
 		allPlayerIDs[player.ID] = struct{}{}
@@ -178,26 +213,25 @@ func (p *PostgresStorage) AddPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel)
 		delete(allPlayerIDs, playerID)
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	for playerID := range allPlayerIDs {
-		selectedPlayerIDs = append(selectedPlayerIDs, playerID)
-	}
+	return allPlayerIDs
+}
 
-	if len(selectedPlayerIDs) == 0 {
-		return GetAllCardsError
+func generateCards(allPlayers map[int]struct{}) []int {
+	var selectedPlayerIDs []int
+
+	rand.Seed(time.Now().UnixNano())
+	for playerID := range allPlayers {
+		selectedPlayerIDs = append(selectedPlayerIDs, playerID)
 	}
 
 	rand.Shuffle(len(selectedPlayerIDs), func(i, j int) {
 		selectedPlayerIDs[i], selectedPlayerIDs[j] = selectedPlayerIDs[j], selectedPlayerIDs[i]
 	})
 
-	cardsCount := buy.PlayerCardsCount
-	if len(selectedPlayerIDs) < buy.PlayerCardsCount {
-		cardsCount = len(selectedPlayerIDs)
-	}
+	return selectedPlayerIDs
+}
 
-	selectedPlayerIDs = selectedPlayerIDs[:cardsCount]
-
+func (p *PostgresStorage) InsertPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel, selectedPlayerIDs []int) error {
 	query := `INSERT INTO player_cards (profile_id, player_id, rarity, multiply, bonus_metric, unpacked) VALUES `
 	var valueStrings []string
 	var valueArgs []interface{}
@@ -213,7 +247,7 @@ func (p *PostgresStorage) AddPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel)
 
 	query += strings.Join(valueStrings, ", ")
 
-	_, err = tx.Exec(query, valueArgs...)
+	_, err := tx.Exec(query, valueArgs...)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -226,9 +260,10 @@ func (p *PostgresStorage) CardUnpacking(id int, userID uuid.UUID) error {
 	card := players.PlayerCardsFilter{}
 
 	err := p.db.QueryRow("SELECT profile_id, unpacked FROM player_cards WHERE id = $1", id).Scan(&card.ProfileID, &card.Unpacked)
-	if err == sql.ErrNoRows {
-		return PlayerCardNotFoundError
-	} else if err != nil {
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return PlayerCardNotFoundError
+		}
 		return err
 	}
 
