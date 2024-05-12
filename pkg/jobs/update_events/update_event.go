@@ -33,8 +33,8 @@ type UpdateHockeyEvents struct {
 
 func (job *UpdateHockeyEvents) UpdateDuration(ctx context.Context) time.Duration {
 	tournInfo, err := job.ev.GetTournamentsByNextDay(ctx, 1)
-	//tournInfo1 := tournaments.Tournament{TournamentId: 523294174, TimeStart: 1715469180000, TimeEnd: 1715469360000}
-	//tournInfo2 := tournaments.Tournament{TournamentId: 1631395586, TimeStart: 1715469180000, TimeEnd: 1715469360000}
+	//tournInfo1 := tournaments.Tournament{TournamentId: 523294174, TimeStart: 1715532060000, TimeEnd: 1715532180000}
+	//tournInfo2 := tournaments.Tournament{TournamentId: 1631395586, TimeStart: 1715532060000, TimeEnd: 1715532180000}
 	//tournInfo := []tournaments.Tournament{tournInfo1, tournInfo2}
 	//var err error
 	//err = nil
@@ -56,9 +56,7 @@ func (job *UpdateHockeyEvents) UpdateDuration(ctx context.Context) time.Duration
 		}
 	} else {
 		job.dailyGetTime = time.UnixMilli(tournInfo[0].TimeStart)
-		//log.Println(job.dailyGetTime)
 		job.tournamentsID[0] = tournInfo[0].TournamentId
-		//log.Println(job.tournamentsID[0])
 		job.tournamentsID[1] = tournInfo[1].TournamentId
 		job.dailyEndTime = time.UnixMilli(tournInfo[0].TimeEnd)
 	}
@@ -108,7 +106,7 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 
 func (job *UpdateHockeyEvents) GetMatchesResult(ctx context.Context, cancel context.CancelFunc) {
 	defer cancel()
-	ticker := time.NewTicker(1 * time.Minute)
+	ticker := time.NewTicker(10 * time.Minute)
 	defer ticker.Stop()
 	for {
 		select {
