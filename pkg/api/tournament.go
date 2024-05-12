@@ -337,7 +337,7 @@ func (api Api) getTournamentRoster(ctx *gin.Context) {
 		return
 	}
 
-	res, err := api.services.Teams.GetRosterByTournamentID(userID, tournamentID)
+	res, err := api.services.Tournaments.GetRosterByTournamentID(userID, tournamentID)
 	if err != nil {
 		log.Println("GetTournamentRoster:", err)
 		switch err {
@@ -395,7 +395,7 @@ func (api Api) createTournamentTeam(ctx *gin.Context) {
 		return
 	}
 
-	err = api.services.Teams.CreateTournamentTeam(inp)
+	err = api.services.Tournaments.CreateTournamentTeam(inp)
 	if err != nil {
 		log.Println("CreateTournamentTeam:", err)
 		switch err {
@@ -452,7 +452,7 @@ func (api Api) getTournamentTeam(ctx *gin.Context) {
 		return
 	}
 
-	res, err := api.services.Teams.GetTournamentTeam(userID, tournamentID)
+	res, err := api.services.Tournaments.GetTournamentTeam(userID, tournamentID)
 	if err != nil {
 		switch err {
 		case storage.IncorrectTournamentID:
@@ -510,7 +510,7 @@ func (api Api) editTournamentTeam(ctx *gin.Context) {
 		return
 	}
 
-	err = api.services.Teams.EditTournamentTeam(inp)
+	err = api.services.Tournaments.EditTournamentTeam(inp)
 	if err != nil {
 		log.Println("EditTournamentTeam:", err)
 		switch err {
