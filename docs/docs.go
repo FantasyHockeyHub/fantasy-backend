@@ -688,7 +688,15 @@ const docTemplate = `{
         },
         "/tournament/get_tournaments/{league}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Дата берётся автоматически",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -743,7 +751,15 @@ const docTemplate = `{
         },
         "/tournament/matches_by_tournament_id/{tournament_id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Возвращается вся необходимая информация о матчах",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
