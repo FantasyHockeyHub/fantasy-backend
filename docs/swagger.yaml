@@ -824,6 +824,8 @@ paths:
       - tournament
   /tournament/get_tournaments/{league}:
     get:
+      consumes:
+      - application/json
       description: Дата берётся автоматически
       parameters:
       - description: league
@@ -856,11 +858,15 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
       summary: Получение турниров на ближайшие 2 дня
       tags:
       - tournament
   /tournament/matches_by_tournament_id/{tournament_id}:
     get:
+      consumes:
+      - application/json
       description: Возвращается вся необходимая информация о матчах
       parameters:
       - description: id турнира
@@ -889,6 +895,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
       summary: Получение матчей по id турнира
       tags:
       - tournament

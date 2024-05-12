@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/events"
 	"github.com/google/uuid"
 	"log"
-	"time"
 )
 
 var (
@@ -52,12 +52,12 @@ type TournamentsService struct {
 
 func (s *TournamentsService) GetTournaments(ctx context.Context, league tournaments.League) ([]tournaments.Tournament, error) {
 	//var tourn []tournamentsInfo.GetTournaments
-	curTime := time.Now()
-	tomorrowTime := curTime.Add(24 * time.Hour)
-	startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 0, 0, 0, 0, time.UTC)
-	endDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 23, 59, 59, 0, time.UTC)
+	startDay, endDay, err := events.GetTimeFor2Days()
+	if err != nil {
+		log.Println("GetTimeFor2Days: ", err)
+	}
 
-	tournamentsInfo, err := s.storage.GetTournamentsByDate(ctx, startDay.UnixMilli(), endDay.UnixMilli(), league)
+	tournamentsInfo, err := s.storage.GetTournamentsByDate(ctx, startDay, endDay, league)
 	if len(tournamentsInfo) == 0 {
 		return tournamentsInfo, NotFoundTournaments
 	}

@@ -266,9 +266,11 @@ func (api *Api) GetMatches(ctx *gin.Context) {
 
 // GetTournaments godoc
 // @Summary Получение турниров на ближайшие 2 дня
+// @Security ApiKeyAuth
 // @Schemes
 // @Description Дата берётся автоматически
 // @Tags tournament
+// @Accept json
 // @Produce json
 // @Success 200 {object} []tournaments.Tournament
 // @Failure 400 {object} Error
@@ -277,8 +279,13 @@ func (api *Api) GetMatches(ctx *gin.Context) {
 // @Param league path string true "league" Enums(NHL, KHL, Both)
 // @Router /tournament/get_tournaments/{league} [get]
 func (api *Api) GetTournaments(ctx *gin.Context) {
-	//var leagueName tournaments.League
-	//var leagueName string
+
+	_, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("GetTournamentTeam:", err)
+		return
+	}
+
 	leagueName := ctx.Param("league")
 	if leagueName == "" {
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(errors.New("empty league name")))
@@ -287,7 +294,7 @@ func (api *Api) GetTournaments(ctx *gin.Context) {
 
 	league := new(tournaments.League)
 	*league = league.GetLeagueId(leagueName)
-	tournaments, err := api.services.Tournaments.GetTournaments(ctx, *league)
+	tournamentsInfo, err := api.services.Tournaments.GetTournaments(ctx, *league)
 	if errors.Is(err, service.NotFoundTournaments) {
 		log.Printf("GetTournaments: %v", err)
 		ctx.JSON(http.StatusNotFound, getNotFoundError())
@@ -299,7 +306,7 @@ func (api *Api) GetTournaments(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, tournaments)
+	ctx.JSON(http.StatusOK, tournamentsInfo)
 }
 
 // getTournamentRoster godoc
@@ -538,9 +545,11 @@ type TournamentID struct {
 
 // GetMatchesByTournId godoc
 // @Summary Получение матчей по id турнира
+// @Security ApiKeyAuth
 // @Schemes
 // @Description Возвращается вся необходимая информация о матчах
 // @Tags tournament
+// @Accept json
 // @Produce json
 // @Success 200 {object} []tournaments.GetTournamentsTotalInfo
 // @Failure 400 {object} Error
@@ -549,6 +558,12 @@ type TournamentID struct {
 // @Param tournament_id path int64 true  "id турнира"
 // @Router /tournament/matches_by_tournament_id/{tournament_id} [get]
 func (api *Api) GetMatchesByTournId(ctx *gin.Context) {
+	_, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("GetTournamentTeam:", err)
+		return
+	}
+
 	var tourId TournamentID
 	if err := ctx.ShouldBindUri(&tourId); err != nil {
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))

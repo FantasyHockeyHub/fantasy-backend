@@ -29,7 +29,10 @@ type EventsStorage interface {
 	GetMatchesByDate(context.Context, int64, int64, tournaments.League) ([]tournaments.Matches, error)
 	CreateTournaments(context.Context, []tournaments.Tournament) error
 	GetTournamentsByDate(context.Context, int64, int64, tournaments.League) ([]tournaments.Tournament, error)
-	UpdateStatusTournamentsByIds(context.Context, []tournaments.ID) error
+	UpdateStatusTournamentsByIds(context.Context, []tournaments.ID, string) error
+	GetInfoByTournamentsId(context.Context, tournaments.ID) (tournaments.GetShotTournaments, error)
+	GetMatchesByTournamentsId(context.Context, tournaments.IDArray) ([]tournaments.GetTournamentsTotalInfo, error)
+	UpdateMatchesInfo(context.Context, []tournaments.GameResult) error
 }
 
 type EventsService struct {
@@ -125,11 +128,12 @@ func (s *EventsService) AddEventsNHL(ctx context.Context) error {
 
 func (s *EventsService) CreateTournaments(ctx context.Context) error {
 	log.Printf("Start CreateTournaments")
-	curTime := time.Now()
-	curTime = curTime.Add(24 * time.Hour)
-	startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 0, 0, 0, 0, time.UTC)
-	endDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 23, 59, 59, 0, time.UTC)
-	KhlMatches, err := s.storage.GetMatchesByDate(ctx, startDay.UnixMilli(), endDay.UnixMilli(), tournaments.KHL)
+
+	startDay, endDay, err := GetTimeForNextDay()
+	if err != nil {
+		log.Println("GetTimeForNextDay: ", err)
+	}
+	KhlMatches, err := s.storage.GetMatchesByDate(ctx, startDay, endDay, tournaments.KHL)
 	if err != nil {
 		return fmt.Errorf("CreateTournaments: %v", err)
 	}
@@ -139,7 +143,7 @@ func (s *EventsService) CreateTournaments(ctx context.Context) error {
 		KhlTournaments = tournaments.NewTournamentHandle(KhlMatches)
 	}
 
-	NhlMatches, err := s.storage.GetMatchesByDate(ctx, startDay.UnixMilli(), endDay.UnixMilli(), tournaments.NHL)
+	NhlMatches, err := s.storage.GetMatchesByDate(ctx, startDay, endDay, tournaments.NHL)
 	if err != nil {
 		return fmt.Errorf("CreateTournaments: %v", err)
 	}
@@ -159,35 +163,84 @@ func (s *EventsService) CreateTournaments(ctx context.Context) error {
 }
 
 func (s *EventsService) GetTournamentsByNextDay(ctx context.Context, league tournaments.League) ([]tournaments.Tournament, error) {
-	curTime := time.Now()
-	tomorrowTime := curTime.Add(24 * time.Hour)
-	//startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 21, 0, 0, 0, time.UTC)
-	startDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 0, 0, 0, 0, time.UTC)
-	endDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 23, 59, 59, 0, time.UTC)
+	startDay, endDay, err := GetTimeForNextDay()
+	if err != nil {
+		log.Println("GetTimeForNextDay: ", err)
+	}
 
-	//tomorrowTime := time.Now()
-	////tomorrowTime := curTime.Add(24 * time.Hour)
-	//startDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 0, 0, 0, 0, time.UTC)
-	//endDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 23, 59, 59, 0, time.UTC)
-
-	tourn, err := s.storage.GetTournamentsByDate(ctx, startDay.UnixMilli(), endDay.UnixMilli(), league)
+	tourn, err := s.storage.GetTournamentsByDate(ctx, startDay, endDay, league)
 	if len(tourn) == 0 {
 		return tourn, NotFoundTour
 	}
 	if err != nil {
 		return tourn, fmt.Errorf("GetMatchesDay: %v", err)
 	}
-	log.Println(len(tourn))
 
 	return tourn, nil
 }
 
-func (s *EventsService) UpdateStatusTournaments(ctx context.Context, tourID []tournaments.ID) error {
+func (s *EventsService) UpdateStatusTournaments(ctx context.Context, tourID []tournaments.ID, statusName string) error {
 
 	log.Printf("Start UpdateStatusTournaments")
-	err := s.storage.UpdateStatusTournamentsByIds(ctx, tourID)
+	err := s.storage.UpdateStatusTournamentsByIds(ctx, tourID, statusName)
 	if err != nil {
 		return fmt.Errorf("UpdateStatusTournamentsByIds: %v", err)
 	}
+	return nil
+}
+
+func (s *EventsService) UpdateMatches(ctx context.Context, tourID []tournaments.ID) error {
+	log.Printf("Start UpdateMatches")
+
+	tourInfo, err := s.storage.GetInfoByTournamentsId(ctx, tourID[0])
+	if err != nil {
+		fmt.Errorf("GetInfoByTournamentsId: %v", err)
+	}
+
+	matchesInfo, err := s.storage.GetMatchesByTournamentsId(ctx, tourInfo.Matches)
+	if err != nil {
+		fmt.Errorf("GetMatchesByTournamentsId: %v", err)
+	}
+
+	var gameResults []tournaments.GameResult
+
+	for _, matchId := range matchesInfo {
+		url := fmt.Sprintf("https://api-web.nhle.com/v1/gamecenter/%d/boxscore", matchId.EventId)
+
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return fmt.Errorf("EventsNHL: %v", err)
+		}
+
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return fmt.Errorf("EventsNHL: %v", err)
+		}
+		defer res.Body.Close()
+		decoder := json.NewDecoder(res.Body)
+
+		var gameRes tournaments.GameResult
+		err = decoder.Decode(&gameRes)
+		if err != nil {
+			return fmt.Errorf("error decoding JSON: %v", err)
+		}
+		gameRes.MatchId = matchId.MatchId
+		switch gameRes.GameState {
+		case "OFF":
+			gameRes.GameState = "finished"
+		case "FUT":
+			gameRes.GameState = "not_yet_started"
+		default:
+			gameRes.GameState = "started"
+		}
+
+		gameResults = append(gameResults, gameRes)
+	}
+
+	err = s.storage.UpdateMatchesInfo(ctx, gameResults)
+	if err != nil {
+		return fmt.Errorf("UpdateMatchesInfo: %v", err)
+	}
+
 	return nil
 }

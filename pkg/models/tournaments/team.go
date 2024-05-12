@@ -182,6 +182,14 @@ type Game struct {
 	GameCenterLink string  `json:"gameCenterLink"`
 }
 
+type GameResult struct {
+	ID        int     `json:"id"`
+	GameState string  `json:"gameState"`
+	AwayTeam  TeamNHL `json:"awayTeam"`
+	HomeTeam  TeamNHL `json:"homeTeam"`
+	MatchId   int
+}
+
 type TeamNHL struct {
 	ID     int    `json:"id"`
 	Abbrev string `json:"abbrev"`
