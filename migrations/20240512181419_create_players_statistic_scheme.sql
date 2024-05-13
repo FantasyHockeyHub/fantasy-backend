@@ -2,20 +2,19 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS players_statistic (
     id SERIAL PRIMARY KEY,
-    player_id INTEGER,
-    match_id INTEGER,
+    player_id INTEGER NOT NULL,
+    match_id INTEGER NOT NULL,
     game_date TIMESTAMP,
     opponent VARCHAR(255),
-    score VARCHAR(255),
-    fantasy_points NUMERIC,
-    status VARCHAR(255),
-    goals INTEGER,
-    assists INTEGER,
-    shots INTEGER,
-    pims INTEGER,
-    hits INTEGER,
-    saves INTEGER,
-    missed_goals INTEGER
+    fantasy_points NUMERIC(4,1) DEFAULT 0.0::NUMERIC,
+    goals INTEGER DEFAULT 0::INTEGER,
+    assists INTEGER DEFAULT 0::INTEGER,
+    shots INTEGER DEFAULT 0::INTEGER,
+    pims INTEGER DEFAULT 0::INTEGER,
+    hits INTEGER DEFAULT 0::INTEGER,
+    saves INTEGER DEFAULT 0::INTEGER,
+    missed_goals INTEGER DEFAULT 0::INTEGER,
+    shutout BOOLEAN DEFAULT false::BOOLEAN
 );
 -- +goose StatementEnd
 
