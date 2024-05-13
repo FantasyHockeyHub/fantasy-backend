@@ -52,8 +52,8 @@ func (s *TeamsService) CreateTeamsKHL(ctx context.Context, teams []tournaments.T
 func (s *TeamsService) GetMatchesDay(ctx context.Context, league tournaments.League) ([]tournaments.Matches, error) {
 	curTime := time.Now()
 	curTime = curTime.Add(24 * time.Hour)
-	startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 0, 0, 0, 0, time.UTC)
-	endDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 23, 59, 59, 0, time.UTC)
+	startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 0, 0, 0, 0, time.UTC).Add(-3 * time.Hour)
+	endDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 23, 59, 59, 0, time.UTC).Add(-3 * time.Hour)
 
 	matches, err := s.storage.GetMatchesByDate(ctx, startDay.UnixMilli(), endDay.UnixMilli(), league)
 	if len(matches) == 0 {
