@@ -36,12 +36,12 @@ type UpdateHockeyEvents struct {
 }
 
 func (job *UpdateHockeyEvents) UpdateDuration(ctx context.Context) time.Duration {
-	tournInfo, err := job.ev.GetTournamentsByNextDay(ctx, 1)
-	//tournInfo1 := tournaments.Tournament{TournamentId: 523294174, TimeStart: 1715532060000, TimeEnd: 1715532180000}
-	//tournInfo2 := tournaments.Tournament{TournamentId: 1631395586, TimeStart: 1715532060000, TimeEnd: 1715532180000}
-	//tournInfo := []tournaments.Tournament{tournInfo1, tournInfo2}
-	//var err error
-	//err = nil
+	//tournInfo, err := job.ev.GetTournamentsByNextDay(ctx, 1)
+	tournInfo1 := tournaments.Tournament{TournamentId: 523294174, TimeStart: 1715721180000, TimeEnd: 1715721300000}
+	tournInfo2 := tournaments.Tournament{TournamentId: 1631395586, TimeStart: 1715721180000, TimeEnd: 1715721300000}
+	tournInfo := []tournaments.Tournament{tournInfo1, tournInfo2}
+	var err error
+	err = nil
 	if err != nil {
 		switch err {
 		case events.NotFoundTour:
@@ -89,9 +89,9 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 				durationTournament = job.dailyEndTime.Sub(job.dailyGetTime)
 			}
 
-			durationNext := job.UpdateDuration(ctx)
-			timer.Reset(durationNext)
-			//timer.Reset(time.Hour * 24)
+			//durationNext := job.UpdateDuration(ctx)
+			//timer.Reset(durationNext)
+			timer.Reset(time.Hour * 24)
 
 			if durationTournament != 0 {
 				//запускаем получение данных о матчах каждые 15 минут
@@ -100,7 +100,12 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 
 				err := job.ev.UpdateStatusTournaments(ctx, job.tournamentsID, "finished")
 				if err != nil {
-					log.Println("Job UpdateStatusTournaments:", err)
+					log.Println("Job UpdateStatusTournaments: ", err)
+				}
+
+				err = job.ev.GetPlayersStatistic(ctx, job.tournamentsID)
+				if err != nil {
+					log.Println("GetPlayersStatistic: ", err)
 				}
 			}
 
@@ -110,7 +115,7 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 
 func (job *UpdateHockeyEvents) GetMatchesResult(ctx context.Context, cancel context.CancelFunc) {
 	defer cancel()
-	ticker := time.NewTicker(10 * time.Minute)
+	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
 	for {
 		select {
