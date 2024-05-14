@@ -1444,6 +1444,9 @@
                 "teamID": {
                     "type": "integer"
                 },
+                "teamLogo": {
+                    "type": "string"
+                },
                 "teamName": {
                     "type": "string"
                 },
@@ -1491,6 +1494,9 @@
                 },
                 "teamID": {
                     "type": "integer"
+                },
+                "teamLogo": {
+                    "type": "string"
                 },
                 "teamName": {
                     "type": "string"

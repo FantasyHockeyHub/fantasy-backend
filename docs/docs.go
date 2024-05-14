@@ -1454,6 +1454,9 @@ const docTemplate = `{
                 "teamID": {
                     "type": "integer"
                 },
+                "teamLogo": {
+                    "type": "string"
+                },
                 "teamName": {
                     "type": "string"
                 },
@@ -1501,6 +1504,9 @@ const docTemplate = `{
                 },
                 "teamID": {
                     "type": "integer"
+                },
+                "teamLogo": {
+                    "type": "string"
                 },
                 "teamName": {
                     "type": "string"

@@ -51,7 +51,7 @@ func (p *PostgresStorage) CreatePlayers(playersData []players.Player) error {
 func (p *PostgresStorage) GetPlayers(playersFilter players.PlayersFilter) ([]players.PlayerResponse, error) {
 	var res []players.PlayerResponse
 
-	query := "SELECT p.id, p.position, p.name, p.team_id, p.sweater_number, p.photo_link, p.league, p.player_cost, t.team_name FROM players p INNER JOIN teams t ON p.team_id = t.team_id WHERE 1=1"
+	query := "SELECT p.id, p.position, p.name, p.team_id, p.sweater_number, p.photo_link, p.league, p.player_cost, t.team_name, t.team_logo FROM players p INNER JOIN teams t ON p.team_id = t.team_id WHERE 1=1"
 
 	if len(playersFilter.Players) > 0 {
 		query += " AND p.id IN ("
@@ -121,7 +121,7 @@ func (p *PostgresStorage) GetPlayerByID(playerID int) (players.PlayerResponse, e
 func (p *PostgresStorage) GetPlayerCards(filter players.PlayerCardsFilter) ([]players.PlayerCardResponse, error) {
 	var res []players.PlayerCardResponse
 
-	query := "SELECT pc.id, pc.profile_id, pc.player_id, pc.rarity, pc.multiply, pc.bonus_metric, pc.unpacked, p.position, p.name, p.team_id, p.sweater_number, p.photo_link, p.league, t.team_name FROM player_cards pc INNER JOIN players p ON pc.player_id = p.id INNER JOIN teams t ON p.team_id = t.team_id WHERE 1=1"
+	query := "SELECT pc.id, pc.profile_id, pc.player_id, pc.rarity, pc.multiply, pc.bonus_metric, pc.unpacked, p.position, p.name, p.team_id, p.sweater_number, p.photo_link, p.league, t.team_name, t.team_logo FROM player_cards pc INNER JOIN players p ON pc.player_id = p.id INNER JOIN teams t ON p.team_id = t.team_id WHERE 1=1"
 
 	if filter.League != 0 {
 		query += fmt.Sprintf(" AND p.league = %d", filter.League)
