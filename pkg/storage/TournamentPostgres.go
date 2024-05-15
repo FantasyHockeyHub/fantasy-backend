@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
@@ -10,6 +11,7 @@ import (
 	"github.com/lib/pq"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
@@ -182,4 +184,48 @@ func (p *PostgresStorage) EditTournamentTeam(teamInput tournaments.TournamentTea
 	}
 
 	return nil
+}
+
+func (p *PostgresStorage) GetTournamentsInfo(filter tournaments.TournamentFilter) ([]tournaments.Tournament, error) {
+	var res []tournaments.Tournament
+	query := "SELECT tournaments.id, league, title, matches_ids, started_at, end_at, players_amount, deposit, prize_fond, status_tournament FROM tournaments"
+
+	if filter.ProfileID != uuid.Nil {
+		query += fmt.Sprintf(" INNER JOIN user_roster ON tournaments.id = user_roster.tournament_id WHERE user_roster.user_id = '%s'", filter.ProfileID.String())
+	} else {
+		query += " WHERE 1=1"
+	}
+
+	if filter.TournamentID != 0 {
+		query += fmt.Sprintf(" AND id = %d", filter.TournamentID)
+	}
+
+	if filter.League != 0 {
+		query += fmt.Sprintf(" AND league = %d", filter.League)
+	}
+
+	if filter.Status != "" {
+		switch filter.Status {
+		case "active":
+			query += fmt.Sprintf(" AND (status_tournament = '%s' OR status_tournament = '%s')", "not_yet_started", "started")
+		default:
+			query += fmt.Sprintf(" AND status_tournament = '%s'", filter.Status)
+		}
+	}
+
+	err := p.db.Select(&res, query)
+	if err != nil {
+		return []tournaments.Tournament{}, err
+	}
+
+	if len(res) == 0 {
+		res = []tournaments.Tournament{}
+	}
+
+	for i, _ := range res {
+		res[i].TimeStartTS = time.Unix(res[i].TimeStart/1000, 0)
+		res[i].TimeEndTS = time.Unix(res[i].TimeEnd/1000, 0)
+	}
+
+	return res, nil
 }
