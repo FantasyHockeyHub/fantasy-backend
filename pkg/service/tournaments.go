@@ -43,6 +43,7 @@ type TournamentsStorage interface {
 	CreateTournamentTeam(teamInput tournaments.TournamentTeamModel) error
 	GetTournamentTeam(userID uuid.UUID, tournamentID int) (players.UserTeam, error)
 	EditTournamentTeam(teamInput tournaments.TournamentTeamModel) error
+	GetTournamentsInfo(filter tournaments.TournamentFilter) ([]tournaments.Tournament, error)
 }
 
 type TournamentsService struct {
@@ -333,4 +334,14 @@ func (s *TournamentsService) EditTournamentTeam(inp tournaments.TournamentTeamMo
 	}
 
 	return nil
+}
+
+func (s *TournamentsService) GetTournamentsInfo(filter tournaments.TournamentFilter) ([]tournaments.Tournament, error) {
+	res, err := s.storage.GetTournamentsInfo(filter)
+	if err != nil {
+		log.Println("Service. GetTournamentsInfo:", err)
+		return res, err
+	}
+
+	return res, nil
 }

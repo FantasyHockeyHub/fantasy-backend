@@ -229,8 +229,6 @@ definitions:
     type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Tournament:
     properties:
-      TimeStart:
-        type: integer
       deposit:
         type: integer
       league:
@@ -247,6 +245,12 @@ definitions:
         type: string
       timeEnd:
         type: integer
+      timeEndTS:
+        type: string
+      timeStart:
+        type: integer
+      timeStartTS:
+        type: string
       title:
         type: string
       tournamentId:
@@ -956,9 +960,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.UserTeamResponse'
-            type: array
+            $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.UserTeamResponse'
         "400":
           description: Bad Request
           schema:
@@ -987,7 +989,7 @@ paths:
         name: tournamentID
         required: true
         type: integer
-      - description: Список идентификаторов команд
+      - description: Список идентификаторов игроков
         in: body
         name: team
         required: true
@@ -1030,7 +1032,7 @@ paths:
         name: tournamentID
         required: true
         type: integer
-      - description: Список идентификаторов команд
+      - description: Список идентификаторов игроков
         in: body
         name: team
         required: true
@@ -1060,6 +1062,56 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Редактирование команды пользователя в турнире
+      tags:
+      - tournament
+  /tournaments:
+    get:
+      consumes:
+      - application/json
+      description: Получение турниров
+      parameters:
+      - description: profileID
+        in: query
+        name: profileID
+        type: string
+      - description: tournamentID
+        in: query
+        name: tournamentID
+        type: integer
+      - description: league
+        enum:
+        - NHL
+        - KHL
+        in: query
+        name: league
+        type: string
+      - description: status
+        enum:
+        - not_yet_started
+        - started
+        - finished
+        - active
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.Tournament'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Получение турниров
       tags:
       - tournament
   /user/delete:

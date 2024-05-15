@@ -53,6 +53,7 @@ type Tournaments interface {
 	GetTeamCost(team []int) (float32, error)
 	GetTournamentTeam(userID uuid.UUID, tournamentID int) (players.UserTeamResponse, error)
 	EditTournamentTeam(inp tournaments.TournamentTeamModel) error
+	GetTournamentsInfo(filter tournaments.TournamentFilter) ([]tournaments.Tournament, error)
 }
 
 type Store interface {
