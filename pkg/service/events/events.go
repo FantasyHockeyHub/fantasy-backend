@@ -183,7 +183,7 @@ func (s *EventsService) GetTournamentsByNextDay(ctx context.Context, league tour
 
 func (s *EventsService) UpdateStatusTournaments(ctx context.Context, tourID []tournaments.ID, statusName string) error {
 
-	log.Printf("Start UpdateStatusTournaments")
+	log.Println("Start UpdateStatusTournaments ", tourID[0], ", status = ", statusName, "time: ", time.Now())
 	err := s.storage.UpdateStatusTournamentsByIds(ctx, tourID, statusName)
 	if err != nil {
 		return fmt.Errorf("UpdateStatusTournamentsByIds: %v", err)
@@ -285,7 +285,7 @@ func CountFantasyPointsGoalies(statistic players.PlayersStatisticDB) float32 {
 }
 
 func (s *EventsService) GetPlayersStatistic(ctx context.Context, tourID []tournaments.ID) error {
-	log.Printf("Start GetPlayersStatistic")
+	log.Println("Start GetPlayersStatistic by tour: ", tourID[0], " Time: ", time.Now())
 
 	tourInfo, err := s.storage.GetInfoByTournamentsId(ctx, tourID[0])
 	if err != nil {
