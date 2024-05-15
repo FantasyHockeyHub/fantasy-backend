@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type ID int
@@ -46,16 +47,18 @@ func (a *IDArray) Scan(value interface{}) error {
 }
 
 type Tournament struct {
-	TournamentId     ID      `db:"id" json:"tournamentId"`
-	League           League  `db:"league" json:"league"`
-	Title            string  `db:"title" json:"title"`
-	MatchesIds       IDArray `db:"matches_ids" json:"matchesIds"`
-	TimeStart        int64   `db:"started_at" json:"TimeStart"`
-	TimeEnd          int64   `db:"end_at" json:"timeEnd"`
-	PlayersAmount    int     `db:"players_amount" json:"playersAmount"`
-	Deposit          int     `db:"deposit" json:"deposit"`
-	PrizeFond        int     `db:"prize_fond" json:"prizeFond"`
-	StatusTournament string  `db:"status_tournament" json:"statusTournament"`
+	TournamentId     ID        `db:"id" json:"tournamentId"`
+	League           League    `db:"league" json:"league"`
+	Title            string    `db:"title" json:"title"`
+	MatchesIds       IDArray   `db:"matches_ids" json:"matchesIds"`
+	TimeStart        int64     `db:"started_at" json:"timeStart"`
+	TimeStartTS      time.Time `json:"timeStartTS"`
+	TimeEnd          int64     `db:"end_at" json:"timeEnd"`
+	TimeEndTS        time.Time `json:"timeEndTS"`
+	PlayersAmount    int       `db:"players_amount" json:"playersAmount"`
+	Deposit          int       `db:"deposit" json:"deposit"`
+	PrizeFond        int       `db:"prize_fond" json:"prizeFond"`
+	StatusTournament string    `db:"status_tournament" json:"statusTournament"`
 }
 
 type GetShotTournaments struct {
@@ -141,4 +144,11 @@ type TournamentTeamModel struct {
 	UserTeam     []int `json:"userTeam"`
 	TeamCost     float32
 	Deposit      int
+}
+
+type TournamentFilter struct {
+	TournamentID int       `json:"tournamentID"`
+	Status       string    `json:"status"`
+	ProfileID    uuid.UUID `json:"profileID"`
+	League       League    `json:"league"`
 }

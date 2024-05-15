@@ -94,6 +94,7 @@ type PlayerResponse struct {
 	Photo         string             `json:"photo"  db:"photo_link"`
 	TeamID        int                `json:"teamID"  db:"team_id"`
 	TeamName      string             `json:"teamName" db:"team_name"`
+	TeamLogo      string             `json:"teamLogo" db:"team_logo"`
 	Position      Position           `json:"position"  db:"position"`
 	PositionName  string             `json:"positionName"`
 	League        tournaments.League `json:"league"  db:"league"`
@@ -126,6 +127,7 @@ type PlayerCardResponse struct {
 	Photo           string             `json:"photo"  db:"photo_link"`
 	TeamID          int                `json:"teamID"  db:"team_id"`
 	TeamName        string             `json:"teamName" db:"team_name"`
+	TeamLogo        string             `json:"teamLogo" db:"team_logo"`
 	Position        Position           `json:"position"  db:"position"`
 	PositionName    string             `json:"positionName"`
 	League          tournaments.League `json:"league"  db:"league"`

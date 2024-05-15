@@ -8,6 +8,7 @@ import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"strconv"
@@ -369,7 +370,7 @@ func (api Api) getTournamentRoster(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param tournamentID query int true "tournamentID"
-// @Param team body []int true "Список идентификаторов команд"
+// @Param team body []int true "Список идентификаторов игроков"
 // @Success 200 {object} StatusResponse
 // @Failure 400,401 {object} Error
 // @Failure 500 {object} Error
@@ -434,7 +435,7 @@ func (api Api) createTournamentTeam(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param tournamentID query int true "tournamentID"
-// @Success 200 {array} players.UserTeamResponse
+// @Success 200 {object} players.UserTeamResponse
 // @Failure 400,401 {object} Error
 // @Failure 500 {object} Error
 // @Router /tournament/team [GET]
@@ -484,7 +485,7 @@ func (api Api) getTournamentTeam(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param tournamentID query int true "tournamentID"
-// @Param team body []int true "Список идентификаторов команд"
+// @Param team body []int true "Список идентификаторов игроков"
 // @Success 200 {object} StatusResponse
 // @Failure 400,401 {object} Error
 // @Failure 500 {object} Error
@@ -582,4 +583,79 @@ func (api *Api) GetMatchesByTournId(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, tournInfo)
 
+}
+
+// getTournamentsInfo godoc
+// @Summary Получение турниров
+// @Schemes
+// @Description Получение турниров
+// @Tags tournament
+// @Accept json
+// @Produce json
+// @Param profileID query string false "profileID"
+// @Param tournamentID query int false "tournamentID"
+// @Param league query string false "league" Enums(NHL, KHL)
+// @Param status query string false "status" Enums(not_yet_started, started, finished, active)
+// @Success 200 {array} tournaments.Tournament
+// @Failure 400 {object} Error
+// @Failure 500 {object} Error
+// @Router /tournaments [GET]
+func (api Api) getTournamentsInfo(ctx *gin.Context) {
+	var filterTournament tournaments.TournamentFilter
+	query := ctx.Request.URL.Query()
+
+	if query.Has("profileID") {
+		parsedUserID, err := uuid.Parse(query.Get("profileID"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+		filterTournament.ProfileID = parsedUserID
+	}
+
+	if query.Has("tournamentID") {
+		id := query.Get("tournamentID")
+		tournamentID, err := strconv.Atoi(id)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+		filterTournament.TournamentID = tournamentID
+	}
+
+	if query.Has("status") {
+		switch query.Get("status") {
+		case "not_yet_started":
+			filterTournament.Status = "not_yet_started"
+		case "started":
+			filterTournament.Status = "started"
+		case "finished":
+			filterTournament.Status = "finished"
+		case "active":
+			filterTournament.Status = "active"
+		default:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+	}
+
+	if query.Has("league") {
+		switch query.Get("league") {
+		case "NHL":
+			filterTournament.League = tournaments.NHL
+		case "KHL":
+			filterTournament.League = tournaments.KHL
+		default:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+	}
+
+	res, err := api.services.Tournaments.GetTournamentsInfo(filterTournament)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, res)
 }
