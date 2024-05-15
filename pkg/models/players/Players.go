@@ -4,6 +4,7 @@ import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"github.com/google/uuid"
+	"time"
 )
 
 type Position int8
@@ -158,4 +159,84 @@ type UserTeam struct {
 type UserTeamResponse struct {
 	Balance float64          `json:"balance"`
 	Players []PlayerResponse `json:"players"`
+}
+
+//for players statistic
+
+type PlayerStatistic struct {
+	PlayerID           int     `json:"playerId"`
+	SweaterNumber      int     `json:"sweaterNumber"`
+	Name               Name    `json:"name"`
+	Position           string  `json:"position"`
+	Goals              int     `json:"goals"`
+	Assists            int     `json:"assists"`
+	Points             int     `json:"points"`
+	PlusMinus          int     `json:"plusMinus"`
+	PIM                int     `json:"pim"`
+	Hits               int     `json:"hits"`
+	PowerPlayGoals     int     `json:"powerPlayGoals"`
+	Shots              int     `json:"shots"`
+	FaceoffWinningPctg float64 `json:"faceoffWinningPctg"`
+	TOI                string  `json:"toi"`
+}
+
+type Name struct {
+	Default string `json:"default"`
+}
+
+type GoalieStatistic struct {
+	PlayerID                 int    `json:"playerId"`
+	SweaterNumber            int    `json:"sweaterNumber"`
+	Name                     Name   `json:"name"`
+	Position                 string `json:"position"`
+	EvenStrengthShotsAgainst string `json:"evenStrengthShotsAgainst"`
+	PowerPlayShotsAgainst    string `json:"powerPlayShotsAgainst"`
+	ShorthandedShotsAgainst  string `json:"shorthandedShotsAgainst"`
+	SaveShotsAgainst         string `json:"saveShotsAgainst"`
+	SavePctg                 string `json:"savePctg"`
+	EvenStrengthGoalsAgainst int    `json:"evenStrengthGoalsAgainst"`
+	PowerPlayGoalsAgainst    int    `json:"powerPlayGoalsAgainst"`
+	ShorthandedGoalsAgainst  int    `json:"shorthandedGoalsAgainst"`
+	PIM                      int    `json:"pim"`
+	GoalsAgainst             int    `json:"goalsAgainst"`
+	TOI                      string `json:"toi"`
+	Starter                  bool   `json:"starter"`
+	Decision                 string `json:"decision"`
+}
+
+type TeamPlayersStatistic struct {
+	Forwards []PlayerStatistic `json:"forwards"`
+	Defense  []PlayerStatistic `json:"defense"`
+	Goalies  []GoalieStatistic `json:"goalies"`
+}
+
+type PlayerByGameStats struct {
+	AwayTeam TeamPlayersStatistic `json:"awayTeam"`
+	HomeTeam TeamPlayersStatistic `json:"homeTeam"`
+}
+
+type TotalPlayersStatistic struct {
+	ID                int                 `json:"id"`
+	GameDate          string              `json:"gameDate"`
+	AwayTeam          tournaments.TeamNHL `json:"awayTeam"`
+	HomeTeam          tournaments.TeamNHL `json:"homeTeam"`
+	PlayerByGameStats PlayerByGameStats   `json:"playerByGameStats"`
+	MatchIdLocal      int
+}
+
+type PlayersStatisticDB struct {
+	PlayerIdNhl  int
+	MatchIdLocal int
+	GameDate     time.Time
+	Opponent     string
+	FantasyPoint float32
+	Goals        int
+	Assists      int
+	Shots        int
+	Pims         int
+	Hits         int
+	Saves        int
+	MissedGoals  int
+	Shutout      bool
+	League       tournaments.League
 }
