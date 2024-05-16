@@ -192,7 +192,7 @@ func (s *EventsService) UpdateStatusTournaments(ctx context.Context, tourID []to
 }
 
 func (s *EventsService) UpdateMatches(ctx context.Context, tourID []tournaments.ID) error {
-	log.Printf("Start UpdateMatches")
+	log.Println("Start UpdateMatches ", tourID)
 
 	tourInfo, err := s.storage.GetInfoByTournamentsId(ctx, tourID[0])
 	if err != nil {
