@@ -99,7 +99,7 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 			if durationTournament != 0 {
 				//запускаем получение данных о матчах каждые 15 минут
 				ctx2, cancel := context.WithTimeout(ctx, durationTournament)
-				job.GetMatchesResult(ctx2, cancel)
+				job.GetMatchesResult(ctx2, cancel, tourId)
 
 				err := job.ev.UpdateStatusTournaments(ctx, tourId, "finished")
 				if err != nil {
@@ -116,7 +116,7 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 	}
 }
 
-func (job *UpdateHockeyEvents) GetMatchesResult(ctx context.Context, cancel context.CancelFunc) {
+func (job *UpdateHockeyEvents) GetMatchesResult(ctx context.Context, cancel context.CancelFunc, tourId []tournaments.ID) {
 	defer cancel()
 	ticker := time.NewTicker(10 * time.Minute)
 	defer ticker.Stop()
@@ -125,7 +125,7 @@ func (job *UpdateHockeyEvents) GetMatchesResult(ctx context.Context, cancel cont
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			err := job.ev.UpdateMatches(ctx, job.tournamentsID)
+			err := job.ev.UpdateMatches(ctx, tourId)
 			if err != nil {
 				log.Println("Job UpdateMatches:", err)
 			}
