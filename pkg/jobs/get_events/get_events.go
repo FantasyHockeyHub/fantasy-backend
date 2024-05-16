@@ -14,7 +14,7 @@ func NewGetHokeyEvents(
 ) *GetHokeyEvents {
 	curTime := time.Now()
 	return &GetHokeyEvents{
-		dailyGetTime: time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 3, 0, 0, 0, time.Local),
+		dailyGetTime: time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 1, 0, 0, 0, time.Local),
 		//events:       events,
 		ev: ev,
 	}

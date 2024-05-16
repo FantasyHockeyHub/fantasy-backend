@@ -88,6 +88,9 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 				}
 				durationTournament = job.dailyEndTime.Sub(job.dailyGetTime)
 			}
+			tourId := make([]tournaments.ID, 2)
+			tourId[0] = job.tournamentsID[0]
+			tourId[1] = job.tournamentsID[1]
 
 			durationNext := job.UpdateDuration(ctx)
 			timer.Reset(durationNext)
@@ -98,12 +101,12 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 				ctx2, cancel := context.WithTimeout(ctx, durationTournament)
 				job.GetMatchesResult(ctx2, cancel)
 
-				err := job.ev.UpdateStatusTournaments(ctx, job.tournamentsID, "finished")
+				err := job.ev.UpdateStatusTournaments(ctx, tourId, "finished")
 				if err != nil {
 					log.Println("Job UpdateStatusTournaments: ", err)
 				}
 
-				err = job.ev.GetPlayersStatistic(ctx, job.tournamentsID)
+				err = job.ev.GetPlayersStatistic(ctx, tourId)
 				if err != nil {
 					log.Println("GetPlayersStatistic: ", err)
 				}
@@ -115,7 +118,7 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 
 func (job *UpdateHockeyEvents) GetMatchesResult(ctx context.Context, cancel context.CancelFunc) {
 	defer cancel()
-	ticker := time.NewTicker(1 * time.Minute)
+	ticker := time.NewTicker(10 * time.Minute)
 	defer ticker.Stop()
 	for {
 		select {
