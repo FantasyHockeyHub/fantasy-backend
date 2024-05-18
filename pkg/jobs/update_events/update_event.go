@@ -20,7 +20,7 @@ func NewUpdateHockeyEvents(
 		location = time.UTC
 	}
 	return &UpdateHockeyEvents{
-		dailyGetTime:  time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 22, 0, 0, 0, location).Add(-3 * time.Hour),
+		dailyGetTime:  time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 22, 0, 0, 0, location),
 		dailyEndTime:  curTime,
 		ev:            ev,
 		tournamentsID: tournamentsID,
@@ -92,10 +92,6 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 			tourId[0] = job.tournamentsID[0]
 			tourId[1] = job.tournamentsID[1]
 
-			durationNext := job.UpdateDuration(ctx)
-			timer.Reset(durationNext)
-			//timer.Reset(time.Hour * 24)
-
 			if durationTournament != 0 {
 				//запускаем получение данных о матчах каждые 15 минут
 				ctx2, cancel := context.WithTimeout(ctx, durationTournament)
@@ -111,6 +107,9 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 					log.Println("GetPlayersStatistic: ", err)
 				}
 			}
+			durationNext := job.UpdateDuration(ctx)
+			timer.Reset(durationNext)
+			//timer.Reset(time.Hour * 24)
 
 		}
 	}
