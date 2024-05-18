@@ -169,6 +169,7 @@ func (s *EventsService) GetTournamentsByNextDay(ctx context.Context, league tour
 	if err != nil {
 		log.Println("GetTimeForNextDay: ", err)
 	}
+	log.Println("Get time by next day for get tour:", startDay, endDay)
 
 	tourn, err := s.storage.GetTournamentsByDate(ctx, startDay, endDay, league)
 	if len(tourn) == 0 {
@@ -177,6 +178,7 @@ func (s *EventsService) GetTournamentsByNextDay(ctx context.Context, league tour
 	if err != nil {
 		return tourn, fmt.Errorf("GetMatchesDay: %v", err)
 	}
+	log.Println("End get tournament: ", tourn[0].TournamentId, tourn[1].TournamentId)
 
 	return tourn, nil
 }
