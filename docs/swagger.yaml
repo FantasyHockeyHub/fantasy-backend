@@ -256,6 +256,13 @@ definitions:
       tournamentId:
         type: integer
     type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.UserTeamInput:
+    properties:
+      team:
+        items:
+          type: integer
+        type: array
+    type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_user.ChangePasswordInput:
     properties:
       newPassword:
@@ -989,14 +996,12 @@ paths:
         name: tournamentID
         required: true
         type: integer
-      - description: Список идентификаторов игроков
+      - description: Входные параметры
         in: body
-        name: team
+        name: data
         required: true
         schema:
-          items:
-            type: integer
-          type: array
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.UserTeamInput'
       produces:
       - application/json
       responses:
@@ -1032,14 +1037,12 @@ paths:
         name: tournamentID
         required: true
         type: integer
-      - description: Список идентификаторов игроков
+      - description: Входные параметры
         in: body
-        name: team
+        name: data
         required: true
         schema:
-          items:
-            type: integer
-          type: array
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.UserTeamInput'
       produces:
       - application/json
       responses:
