@@ -10,8 +10,8 @@ func GetTimeForNextDay() (int64, int64, error) {
 	if err != nil {
 		curTime := time.Now().UTC().Truncate(24 * time.Hour)
 		tomorrow := curTime.Add(24 * time.Hour)
-		startDay := time.Date(tomorrow.Year(), tomorrow.Month(), tomorrow.Day(), 0, 0, 0, 0, time.UTC).Add(-3 * time.Hour)
-		endDay := time.Date(tomorrow.Year(), tomorrow.Month(), tomorrow.Day(), 23, 59, 59, 0, time.UTC).Add(-3 * time.Hour)
+		startDay := time.Date(tomorrow.Year(), tomorrow.Month(), tomorrow.Day(), 0, 0, 0, 0, time.UTC)
+		endDay := time.Date(tomorrow.Year(), tomorrow.Month(), tomorrow.Day(), 23, 59, 59, 0, time.UTC)
 		log.Println("GetTimeForNextDay: start: ", startDay, "end:", endDay)
 		return startDay.UnixMilli(), endDay.UnixMilli(), err
 	}
@@ -28,8 +28,8 @@ func GetTimeFor2Days() (int64, int64, error) {
 	if err != nil {
 		curTime := time.Now()
 		tomorrowTime := curTime.Add(24 * time.Hour)
-		startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 0, 0, 0, 0, time.UTC).Add(-3 * time.Hour)
-		endDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 23, 59, 59, 0, time.UTC).Add(-3 * time.Hour)
+		startDay := time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 0, 0, 0, 0, time.UTC)
+		endDay := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(), 23, 59, 59, 0, time.UTC)
 		log.Println("GetTimeFor2Days: start: ", startDay, "end:", endDay)
 		return startDay.UnixMilli(), endDay.UnixMilli(), err
 	}
