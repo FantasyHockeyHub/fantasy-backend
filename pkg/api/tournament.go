@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	_ "github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
@@ -370,7 +371,7 @@ func (api Api) getTournamentRoster(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param tournamentID query int true "tournamentID"
-// @Param team body []int true "Список идентификаторов игроков"
+// @Param data body tournaments.UserTeamInput true "Входные параметры"
 // @Success 200 {object} StatusResponse
 // @Failure 400,401 {object} Error
 // @Failure 500 {object} Error
@@ -398,10 +399,13 @@ func (api Api) createTournamentTeam(ctx *gin.Context) {
 		return
 	}
 
-	if err = ctx.BindJSON(&inp.UserTeam); err != nil {
+	var bodyInp tournaments.UserTeamInput
+	if err = ctx.BindJSON(&bodyInp); err != nil {
+		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputBodyError))
 		return
 	}
+	inp.UserTeam = bodyInp.Team
 
 	err = api.services.Tournaments.CreateTournamentTeam(inp)
 	if err != nil {
@@ -485,7 +489,7 @@ func (api Api) getTournamentTeam(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param tournamentID query int true "tournamentID"
-// @Param team body []int true "Список идентификаторов игроков"
+// @Param data body tournaments.UserTeamInput true "Входные параметры"
 // @Success 200 {object} StatusResponse
 // @Failure 400,401 {object} Error
 // @Failure 500 {object} Error
@@ -513,10 +517,12 @@ func (api Api) editTournamentTeam(ctx *gin.Context) {
 		return
 	}
 
-	if err = ctx.BindJSON(&inp.UserTeam); err != nil {
+	var bodyInp tournaments.UserTeamInput
+	if err = ctx.BindJSON(&bodyInp); err != nil {
 		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputBodyError))
 		return
 	}
+	inp.UserTeam = bodyInp.Team
 
 	err = api.services.Tournaments.EditTournamentTeam(inp)
 	if err != nil {

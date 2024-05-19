@@ -944,15 +944,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Список идентификаторов игроков",
-                        "name": "team",
+                        "description": "Входные параметры",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "integer"
-                            }
+                            "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.UserTeamInput"
                         }
                     }
                 ],
@@ -1011,15 +1008,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Список идентификаторов игроков",
-                        "name": "team",
+                        "description": "Входные параметры",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "integer"
-                            }
+                            "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.UserTeamInput"
                         }
                     }
                 ],
@@ -1851,6 +1845,17 @@ const docTemplate = `{
                 },
                 "tournamentId": {
                     "type": "integer"
+                }
+            }
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.UserTeamInput": {
+            "type": "object",
+            "properties": {
+                "team": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
