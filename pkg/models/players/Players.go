@@ -226,18 +226,24 @@ type TotalPlayersStatistic struct {
 }
 
 type PlayersStatisticDB struct {
-	PlayerIdNhl  int
-	MatchIdLocal int
-	GameDate     time.Time
-	Opponent     string
-	FantasyPoint float32
-	Goals        int
-	Assists      int
-	Shots        int
-	Pims         int
-	Hits         int
-	Saves        int
-	MissedGoals  int
-	Shutout      bool
-	League       tournaments.League
+	PlayerIdNhl  int                `json:"playerIdNhl,omitempty"`
+	MatchIdLocal int                `json:"matchIdLocal,omitempty"`
+	GameDate     time.Time          `json:"gameDate"`
+	Opponent     string             `json:"opponent,omitempty"`
+	FantasyPoint float32            `json:"fantasyPoint"`
+	Goals        int                `json:"goals"`
+	Assists      int                `json:"assists"`
+	Shots        int                `json:"shots"`
+	Pims         int                `json:"pims"`
+	Hits         int                `json:"hits"`
+	Saves        int                `json:"saves"`
+	MissedGoals  int                `json:"missedGoals"`
+	Shutout      bool               `json:"shutout"`
+	League       tournaments.League `json:"league,omitempty"`
+}
+
+type PlayerFantasyPoints struct {
+	PlayerID           int
+	TotalFantasyPoints float64
+	Cost               float64
 }

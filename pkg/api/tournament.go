@@ -285,6 +285,7 @@ func (api *Api) GetTournaments(ctx *gin.Context) {
 	_, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("GetTournamentTeam:", err)
+		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 
@@ -328,6 +329,7 @@ func (api Api) getTournamentRoster(ctx *gin.Context) {
 	userID, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("GetTournamentRoster:", err)
+		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 
@@ -382,6 +384,7 @@ func (api Api) createTournamentTeam(ctx *gin.Context) {
 	userID, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("CreateTournamentTeam:", err)
+		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 	inp.ProfileID = userID
@@ -447,6 +450,7 @@ func (api Api) getTournamentTeam(ctx *gin.Context) {
 	userID, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("GetTournamentTeam:", err)
+		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 	var tournamentID int
@@ -500,6 +504,7 @@ func (api Api) editTournamentTeam(ctx *gin.Context) {
 	userID, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("EditTournamentTeam:", err)
+		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 	inp.ProfileID = userID
@@ -568,6 +573,7 @@ func (api *Api) GetMatchesByTournId(ctx *gin.Context) {
 	_, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("GetTournamentTeam:", err)
+		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 

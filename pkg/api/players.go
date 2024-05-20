@@ -2,10 +2,12 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -386,4 +388,50 @@ func (api Api) cardUnpacking(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, StatusResponse{"ок"})
+}
+
+type PlayerID struct {
+	ID int `uri:"player_id" binding:"required"`
+}
+
+// GetStatisticByPlayerId godoc
+// @Summary Получение полной статистики по id игрока
+// @Security ApiKeyAuth
+// @Schemes
+// @Description Возвращается все поля статистики за всё время
+// @Tags players
+// @Accept json
+// @Produce json
+// @Success 200 {object} []players.PlayersStatisticDB
+// @Failure 400 {object} Error
+// @Failure 401 {object} Error
+// @Failure 404 {object} Error
+// @Param player_id path int64 true  "id игрока"
+// @Router /players/statistic_player/{player_id} [get]
+func (api *Api) GetStatisticByPlayerId(ctx *gin.Context) {
+	_, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("GetStatisticByPlayerId:", err)
+		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
+		return
+	}
+
+	var playerId PlayerID
+	if err := ctx.ShouldBindUri(&playerId); err != nil {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+		return
+	}
+
+	playerInfo, err := api.services.Players.GetStatisticByPlayerId(ctx, playerId.ID)
+	if err != nil {
+		log.Printf("GetStatisticByPlayerId: %v", err)
+		if errors.Is(err, service.NotFoundPlayerStatistic) {
+			ctx.JSON(http.StatusNotFound, getNotFoundError())
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+		return
+	}
+	ctx.JSON(http.StatusOK, playerInfo)
+
 }
