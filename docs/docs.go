@@ -1533,6 +1533,9 @@ const docTemplate = `{
         "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse": {
             "type": "object",
             "properties": {
+                "avgFantasyPoints": {
+                    "type": "number"
+                },
                 "cardRarity": {
                     "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity"
                 },
