@@ -88,20 +88,21 @@ type PlayersFilter struct {
 }
 
 type PlayerResponse struct {
-	ID            int                `json:"id" db:"id"`
-	Name          string             `json:"name" db:"name"`
-	SweaterNumber int                `json:"sweaterNumber" db:"sweater_number"`
-	Photo         string             `json:"photo"  db:"photo_link"`
-	TeamID        int                `json:"teamID"  db:"team_id"`
-	TeamName      string             `json:"teamName" db:"team_name"`
-	TeamLogo      string             `json:"teamLogo" db:"team_logo"`
-	Position      Position           `json:"position"  db:"position"`
-	PositionName  string             `json:"positionName"`
-	League        tournaments.League `json:"league"  db:"league"`
-	LeagueName    string             `json:"leagueName"`
-	PlayerCost    float32            `json:"playerCost" db:"player_cost"`
-	CardRarity    store.CardRarity   `json:"cardRarity" db:"rarity"`
-	RarityName    string             `json:"rarityName" default:"Default"`
+	ID               int                `json:"id" db:"id"`
+	Name             string             `json:"name" db:"name"`
+	SweaterNumber    int                `json:"sweaterNumber" db:"sweater_number"`
+	Photo            string             `json:"photo"  db:"photo_link"`
+	TeamID           int                `json:"teamID"  db:"team_id"`
+	TeamName         string             `json:"teamName" db:"team_name"`
+	TeamLogo         string             `json:"teamLogo" db:"team_logo"`
+	Position         Position           `json:"position"  db:"position"`
+	PositionName     string             `json:"positionName"`
+	League           tournaments.League `json:"league"  db:"league"`
+	LeagueName       string             `json:"leagueName"`
+	PlayerCost       float32            `json:"playerCost" db:"player_cost"`
+	CardRarity       store.CardRarity   `json:"cardRarity" db:"rarity"`
+	RarityName       string             `json:"rarityName" default:"Default"`
+	AvgFantasyPoints float32            `json:"avgFantasyPoints" db:"avg_fantasy_points"`
 }
 
 type PlayerCardsFilter struct {

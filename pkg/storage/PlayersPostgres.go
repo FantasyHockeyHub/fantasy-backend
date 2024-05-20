@@ -51,7 +51,9 @@ func (p *PostgresStorage) CreatePlayers(playersData []players.Player) error {
 func (p *PostgresStorage) GetPlayers(playersFilter players.PlayersFilter) ([]players.PlayerResponse, error) {
 	var res []players.PlayerResponse
 
-	query := "SELECT p.id, p.position, p.name, p.team_id, p.sweater_number, p.photo_link, p.league, p.player_cost, t.team_name, t.team_logo FROM players p INNER JOIN teams t ON p.team_id = t.team_id WHERE 1=1"
+	query := "SELECT p.id, p.position, p.name, p.team_id, p.sweater_number, p.photo_link, p.league, p.player_cost, " +
+		"t.team_name, t.team_logo, ROUND(COALESCE(AVG(fantasy_points), 0), 1) AS avg_fantasy_points FROM players p " +
+		"INNER JOIN teams t ON p.team_id = t.team_id LEFT JOIN players_statistic ON p.id = players_statistic.player_id WHERE 1=1"
 
 	if len(playersFilter.Players) > 0 {
 		query += " AND p.id IN ("
@@ -84,6 +86,7 @@ func (p *PostgresStorage) GetPlayers(playersFilter players.PlayersFilter) ([]pla
 	}
 
 	query = strings.TrimSuffix(query, "AND")
+	query += " GROUP BY p.id, p.position, p.name, p.team_id, p.sweater_number, p.photo_link, p.league, p.player_cost, t.team_name, t.team_logo"
 
 	err := p.db.Select(&res, query)
 	if err != nil {
