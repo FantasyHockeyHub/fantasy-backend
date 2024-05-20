@@ -1,11 +1,18 @@
 package service
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"log"
+)
+
+var (
+	NotFoundPlayerStatistic = errors.New("not found statistic by player id")
 )
 
 func NewPlayersService(storage PlayersStorage) *PlayersService {
@@ -22,6 +29,7 @@ type PlayersStorage interface {
 	AddPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel) error
 	CardUnpacking(id int, userID uuid.UUID) error
 	InsertPlayerCards(tx *sqlx.Tx, buy store.BuyProductModel, selectedPlayerIDs []int) error
+	GetPlayerStatistics(ctx context.Context, playerID int) ([]players.PlayersStatisticDB, error)
 }
 
 type PlayersService struct {
@@ -106,4 +114,16 @@ func (s *PlayersService) CardUnpacking(id int, userID uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func (s *PlayersService) GetStatisticByPlayerId(ctx context.Context, playerId int) ([]players.PlayersStatisticDB, error) {
+
+	playerStatistic, err := s.storage.GetPlayerStatistics(ctx, playerId)
+	if err != nil {
+		return playerStatistic, fmt.Errorf("GetPlayerStatistics: %v", err)
+	}
+	if len(playerStatistic) <= 0 {
+		return nil, NotFoundPlayerStatistic
+	}
+	return playerStatistic, nil
 }

@@ -20,7 +20,7 @@ func NewUpdateHockeyEvents(
 		location = time.UTC
 	}
 	return &UpdateHockeyEvents{
-		dailyGetTime:  time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 22, 0, 0, 0, location),
+		dailyGetTime:  time.Date(curTime.Year(), curTime.Month(), curTime.Day(), 7, 0, 0, 0, location),
 		dailyEndTime:  curTime,
 		ev:            ev,
 		tournamentsID: tournamentsID,
@@ -71,7 +71,6 @@ func (job *UpdateHockeyEvents) UpdateDuration(ctx context.Context) time.Duration
 func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 
 	durationTillNextExecution := job.UpdateDuration(ctx)
-	//log.Println(durationTillNextExecution)
 
 	timer := time.NewTimer(durationTillNextExecution)
 
@@ -106,6 +105,11 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 				if err != nil {
 					log.Println("GetPlayersStatistic: ", err)
 				}
+			}
+
+			err := job.ev.GeneratePlayersPrice(ctx, tournaments.NHL)
+			if err != nil {
+				log.Println("GeneratePlayersPrice:", err)
 			}
 			durationNext := job.UpdateDuration(ctx)
 			timer.Reset(durationNext)

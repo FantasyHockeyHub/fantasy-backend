@@ -2,6 +2,8 @@ package storage
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
@@ -14,6 +16,7 @@ const (
 	PlayersApiId          = "api_id"
 	TablePlayersStatistic = "players_statistic"
 	PlayerID              = "player_id"
+	PlayerIdTablePlayers  = "id"
 	MatchIdPlayers        = "match_id"
 	GameDate              = "game_date"
 	Opponent              = "opponent"
@@ -26,6 +29,7 @@ const (
 	Saves                 = "saves"
 	MissGoals             = "missed_goals"
 	Shutout               = "shutout"
+	PlayersCost           = "player_cost"
 )
 
 func (p *PostgresStorage) AddPlayersStatistic(ctx context.Context, players []players.PlayersStatisticDB) error {
@@ -95,4 +99,121 @@ func (p *PostgresStorage) AddPlayersStatistic(ctx context.Context, players []pla
 	}
 
 	return nil
+}
+
+func (p *PostgresStorage) GetSumFantasyCoins(ctx context.Context, league tournaments.League) ([]players.PlayerFantasyPoints, error) {
+
+	query, args, err := sq.
+		Select("ps."+PlayerID, "SUM(ps."+FantasyPoints+") AS total_fantasy_points").
+		From(TablePlayersStatistic + " ps").
+		Join(TablePlayers + " p ON ps." + PlayerID + " = p.id").
+		Where(sq.Eq{"p." + League: league}).
+		GroupBy("ps." + PlayerID).
+		OrderBy("total_fantasy_points DESC").
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to build query: %v", err)
+	}
+
+	rows, err := p.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("unable to execute query: %v", err)
+	}
+	defer rows.Close()
+
+	var results []players.PlayerFantasyPoints
+	for rows.Next() {
+		var playerStat players.PlayerFantasyPoints
+		if err := rows.Scan(&playerStat.PlayerID, &playerStat.TotalFantasyPoints); err != nil {
+			return nil, fmt.Errorf("unable to scan row: %v", err)
+		}
+		results = append(results, playerStat)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %v", err)
+	}
+
+	return results, nil
+}
+
+func (p *PostgresStorage) UpsertCostPlayers(ctx context.Context, playersStatistic []players.PlayerFantasyPoints) error {
+
+	tx, err := p.db.Begin()
+	if err != nil {
+		return fmt.Errorf("begin transaction error: %v", err)
+	}
+
+	defer tx.Rollback()
+
+	for _, player := range playersStatistic {
+		query, args, err := sq.
+			Update(TablePlayers).
+			Set(PlayersCost, player.Cost).
+			Where(sq.Eq{PlayerIdTablePlayers: player.PlayerID}).
+			PlaceholderFormat(sq.Dollar).
+			ToSql()
+
+		if err != nil {
+			return fmt.Errorf("build query error: %v", err)
+		}
+
+		_, err = tx.ExecContext(ctx, query, args...)
+		if err != nil {
+			return fmt.Errorf("execute query error: %v", err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit transaction error: %v", err)
+	}
+
+	return nil
+}
+
+func (p *PostgresStorage) GetPlayerStatistics(ctx context.Context, playerID int) ([]players.PlayersStatisticDB, error) {
+	query, args, err := sq.
+		Select(MatchIdPlayers, GameDate, Opponent, FantasyPoints,
+			Goals, Assists, Shots, Pim, Hits, Saves, MissGoals, Shutout).
+		From(TablePlayersStatistic).
+		Where(sq.Eq{PlayerID: playerID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	// Выполнение запроса
+	rows, err := p.db.QueryContext(ctx, query, args...)
+	defer rows.Close()
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			err = nil
+		}
+		return nil, err
+	}
+
+	// Инициализация слайса для хранения результатов
+	var statistics []players.PlayersStatisticDB
+
+	// Чтение результатов
+	for rows.Next() {
+		var stat players.PlayersStatisticDB
+		err := rows.Scan(&stat.MatchIdLocal, &stat.GameDate, &stat.Opponent, &stat.FantasyPoint,
+			&stat.Goals, &stat.Assists, &stat.Shots, &stat.Pims, &stat.Hits, &stat.Saves, &stat.MissedGoals, &stat.Shutout)
+		if err != nil {
+			return nil, err
+		}
+		statistics = append(statistics, stat)
+	}
+
+	// Проверка на наличие ошибок при чтении строк
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return statistics, nil
 }

@@ -35,6 +35,8 @@ type EventsStorage interface {
 	GetMatchesByTournamentsId(context.Context, tournaments.IDArray) ([]tournaments.GetTournamentsTotalInfo, error)
 	UpdateMatchesInfo(context.Context, []tournaments.GameResult) error
 	AddPlayersStatistic(context.Context, []players.PlayersStatisticDB) error
+	GetSumFantasyCoins(context.Context, tournaments.League) ([]players.PlayerFantasyPoints, error)
+	UpsertCostPlayers(context.Context, []players.PlayerFantasyPoints) error
 }
 
 type EventsService struct {
@@ -499,6 +501,29 @@ func (s *EventsService) GetPlayersStatistic(ctx context.Context, tourID []tourna
 	err = s.storage.AddPlayersStatistic(ctx, controlDataStatistic)
 	if err != nil {
 		return fmt.Errorf("AddPlayersStatistic: %v", err)
+	}
+
+	return nil
+}
+
+func (s *EventsService) GeneratePlayersPrice(ctx context.Context, league tournaments.League) error {
+
+	playersPoints, err := s.storage.GetSumFantasyCoins(ctx, league)
+	if err != nil {
+		return fmt.Errorf("GetSumFantasyCoins: %v", err)
+	}
+	maxPoint := playersPoints[0].TotalFantasyPoints
+	for i, player := range playersPoints {
+		if player.TotalFantasyPoints <= 0 {
+			player.TotalFantasyPoints = 0
+		}
+		playersPoints[i].Cost = player.TotalFantasyPoints/maxPoint*23 + 4
+	}
+	fmt.Println(playersPoints[0])
+
+	err = s.storage.UpsertCostPlayers(ctx, playersPoints)
+	if err != nil {
+		return fmt.Errorf("UpsertCostPlayers: %v", err)
 	}
 
 	return nil
