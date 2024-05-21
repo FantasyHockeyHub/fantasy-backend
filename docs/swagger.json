@@ -1037,6 +1037,11 @@
         },
         "/tournaments": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Получение турниров",
                 "consumes": [
                     "application/json"
@@ -1049,12 +1054,6 @@
                 ],
                 "summary": "Получение турниров",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "profileID",
-                        "name": "profileID",
-                        "in": "query"
-                    },
                     {
                         "type": "integer",
                         "description": "tournamentID",
@@ -1082,6 +1081,17 @@
                         "description": "status",
                         "name": "status",
                         "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "all",
+                            "personal"
+                        ],
+                        "type": "string",
+                        "description": "type",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1096,6 +1106,12 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }
@@ -1817,6 +1833,9 @@
                 },
                 "prizeFond": {
                     "type": "integer"
+                },
+                "statusParticipation": {
+                    "type": "string"
                 },
                 "statusTournament": {
                     "type": "string"

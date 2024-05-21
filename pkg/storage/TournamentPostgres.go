@@ -189,16 +189,17 @@ func (p *PostgresStorage) EditTournamentTeam(teamInput tournaments.TournamentTea
 
 func (p *PostgresStorage) GetTournamentsInfo(filter tournaments.TournamentFilter) ([]tournaments.Tournament, error) {
 	var res []tournaments.Tournament
-	query := "SELECT tournaments.id, league, title, matches_ids, started_at, end_at, players_amount, deposit, prize_fond, status_tournament FROM tournaments"
 
-	if filter.ProfileID != uuid.Nil {
-		query += fmt.Sprintf(" INNER JOIN user_roster ON tournaments.id = user_roster.tournament_id WHERE user_roster.user_id = '%s'", filter.ProfileID.String())
+	query := "SELECT tournaments.id, league, title, matches_ids, started_at, end_at, players_amount, deposit, prize_fond, status_tournament, COALESCE(user_roster.user_id IS NOT NULL, false) AS status_participation FROM tournaments LEFT JOIN user_roster ON tournaments.id = user_roster.tournament_id AND user_roster.user_id = '" + filter.ProfileID.String() + "'"
+
+	if filter.Type == "personal" {
+		query += " WHERE user_roster.user_id IS NOT NULL AND user_roster.user_id = '" + filter.ProfileID.String() + "'"
 	} else {
 		query += " WHERE 1=1"
 	}
 
 	if filter.TournamentID != 0 {
-		query += fmt.Sprintf(" AND id = %d", filter.TournamentID)
+		query += fmt.Sprintf(" AND tournaments.id = %d", filter.TournamentID)
 	}
 
 	if filter.League != 0 {

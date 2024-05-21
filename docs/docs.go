@@ -1047,6 +1047,11 @@ const docTemplate = `{
         },
         "/tournaments": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Получение турниров",
                 "consumes": [
                     "application/json"
@@ -1059,12 +1064,6 @@ const docTemplate = `{
                 ],
                 "summary": "Получение турниров",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "profileID",
-                        "name": "profileID",
-                        "in": "query"
-                    },
                     {
                         "type": "integer",
                         "description": "tournamentID",
@@ -1092,6 +1091,17 @@ const docTemplate = `{
                         "description": "status",
                         "name": "status",
                         "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "all",
+                            "personal"
+                        ],
+                        "type": "string",
+                        "description": "type",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1106,6 +1116,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }
@@ -1827,6 +1843,9 @@ const docTemplate = `{
                 },
                 "prizeFond": {
                     "type": "integer"
+                },
+                "statusParticipation": {
+                    "type": "string"
                 },
                 "statusTournament": {
                     "type": "string"

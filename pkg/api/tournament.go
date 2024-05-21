@@ -9,7 +9,6 @@ import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"strconv"
@@ -593,32 +592,31 @@ func (api *Api) GetMatchesByTournId(ctx *gin.Context) {
 
 // getTournamentsInfo godoc
 // @Summary Получение турниров
+// @Security ApiKeyAuth
 // @Schemes
 // @Description Получение турниров
 // @Tags tournament
 // @Accept json
 // @Produce json
-// @Param profileID query string false "profileID"
 // @Param tournamentID query int false "tournamentID"
 // @Param league query string false "league" Enums(NHL, KHL)
 // @Param status query string false "status" Enums(not_yet_started, started, finished, active)
+// @Param type query string true "type" Enums(all, personal)
 // @Success 200 {array} tournaments.Tournament
-// @Failure 400 {object} Error
+// @Failure 400,401 {object} Error
 // @Failure 500 {object} Error
 // @Router /tournaments [GET]
 func (api Api) getTournamentsInfo(ctx *gin.Context) {
+	userID, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("GetTournamentsInfo:", err)
+		return
+	}
+
 	var filterTournament tournaments.TournamentFilter
 	query := ctx.Request.URL.Query()
 
-	if query.Has("profileID") {
-		parsedUserID, err := uuid.Parse(query.Get("profileID"))
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
-			return
-		}
-		filterTournament.ProfileID = parsedUserID
-	}
-
+	filterTournament.ProfileID = userID
 	if query.Has("tournamentID") {
 		id := query.Get("tournamentID")
 		tournamentID, err := strconv.Atoi(id)
@@ -651,6 +649,18 @@ func (api Api) getTournamentsInfo(ctx *gin.Context) {
 			filterTournament.League = tournaments.NHL
 		case "KHL":
 			filterTournament.League = tournaments.KHL
+		default:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+	}
+
+	if query.Has("type") {
+		switch query.Get("type") {
+		case "all":
+			filterTournament.Type = "all"
+		case "personal":
+			filterTournament.Type = "personal"
 		default:
 			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
 			return
