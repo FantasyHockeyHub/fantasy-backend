@@ -226,18 +226,26 @@ type TotalPlayersStatistic struct {
 }
 
 type PlayersStatisticDB struct {
-	PlayerIdNhl  int
-	MatchIdLocal int
-	GameDate     time.Time
-	Opponent     string
-	FantasyPoint float32
-	Goals        int
-	Assists      int
-	Shots        int
-	Pims         int
-	Hits         int
-	Saves        int
-	MissedGoals  int
-	Shutout      bool
-	League       tournaments.League
+	PlayerIdNhl  int                `json:"playerIdNhl,omitempty" db:"player_id"`
+	MatchIdLocal int                `json:"matchIdLocal,omitempty" db:"match_id"`
+	GameDate     time.Time          `json:"gameDate" db:"game_date"`
+	Opponent     string             `json:"opponent,omitempty" db:"opponent"`
+	FantasyPoint float32            `json:"fantasyPoint" db:"fantasy_points"`
+	Goals        int                `json:"goals" db:"goals"`
+	Assists      int                `json:"assists" db:"assists"`
+	Shots        int                `json:"shots" db:"shots"`
+	Pims         int                `json:"pims" db:"pims"`
+	Hits         int                `json:"hits" db:"hits"`
+	Saves        int                `json:"saves" db:"saves"`
+	MissedGoals  int                `json:"missedGoals" db:"missed_goals"`
+	Shutout      bool               `json:"shutout" db:"shutout"`
+	League       tournaments.League `json:"league,omitempty"`
+}
+
+type TournamentTeamsResults struct {
+	ProfileID     uuid.UUID `json:"profileID" db:"user_id"`
+	UserTeam      []int     `json:"playerIDs"`
+	FantasyPoints float32   `json:"fantasyPoints" db:"points"`
+	Coins         int       `json:"coins" db:"coins"`
+	Place         int       `json:"place" db:"place"`
 }

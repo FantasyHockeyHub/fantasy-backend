@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -35,6 +37,13 @@ type EventsStorage interface {
 	GetMatchesByTournamentsId(context.Context, tournaments.IDArray) ([]tournaments.GetTournamentsTotalInfo, error)
 	UpdateMatchesInfo(context.Context, []tournaments.GameResult) error
 	AddPlayersStatistic(context.Context, []players.PlayersStatisticDB) error
+	GetUserTeamsByTournamentID(ctx context.Context, tournamentID int64) ([]players.TournamentTeamsResults, error)
+	GetMatchesByTournamentID(tournamentID int) ([]int, error)
+	GetStatisticByPlayerIDAndMatchID(playerID int, matchID int) (players.PlayersStatisticDB, error)
+	GetPlayers(playersFilter players.PlayersFilter) ([]players.PlayerResponse, error)
+	GetPlayerCards(filter players.PlayerCardsFilter) ([]players.PlayerCardResponse, error)
+	GetTournamentDataByID(tournamentID int) (tournaments.Tournament, error)
+	UpdateRosterResults(results []players.TournamentTeamsResults, tournamentID int) error
 }
 
 type EventsService struct {
@@ -502,4 +511,141 @@ func (s *EventsService) GetPlayersStatistic(ctx context.Context, tourID []tourna
 	}
 
 	return nil
+}
+
+func (s *EventsService) CalculateTournamentResults(ctx context.Context, tourID []tournaments.ID) error {
+
+	log.Println("Start CalculateTournamentResults ", tourID, "time: ", time.Now())
+	for _, tournID := range tourID {
+		results, err := s.storage.GetUserTeamsByTournamentID(ctx, int64(tournID))
+		if err != nil {
+			return fmt.Errorf("GetUserTeamsByTournamentID: %v", err)
+		}
+
+		matches, err := s.storage.GetMatchesByTournamentID(int(tournID))
+		if err != nil {
+			return fmt.Errorf("GetMatchesByTournamentID: %v", err)
+		}
+
+		for i, res := range results {
+			for _, player := range res.UserTeam {
+				for _, match := range matches {
+					stat, err := s.storage.GetStatisticByPlayerIDAndMatchID(player, match)
+					if err != nil {
+						return fmt.Errorf("GetStatisticByPlayerIDAndMatchID: %v", err)
+					}
+					if stat.PlayerIdNhl == 0 {
+						continue
+					}
+					results[i].FantasyPoints += stat.FantasyPoint
+					currentPlayer := []int{player}
+					playerInfo, err := s.GetPlayers(players.PlayersFilter{Players: currentPlayer, ProfileID: res.ProfileID})
+					if err != nil {
+						return fmt.Errorf("GetPlayers: %v", err)
+					}
+
+					var rarityMultiplier float32
+					switch playerInfo[0].CardRarity {
+					case store.Gold:
+						rarityMultiplier = 0.5
+					case store.Silver:
+						rarityMultiplier = 0.25
+					default:
+						rarityMultiplier = 0
+					}
+
+					switch playerInfo[0].Position {
+					case players.Forward:
+						results[i].FantasyPoints += rarityMultiplier * float32(stat.Goals) * 5
+					case players.Defensemen:
+						results[i].FantasyPoints += rarityMultiplier * float32(stat.Assists) * 4
+					case players.Goalie:
+						results[i].FantasyPoints += rarityMultiplier * float32(stat.Saves) * 0.5
+					}
+
+				}
+			}
+
+		}
+
+		sort.Slice(results, func(i, j int) bool {
+			return results[i].FantasyPoints > results[j].FantasyPoints
+		})
+
+		for i, _ := range results {
+			results[i].Place = i + 1
+		}
+
+		tournamentInfo, err := s.storage.GetTournamentDataByID(int(tournID))
+		if err != nil {
+			return fmt.Errorf("GetInfoByTournamentID: %v", err)
+		}
+		totalPrize := tournamentInfo.PrizeFond
+
+		numParticipants := len(results)
+
+		prizes := make([]int, numParticipants)
+
+		for i := 0; i < numParticipants; i++ {
+			prizes[i] = (numParticipants - i) * totalPrize / (numParticipants * (numParticipants + 1) / 2)
+		}
+
+		for i := 0; i < numParticipants; i++ {
+			results[i].Coins = prizes[i]
+		}
+
+		err = s.storage.UpdateRosterResults(results, int(tournID))
+		if err != nil {
+			return fmt.Errorf("UpdateRosterResults: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func (s *EventsService) GetPlayers(playersFilter players.PlayersFilter) ([]players.PlayerResponse, error) {
+
+	res, err := s.storage.GetPlayers(playersFilter)
+	if err != nil {
+		log.Println("Service. GetPlayers:", err)
+		return res, err
+	}
+	playerCardsMap := make(map[int][]players.PlayerCardResponse)
+
+	userCards, err := s.storage.GetPlayerCards(players.PlayerCardsFilter{
+		ProfileID:        playersFilter.ProfileID,
+		League:           playersFilter.League,
+		HasUnpackedParam: true,
+		Unpacked:         true,
+	})
+	if err != nil {
+		log.Println("Service. GetPlayerCards:", err)
+		return res, err
+	}
+
+	for _, card := range userCards {
+		playerCardsMap[card.PlayerID] = append(playerCardsMap[card.PlayerID], card)
+	}
+
+	for i, player := range res {
+		res[i].RarityName = store.PlayerCardsRarityTitles[store.ErrCardRarity]
+		if cards, ok := playerCardsMap[player.ID]; ok {
+			var hasGoldCard bool
+			for _, card := range cards {
+				if card.Rarity == store.Gold {
+					res[i].CardRarity = store.Gold
+					hasGoldCard = true
+					break
+				}
+			}
+
+			if !hasGoldCard && len(cards) > 0 {
+				res[i].CardRarity = store.Silver
+			}
+
+			res[i].RarityName = store.PlayerCardsRarityTitles[res[i].CardRarity]
+		}
+	}
+
+	return res, nil
 }
