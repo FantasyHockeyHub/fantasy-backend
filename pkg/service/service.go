@@ -55,6 +55,7 @@ type Tournaments interface {
 	EditTournamentTeam(inp tournaments.TournamentTeamModel) error
 	GetTournamentsInfo(filter tournaments.TournamentFilter) ([]tournaments.Tournament, error)
 	GetTournamentResults(tournamentID int) ([]players.TournamentResults, error)
+	GetCachedTournamentResults(tournamentID int) ([]players.TournamentResults, error)
 }
 
 type Store interface {
@@ -88,7 +89,7 @@ type Deps struct {
 func NewServices(deps Deps) *Services {
 	userService := NewUserService(deps.Storage, deps.RStorage, deps.Jwt, deps.Cfg)
 	playersService := NewPlayersService(deps.Storage)
-	tournamentsService := NewTournamentsService(deps.Storage, playersService)
+	tournamentsService := NewTournamentsService(deps.Storage, deps.RStorage, playersService)
 	storeService := NewStoreService(deps.Storage)
 	teamsService := NewTeamsService(deps.Storage)
 	return &Services{

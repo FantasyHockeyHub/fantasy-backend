@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
@@ -11,6 +12,7 @@ import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/events"
 	"github.com/google/uuid"
 	"log"
+	"time"
 )
 
 var (
@@ -26,9 +28,10 @@ var (
 	TournamentNotFinishedError = errors.New("турнир еще не завершен")
 )
 
-func NewTournamentsService(storage TournamentsStorage, playersService Players) *TournamentsService {
+func NewTournamentsService(storage TournamentsStorage, rStorage TournamentsRStorage, playersService Players) *TournamentsService {
 	return &TournamentsService{
 		storage:        storage,
+		rStorage:       rStorage,
 		playersService: playersService,
 	}
 }
@@ -53,8 +56,14 @@ type TournamentsStorage interface {
 	GetFullPlayerStatistic(playerID int, matchID int) (players.FullPlayerStatInfo, error)
 }
 
+type TournamentsRStorage interface {
+	Get(key string) (string, error)
+	Set(key string, value string, expiration time.Duration) error
+}
+
 type TournamentsService struct {
 	storage        TournamentsStorage
+	rStorage       TournamentsRStorage
 	playersService Players
 }
 
@@ -459,4 +468,40 @@ func (s *TournamentsService) GetTournamentResults(tournamentID int) ([]players.T
 	}
 
 	return res, err
+}
+
+func (s *TournamentsService) GetCachedTournamentResults(tournamentID int) ([]players.TournamentResults, error) {
+
+	cachedResult, err := s.rStorage.Get(fmt.Sprintf("tournament_results_%d", tournamentID))
+	if err != nil {
+		log.Println("Error getting cached result from Redis:", err)
+	}
+
+	if cachedResult != "" {
+		var cachedRes []players.TournamentResults
+		err := json.Unmarshal([]byte(cachedResult), &cachedRes)
+		if err != nil {
+			log.Println("Error unmarshaling cached result:", err)
+			return nil, err
+		}
+		return cachedRes, nil
+	}
+
+	result, err := s.GetTournamentResults(tournamentID)
+	if err != nil {
+		return nil, err
+	}
+
+	resultJSON, err := json.Marshal(result)
+	if err != nil {
+		log.Println("Error marshaling result to JSON:", err)
+		return nil, err
+	}
+
+	err = s.rStorage.Set(fmt.Sprintf("tournament_results_%d", tournamentID), string(resultJSON), 30*24*time.Hour)
+	if err != nil {
+		log.Println("Error caching result to Redis:", err)
+	}
+
+	return result, nil
 }

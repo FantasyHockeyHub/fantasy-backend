@@ -711,7 +711,7 @@ func (api Api) getTournamentResults(ctx *gin.Context) {
 		return
 	}
 
-	res, err := api.services.Tournaments.GetTournamentResults(tournamentID)
+	res, err := api.services.Tournaments.GetCachedTournamentResults(tournamentID)
 	if err != nil {
 		log.Println("GetTournamentResults:", err)
 		switch err {
