@@ -54,6 +54,7 @@ type Tournaments interface {
 	GetTournamentTeam(userID uuid.UUID, tournamentID int) (players.UserTeamResponse, error)
 	EditTournamentTeam(inp tournaments.TournamentTeamModel) error
 	GetTournamentsInfo(filter tournaments.TournamentFilter) ([]tournaments.Tournament, error)
+	GetTournamentResults(tournamentID int) ([]players.TournamentResults, error)
 }
 
 type Store interface {

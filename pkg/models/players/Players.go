@@ -249,3 +249,46 @@ type TournamentTeamsResults struct {
 	Coins         int       `json:"coins" db:"coins"`
 	Place         int       `json:"place" db:"place"`
 }
+
+type TournamentResults struct {
+	ProfileID     uuid.UUID            `json:"profileID" db:"user_id"`
+	Nickname      string               `json:"nickname" db:"nickname"`
+	UserPhoto     string               `json:"userPhoto" db:"photo_link"`
+	FantasyPoints float32              `json:"fantasyPoints" db:"points"`
+	Coins         int                  `json:"coins" db:"coins"`
+	Place         int                  `json:"place" db:"place"`
+	UserTeam      []FullPlayerStatInfo `json:"userTeam"`
+}
+
+type FullPlayerStatInfo struct {
+	PlayerID     int              `json:"playerID" db:"player_id"`
+	Rarity       store.CardRarity `json:"rarity" db:"rarity"`
+	RarityName   string           `json:"rarityName"`
+	Name         string           `json:"name" db:"name"`
+	Photo        string           `json:"photo"  db:"photo_link"`
+	TeamName     string           `json:"teamName" db:"team_name"`
+	TeamLogo     string           `json:"teamLogo" db:"team_logo"`
+	Position     Position         `json:"position"  db:"position"`
+	PositionName string           `json:"positionName"`
+	GameDate     time.Time        `json:"gameDate" db:"game_date"`
+	Opponent     string           `json:"opponent,omitempty" db:"opponent"`
+	FantasyPoint float32          `json:"fantasyPoint" db:"fantasy_points"`
+	Goals        int              `json:"goals" db:"goals"`
+	Assists      int              `json:"assists" db:"assists"`
+	Shots        int              `json:"shots" db:"shots"`
+	Pims         int              `json:"pims" db:"pims"`
+	Hits         int              `json:"hits" db:"hits"`
+	Saves        int              `json:"saves" db:"saves"`
+	MissedGoals  int              `json:"missedGoals" db:"missed_goals"`
+	Shutout      bool             `json:"shutout" db:"shutout"`
+}
+
+type UserRosterInfo struct {
+	TournamentID      int       `json:"tournamentID" db:"tournament_id"`
+	ProfileID         uuid.UUID `json:"profileID" db:"user_id"`
+	Roster            []int     `json:"roster"`
+	TournamentBalance float32   `json:"tournamentBalance" db:"current_balance"`
+	FantasyPoints     float32   `json:"fantasyPoints" db:"points"`
+	Coins             int       `json:"coins" db:"coins"`
+	Place             int       `json:"place" db:"place"`
+}

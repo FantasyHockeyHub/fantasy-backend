@@ -91,6 +91,7 @@ func (api *Api) registerRoutes() {
 			teamAuthenticated.PUT("team/edit", api.editTournamentTeam)
 			teamAuthenticated.GET("/get_tournaments/:league", api.GetTournaments)
 			teamAuthenticated.GET("/matches_by_tournament_id/:tournament_id", api.GetMatchesByTournId)
+			teamAuthenticated.GET("/results", api.getTournamentResults)
 		}
 	}
 

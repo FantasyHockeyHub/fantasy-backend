@@ -5,22 +5,25 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/players"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/store"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/tournaments"
+	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/models/user"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service/events"
 	"github.com/google/uuid"
 	"log"
 )
 
 var (
-	NotFoundTournaments     = errors.New("not found tournaments by this date")
-	NotFoundTournamentsById = errors.New("not found tournaments by id")
-	JoinTimeExpiredError    = errors.New("турнир уже начался или завершен")
-	TeamExpensiveError      = errors.New("команда стоит больше лимита")
-	InvalidTeamPositions    = errors.New("неверное количество игроков на позициях или игрок повторяется в составе команды")
-	InvalidTournamentTeam   = errors.New("выбранный игрок не может участвовать в турнире")
-	InvalidPlayersNumber    = errors.New("некорректное количество игроков в команде")
-	TeamAlreadyCreatedError = errors.New("команда на турнир уже создана")
-	TeamNotCreatedError     = errors.New("команда на турнир еще не создана")
+	NotFoundTournaments        = errors.New("not found tournaments by this date")
+	NotFoundTournamentsById    = errors.New("not found tournaments by id")
+	JoinTimeExpiredError       = errors.New("турнир уже начался или завершен")
+	TeamExpensiveError         = errors.New("команда стоит больше лимита")
+	InvalidTeamPositions       = errors.New("неверное количество игроков на позициях или игрок повторяется в составе команды")
+	InvalidTournamentTeam      = errors.New("выбранный игрок не может участвовать в турнире")
+	InvalidPlayersNumber       = errors.New("некорректное количество игроков в команде")
+	TeamAlreadyCreatedError    = errors.New("команда на турнир уже создана")
+	TeamNotCreatedError        = errors.New("команда на турнир еще не создана")
+	TournamentNotFinishedError = errors.New("турнир еще не завершен")
 )
 
 func NewTournamentsService(storage TournamentsStorage, playersService Players) *TournamentsService {
@@ -44,6 +47,10 @@ type TournamentsStorage interface {
 	GetTournamentTeam(userID uuid.UUID, tournamentID int) (players.UserTeam, error)
 	EditTournamentTeam(teamInput tournaments.TournamentTeamModel) error
 	GetTournamentsInfo(filter tournaments.TournamentFilter) ([]tournaments.Tournament, error)
+	GetAllUserRosterInfo(userID uuid.UUID, tournamentID int) (players.UserRosterInfo, error)
+	GetUserTeamsByTournamentID(ctx context.Context, tournamentID int64) ([]players.TournamentTeamsResults, error)
+	GetUserInfo(userID uuid.UUID) (user.UserInfoModel, error)
+	GetFullPlayerStatistic(playerID int, matchID int) (players.FullPlayerStatInfo, error)
 }
 
 type TournamentsService struct {
@@ -344,4 +351,112 @@ func (s *TournamentsService) GetTournamentsInfo(filter tournaments.TournamentFil
 	}
 
 	return res, nil
+}
+
+func (s *TournamentsService) GetTournamentResults(tournamentID int) ([]players.TournamentResults, error) {
+	var res []players.TournamentResults
+
+	tournamentInfo, err := s.storage.GetTournamentDataByID(tournamentID)
+	if err != nil {
+		log.Println("Service. GetTournamentDataByID:", err)
+		return res, err
+	}
+
+	if tournamentInfo.StatusTournament != "finished" {
+		log.Println("Service. GetTournamentDataByID:", TournamentNotFinishedError)
+		return res, TournamentNotFinishedError
+	}
+
+	teams, err := s.storage.GetUserTeamsByTournamentID(context.Background(), int64(tournamentID))
+	if err != nil {
+		log.Println("Service. GetUserTeamsByTournamentID:", err)
+		return res, err
+	}
+
+	for _, team := range teams {
+		res = append(res, players.TournamentResults{ProfileID: team.ProfileID})
+		for i, _ := range team.UserTeam {
+			res[len(res)-1].UserTeam = append(res[len(res)-1].UserTeam, players.FullPlayerStatInfo{PlayerID: team.UserTeam[i]})
+		}
+	}
+
+	for i, _ := range res {
+		userRoster, err := s.storage.GetAllUserRosterInfo(res[i].ProfileID, tournamentID)
+		if err != nil {
+			log.Println("Service. GetAllUserRosterInfo:", err)
+			return res, err
+		}
+
+		userInfo, err := s.storage.GetUserInfo(res[i].ProfileID)
+		if err != nil {
+			log.Println("Service. GetUserInfo:", err)
+			return res, err
+		}
+
+		res[i].Coins = userRoster.Coins
+		res[i].Place = userRoster.Place
+		res[i].FantasyPoints = userRoster.FantasyPoints
+		res[i].Nickname = userInfo.Nickname
+		res[i].UserPhoto = userInfo.PhotoLink
+
+		matches, err := s.storage.GetMatchesByTournamentID(tournamentID)
+		if err != nil {
+			log.Println("Service. GetMatchesByTournamentID:", err)
+			return res, err
+		}
+
+		for j, player := range userRoster.Roster {
+			for _, match := range matches {
+				res[i].UserTeam[j], err = s.storage.GetFullPlayerStatistic(player, match)
+				if err != nil {
+					log.Println("Service. GetFullPlayerStatistic:", err)
+					return res, err
+				}
+				if res[i].UserTeam[j].Name == "" {
+					continue
+				}
+
+				currentPlayer := []int{player}
+				playerInfo, err := s.playersService.GetPlayers(players.PlayersFilter{Players: currentPlayer, ProfileID: res[i].ProfileID})
+				if err != nil {
+					log.Println("Service. GetPlayers:", err)
+					return res, err
+				}
+				res[i].UserTeam[j].PositionName = players.PlayerPositionTitles[res[i].UserTeam[j].Position]
+				res[i].UserTeam[j].Rarity = playerInfo[0].CardRarity
+				res[i].UserTeam[j].RarityName = store.PlayerCardsRarityTitles[playerInfo[0].CardRarity]
+				var rarityMultiplier float32
+				switch playerInfo[0].CardRarity {
+				case store.Gold:
+					rarityMultiplier = 0.5
+				case store.Silver:
+					rarityMultiplier = 0.25
+				default:
+					rarityMultiplier = 0
+				}
+
+				switch playerInfo[0].Position {
+				case players.Forward:
+					res[i].UserTeam[j].FantasyPoint += rarityMultiplier * float32(res[i].UserTeam[j].Goals) * 5
+				case players.Defensemen:
+					res[i].UserTeam[j].FantasyPoint += rarityMultiplier * float32(res[i].UserTeam[j].Assists) * 4
+				case players.Goalie:
+					res[i].UserTeam[j].FantasyPoint += rarityMultiplier * float32(res[i].UserTeam[j].Saves) * 0.5
+				}
+
+				if res[i].UserTeam[j].FantasyPoint != 0 {
+					break
+				}
+			}
+
+			res[i].UserTeam[j].GameDate = tournamentInfo.TimeEndTS
+		}
+
+	}
+
+	if len(res) == 0 {
+		return []players.TournamentResults{}, nil
+	}
+
+	return res, err
 }

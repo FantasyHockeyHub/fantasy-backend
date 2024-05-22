@@ -96,6 +96,9 @@ func (p *PostgresStorage) GetTournamentDataByID(tournamentID int) (tournaments.T
 		return tournamentInfo, err
 	}
 
+	tournamentInfo.TimeStartTS = time.Unix(tournamentInfo.TimeStart/1000, 0)
+	tournamentInfo.TimeEndTS = time.Unix(tournamentInfo.TimeEnd/1000, 0)
+
 	return tournamentInfo, nil
 }
 
@@ -238,7 +241,7 @@ type RosterModel struct {
 }
 
 func (p *PostgresStorage) GetUserTeamsByTournamentID(ctx context.Context, tournamentID int64) ([]players.TournamentTeamsResults, error) {
-	query := fmt.Sprintf("SELECT roster, user_id FROM user_roster WHERE tournament_id = %d", tournamentID)
+	query := fmt.Sprintf("SELECT roster, user_id FROM user_roster WHERE tournament_id = %d ORDER BY place", tournamentID)
 
 	var teamsResults []players.TournamentTeamsResults
 	var roster []RosterModel
@@ -326,4 +329,31 @@ func (p *PostgresStorage) UpdateRosterResults(results []players.TournamentTeamsR
 	}
 
 	return tx.Commit()
+}
+
+func (p *PostgresStorage) GetAllUserRosterInfo(userID uuid.UUID, tournamentID int) (players.UserRosterInfo, error) {
+	var res players.UserRosterInfo
+	query := "SELECT tournament_id, user_id, roster, current_balance, points, coins, place FROM user_roster WHERE tournament_id = $1 AND user_id = $2"
+
+	var rosterStr string
+	err := p.db.QueryRow(query, tournamentID, userID).Scan(&res.TournamentID, &res.ProfileID, &rosterStr, &res.TournamentBalance, &res.FantasyPoints, &res.Coins, &res.Place)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return res, nil
+		}
+		return res, err
+	}
+
+	rosterStr = strings.Trim(rosterStr, "{}")
+	rosterStr = strings.ReplaceAll(rosterStr, " ", "")
+	rosterIDsStrArr := strings.Split(rosterStr, ",")
+	for _, idStr := range rosterIDsStrArr {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return res, err
+		}
+		res.Roster = append(res.Roster, id)
+	}
+
+	return res, nil
 }
