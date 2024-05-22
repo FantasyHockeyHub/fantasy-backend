@@ -118,6 +118,7 @@ func (api *Api) registerRoutes() {
 		playersAuthenticated := players.Group("/", api.userIdentity)
 		{
 			playersAuthenticated.POST("/cards/unpack", api.cardUnpacking)
+			playersAuthenticated.GET("/statistic_player/:player_id", api.GetStatisticByPlayerId)
 		}
 	}
 }

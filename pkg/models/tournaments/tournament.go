@@ -70,6 +70,23 @@ type GetShotTournaments struct {
 	StatusTournament string  `db:"status_tournament" json:"statusTournament"`
 }
 
+type GetMatchesByTourId struct {
+	MatchId        int       `json:"matchId" db:"id"`
+	HomeTeamId     int       `json:"homeTeamId" db:"home_team_id"`
+	HomeTeamAbbrev string    `json:"homeTemeAbrev" db:"team_abbrev"`
+	HomeTeamLogo   string    `json:"homeTeamLogo" db:"team_logo"`
+	HomeScore      int       `json:"homeScore" db:"home_team_score"`
+	AwayTeamId     int       `json:"awayTeamId" db:"away_team_id"`
+	AwayTeamAbbrev string    `json:"awayTeamAbbrev" db:"team_abbrev"`
+	AwayTeamLogo   string    `json:"awayTeamLogo" db:"team_logo"`
+	AwayScore      int       `json:"awayScore" db:"away_team_score"`
+	StartAt        time.Time `json:"startAt" db:"start_at"`
+	EndAt          time.Time `json:"endAt" db:"end_at"`
+	EventId        int       `json:"eventId" db:"event_id"`
+	StatusEvent    string    `json:"statusEvent" db:"status"`
+	League         League    `json:"league" db:"league"`
+}
+
 type GetTournamentsTotalInfo struct {
 	MatchId        int    `json:"matchId" db:"id"`
 	HomeTeamId     int    `json:"homeTeamId" db:"home_team_id"`

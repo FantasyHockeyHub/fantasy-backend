@@ -117,6 +117,37 @@ definitions:
       teamName:
         type: string
     type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayersStatisticDB:
+    properties:
+      assists:
+        type: integer
+      fantasyPoint:
+        type: number
+      gameDate:
+        type: string
+      goals:
+        type: integer
+      hits:
+        type: integer
+      league:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League'
+      matchIdLocal:
+        type: integer
+      missedGoals:
+        type: integer
+      opponent:
+        type: string
+      pims:
+        type: integer
+      playerIdNhl:
+        type: integer
+      saves:
+        type: integer
+      shots:
+        type: integer
+      shutout:
+        type: boolean
+    type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position:
     enum:
     - 0
@@ -786,6 +817,43 @@ paths:
           schema:
             $ref: '#/definitions/pkg_api.Error'
       summary: Добавление игроков НХЛ
+      tags:
+      - players
+  /players/statistic_player/{player_id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращается все поля статистики за всё время
+      parameters:
+      - description: id игрока
+        in: path
+        name: player_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayersStatisticDB'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Получение полной статистики по id игрока
       tags:
       - players
   /store/products:

@@ -284,11 +284,31 @@ type FullPlayerStatInfo struct {
 }
 
 type UserRosterInfo struct {
-	TournamentID      int       `json:"tournamentID" db:"tournament_id"`
-	ProfileID         uuid.UUID `json:"profileID" db:"user_id"`
-	Roster            []int     `json:"roster"`
-	TournamentBalance float32   `json:"tournamentBalance" db:"current_balance"`
-	FantasyPoints     float32   `json:"fantasyPoints" db:"points"`
-	Coins             int       `json:"coins" db:"coins"`
-	Place             int       `json:"place" db:"place"`
+	TournamentID      int                `json:"tournamentID" db:"tournament_id"`
+	ProfileID         uuid.UUID          `json:"profileID" db:"user_id"`
+	Roster            []int              `json:"roster"`
+	TournamentBalance float32            `json:"tournamentBalance" db:"current_balance"`
+	FantasyPoints     float32            `json:"fantasyPoints" db:"points"`
+	Coins             int                `json:"coins" db:"coins"`
+	Place             int                `json:"place" db:"place"`
+	PlayerIdNhl       int                `json:"playerIdNhl,omitempty"`
+	MatchIdLocal      int                `json:"matchIdLocal,omitempty"`
+	GameDate          time.Time          `json:"gameDate"`
+	Opponent          string             `json:"opponent,omitempty"`
+	FantasyPoint      float32            `json:"fantasyPoint"`
+	Goals             int                `json:"goals"`
+	Assists           int                `json:"assists"`
+	Shots             int                `json:"shots"`
+	Pims              int                `json:"pims"`
+	Hits              int                `json:"hits"`
+	Saves             int                `json:"saves"`
+	MissedGoals       int                `json:"missedGoals"`
+	Shutout           bool               `json:"shutout"`
+	League            tournaments.League `json:"league,omitempty"`
+}
+
+type PlayerFantasyPoints struct {
+	PlayerID           int
+	TotalFantasyPoints float64
+	Cost               float64
 }

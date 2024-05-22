@@ -500,6 +500,64 @@
                 }
             }
         },
+        "/players/statistic_player/{player_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращается все поля статистики за всё время",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Получение полной статистики по id игрока",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id игрока",
+                        "name": "player_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayersStatisticDB"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/store/products": {
             "get": {
                 "description": "Получение списка товаров из fantasy магазина",
@@ -1707,6 +1765,53 @@
                 },
                 "teamName": {
                     "type": "string"
+                }
+            }
+        },
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayersStatisticDB": {
+            "type": "object",
+            "properties": {
+                "assists": {
+                    "type": "integer"
+                },
+                "fantasyPoint": {
+                    "type": "number"
+                },
+                "gameDate": {
+                    "type": "string"
+                },
+                "goals": {
+                    "type": "integer"
+                },
+                "hits": {
+                    "type": "integer"
+                },
+                "league": {
+                    "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League"
+                },
+                "matchIdLocal": {
+                    "type": "integer"
+                },
+                "missedGoals": {
+                    "type": "integer"
+                },
+                "opponent": {
+                    "type": "string"
+                },
+                "pims": {
+                    "type": "integer"
+                },
+                "playerIdNhl": {
+                    "type": "integer"
+                },
+                "saves": {
+                    "type": "integer"
+                },
+                "shots": {
+                    "type": "integer"
+                },
+                "shutout": {
+                    "type": "boolean"
                 }
             }
         },

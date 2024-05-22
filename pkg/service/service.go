@@ -68,6 +68,7 @@ type Players interface {
 	GetPlayers(playersFilter players.PlayersFilter) ([]players.PlayerResponse, error)
 	GetPlayerCards(filter players.PlayerCardsFilter) ([]players.PlayerCardResponse, error)
 	CardUnpacking(id int, userID uuid.UUID) error
+	GetStatisticByPlayerId(ctx context.Context, playersId int) ([]players.PlayersStatisticDB, error)
 }
 
 type Services struct {

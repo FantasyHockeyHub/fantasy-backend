@@ -44,6 +44,8 @@ type EventsStorage interface {
 	GetPlayerCards(filter players.PlayerCardsFilter) ([]players.PlayerCardResponse, error)
 	GetTournamentDataByID(tournamentID int) (tournaments.Tournament, error)
 	UpdateRosterResults(results []players.TournamentTeamsResults, tournamentID int) error
+	GetSumFantasyCoins(context.Context, tournaments.League) ([]players.PlayerFantasyPoints, error)
+	UpsertCostPlayers(context.Context, []players.PlayerFantasyPoints) error
 }
 
 type EventsService struct {
@@ -648,4 +650,26 @@ func (s *EventsService) GetPlayers(playersFilter players.PlayersFilter) ([]playe
 	}
 
 	return res, nil
+}
+
+func (s *EventsService) GeneratePlayersPrice(ctx context.Context, league tournaments.League) error {
+
+	playersPoints, err := s.storage.GetSumFantasyCoins(ctx, league)
+	if err != nil {
+		return fmt.Errorf("GetSumFantasyCoins: %v", err)
+	}
+	maxPoint := playersPoints[0].TotalFantasyPoints
+	for i, player := range playersPoints {
+		if player.TotalFantasyPoints <= 0 {
+			player.TotalFantasyPoints = 0
+		}
+		playersPoints[i].Cost = player.TotalFantasyPoints/maxPoint*23 + 4
+	}
+
+	err = s.storage.UpsertCostPlayers(ctx, playersPoints)
+	if err != nil {
+		return fmt.Errorf("UpsertCostPlayers: %v", err)
+	}
+
+	return nil
 }
