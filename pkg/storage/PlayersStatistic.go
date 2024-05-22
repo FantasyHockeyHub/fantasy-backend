@@ -217,3 +217,27 @@ func (p *PostgresStorage) GetPlayerStatistics(ctx context.Context, playerID int)
 
 	return statistics, nil
 }
+
+func (p *PostgresStorage) GetFullPlayerStatistic(playerID int, matchID int) (players.FullPlayerStatInfo, error) {
+	var res players.FullPlayerStatInfo
+	query := "SELECT p.id, p.name, p.photo_link, t.team_name, t.team_logo, p.position FROM players p INNER JOIN teams t ON p.team_id = t.team_id WHERE p.id = $1;"
+
+	err := p.db.QueryRow(query, playerID).Scan(&res.PlayerID, &res.Name, &res.Photo, &res.TeamName, &res.TeamLogo, &res.Position)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return res, nil
+		}
+		return res, err
+	}
+
+	query = "SELECT game_date, opponent, fantasy_points, goals, assists, shots, pims, hits, saves, missed_goals, shutout FROM players_statistic WHERE player_id = $1 AND match_id = $2;"
+	err = p.db.QueryRow(query, playerID, matchID).Scan(&res.GameDate, &res.Opponent, &res.FantasyPoint, &res.Goals, &res.Assists, &res.Shots, &res.Pims, &res.Hits, &res.Saves, &res.MissedGoals, &res.Shutout)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return res, nil
+		}
+		return res, err
+	}
+
+	return res, nil
+}

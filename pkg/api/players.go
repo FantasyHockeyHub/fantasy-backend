@@ -412,7 +412,6 @@ func (api *Api) GetStatisticByPlayerId(ctx *gin.Context) {
 	_, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("GetStatisticByPlayerId:", err)
-		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 

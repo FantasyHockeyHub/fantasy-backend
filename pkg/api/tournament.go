@@ -9,7 +9,6 @@ import (
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/service"
 	"github.com/Frozen-Fantasy/fantasy-backend.git/pkg/storage"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"strconv"
@@ -285,7 +284,6 @@ func (api *Api) GetTournaments(ctx *gin.Context) {
 	_, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("GetTournamentTeam:", err)
-		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 
@@ -329,7 +327,6 @@ func (api Api) getTournamentRoster(ctx *gin.Context) {
 	userID, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("GetTournamentRoster:", err)
-		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 
@@ -384,7 +381,6 @@ func (api Api) createTournamentTeam(ctx *gin.Context) {
 	userID, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("CreateTournamentTeam:", err)
-		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 	inp.ProfileID = userID
@@ -450,7 +446,6 @@ func (api Api) getTournamentTeam(ctx *gin.Context) {
 	userID, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("GetTournamentTeam:", err)
-		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 	var tournamentID int
@@ -504,7 +499,6 @@ func (api Api) editTournamentTeam(ctx *gin.Context) {
 	userID, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("EditTournamentTeam:", err)
-		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 	inp.ProfileID = userID
@@ -573,7 +567,6 @@ func (api *Api) GetMatchesByTournId(ctx *gin.Context) {
 	_, err := parseUserIDFromContext(ctx)
 	if err != nil {
 		log.Println("GetTournamentTeam:", err)
-		ctx.JSON(http.StatusForbidden, getUnauthorizedError(err))
 		return
 	}
 
@@ -599,32 +592,31 @@ func (api *Api) GetMatchesByTournId(ctx *gin.Context) {
 
 // getTournamentsInfo godoc
 // @Summary Получение турниров
+// @Security ApiKeyAuth
 // @Schemes
 // @Description Получение турниров
 // @Tags tournament
 // @Accept json
 // @Produce json
-// @Param profileID query string false "profileID"
 // @Param tournamentID query int false "tournamentID"
 // @Param league query string false "league" Enums(NHL, KHL)
 // @Param status query string false "status" Enums(not_yet_started, started, finished, active)
+// @Param type query string true "type" Enums(all, personal)
 // @Success 200 {array} tournaments.Tournament
-// @Failure 400 {object} Error
+// @Failure 400,401 {object} Error
 // @Failure 500 {object} Error
 // @Router /tournaments [GET]
 func (api Api) getTournamentsInfo(ctx *gin.Context) {
+	userID, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("GetTournamentsInfo:", err)
+		return
+	}
+
 	var filterTournament tournaments.TournamentFilter
 	query := ctx.Request.URL.Query()
 
-	if query.Has("profileID") {
-		parsedUserID, err := uuid.Parse(query.Get("profileID"))
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
-			return
-		}
-		filterTournament.ProfileID = parsedUserID
-	}
-
+	filterTournament.ProfileID = userID
 	if query.Has("tournamentID") {
 		id := query.Get("tournamentID")
 		tournamentID, err := strconv.Atoi(id)
@@ -663,10 +655,74 @@ func (api Api) getTournamentsInfo(ctx *gin.Context) {
 		}
 	}
 
+	if query.Has("type") {
+		switch query.Get("type") {
+		case "all":
+			filterTournament.Type = "all"
+		case "personal":
+			filterTournament.Type = "personal"
+		default:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+	}
+
 	res, err := api.services.Tournaments.GetTournamentsInfo(filterTournament)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, getInternalServerError())
 		return
+	}
+
+	ctx.JSON(http.StatusOK, res)
+}
+
+// getTournamentResults godoc
+// @Summary Получение результатов турнира
+// @Security ApiKeyAuth
+// @Schemes
+// @Description Получение результатов турнира
+// @Tags tournament
+// @Accept json
+// @Produce json
+// @Param tournamentID query int true "tournamentID"
+// @Success 200 {array} players.TournamentResults
+// @Failure 400,401 {object} Error
+// @Failure 500 {object} Error
+// @Router /tournament/results [get]
+func (api Api) getTournamentResults(ctx *gin.Context) {
+	_, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("GetTournamentRoster:", err)
+		return
+	}
+
+	var tournamentID int
+
+	query := ctx.Request.URL.Query()
+	if query.Has("tournamentID") {
+		id := query.Get("tournamentID")
+		tournamentID, err = strconv.Atoi(id)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+			return
+		}
+	} else {
+		ctx.JSON(http.StatusBadRequest, getBadRequestError(InvalidInputParametersError))
+		return
+	}
+
+	res, err := api.services.Tournaments.GetCachedTournamentResults(tournamentID)
+	if err != nil {
+		log.Println("GetTournamentResults:", err)
+		switch err {
+		case storage.IncorrectTournamentID,
+			service.TournamentNotFinishedError:
+			ctx.JSON(http.StatusBadRequest, getBadRequestError(err))
+			return
+		default:
+			ctx.JSON(http.StatusInternalServerError, getInternalServerError())
+			return
+		}
 	}
 
 	ctx.JSON(http.StatusOK, res)

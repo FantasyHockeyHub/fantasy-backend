@@ -69,7 +69,6 @@ func (job *UpdateHockeyEvents) UpdateDuration(ctx context.Context) time.Duration
 }
 
 func (job *UpdateHockeyEvents) Start(ctx context.Context) {
-
 	durationTillNextExecution := job.UpdateDuration(ctx)
 
 	timer := time.NewTimer(durationTillNextExecution)
@@ -104,6 +103,11 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 				err = job.ev.GetPlayersStatistic(ctx, tourId)
 				if err != nil {
 					log.Println("GetPlayersStatistic: ", err)
+				}
+
+				err = job.ev.CalculateTournamentResults(ctx, tourId)
+				if err != nil {
+					log.Println("CalculateTournamentResults:", err)
 				}
 			}
 
