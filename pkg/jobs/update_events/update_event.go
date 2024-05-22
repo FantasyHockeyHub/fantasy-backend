@@ -9,7 +9,7 @@ import (
 )
 
 func NewUpdateHockeyEvents(
-	//cfg config.ServiceConfiguration, //Потом брать интервал из конфига
+//cfg config.ServiceConfiguration, //Потом брать интервал из конфига
 	ev *events.EventsService,
 ) *UpdateHockeyEvents {
 	curTime := time.Now()
@@ -105,16 +105,17 @@ func (job *UpdateHockeyEvents) Start(ctx context.Context) {
 					log.Println("GetPlayersStatistic: ", err)
 				}
 
+				err = job.ev.GeneratePlayersPrice(ctx, tournaments.NHL)
+				if err != nil {
+					log.Println("GeneratePlayersPrice:", err)
+				}
+
 				err = job.ev.CalculateTournamentResults(ctx, tourId)
 				if err != nil {
 					log.Println("CalculateTournamentResults:", err)
 				}
 			}
 
-			err := job.ev.GeneratePlayersPrice(ctx, tournaments.NHL)
-			if err != nil {
-				log.Println("GeneratePlayersPrice:", err)
-			}
 			durationNext := job.UpdateDuration(ctx)
 			timer.Reset(durationNext)
 			//timer.Reset(time.Hour * 24)
