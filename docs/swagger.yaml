@@ -1,4 +1,47 @@
 definitions:
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.FullPlayerStatInfo:
+    properties:
+      assists:
+        type: integer
+      fantasyPoint:
+        type: number
+      gameDate:
+        type: string
+      goals:
+        type: integer
+      hits:
+        type: integer
+      missedGoals:
+        type: integer
+      name:
+        type: string
+      opponent:
+        type: string
+      photo:
+        type: string
+      pims:
+        type: integer
+      playerID:
+        type: integer
+      position:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.Position'
+      positionName:
+        type: string
+      rarity:
+        $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_store.CardRarity'
+      rarityName:
+        type: string
+      saves:
+        type: integer
+      shots:
+        type: integer
+      shutout:
+        type: boolean
+      teamLogo:
+        type: string
+      teamName:
+        type: string
+    type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerCardResponse:
     properties:
       bonusMetric:
@@ -132,6 +175,25 @@ definitions:
         type: integer
       teamName:
         type: string
+    type: object
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TournamentResults:
+    properties:
+      coins:
+        type: integer
+      fantasyPoints:
+        type: number
+      nickname:
+        type: string
+      place:
+        type: integer
+      profileID:
+        type: string
+      userPhoto:
+        type: string
+      userTeam:
+        items:
+          $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.FullPlayerStatInfo'
+        type: array
     type: object
   github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TournamentRosterResponse:
     properties:
@@ -274,6 +336,8 @@ definitions:
         type: integer
       prizeFond:
         type: integer
+      statusParticipation:
+        type: string
       statusTournament:
         type: string
       timeEnd:
@@ -985,6 +1049,43 @@ paths:
       summary: Получение матчей по id турнира
       tags:
       - tournament
+  /tournament/results:
+    get:
+      consumes:
+      - application/json
+      description: Получение результатов турнира
+      parameters:
+      - description: tournamentID
+        in: query
+        name: tournamentID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.TournamentResults'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Получение результатов турнира
+      tags:
+      - tournament
   /tournament/roster:
     get:
       consumes:
@@ -1143,10 +1244,6 @@ paths:
       - application/json
       description: Получение турниров
       parameters:
-      - description: profileID
-        in: query
-        name: profileID
-        type: string
       - description: tournamentID
         in: query
         name: tournamentID
@@ -1167,6 +1264,14 @@ paths:
         in: query
         name: status
         type: string
+      - description: type
+        enum:
+        - all
+        - personal
+        in: query
+        name: type
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1180,10 +1285,16 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
       summary: Получение турниров
       tags:
       - tournament
