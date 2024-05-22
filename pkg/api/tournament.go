@@ -563,7 +563,7 @@ type TournamentID struct {
 // @Tags tournament
 // @Accept json
 // @Produce json
-// @Success 200 {object} []tournaments.GetTournamentsTotalInfo
+// @Success 200 {object} []tournaments.GetMatchesByTourId
 // @Failure 400 {object} Error
 // @Failure 401 {object} Error
 // @Failure 404 {object} Error

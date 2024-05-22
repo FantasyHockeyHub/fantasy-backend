@@ -9,6 +9,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
 	"log"
+	"time"
 )
 
 const (
@@ -388,11 +389,14 @@ func (p *PostgresStorage) GetInfoByTournamentsId(ctx context.Context, tourId tou
 	return tourInfo, err
 }
 
-func (p *PostgresStorage) GetMatchesByTournamentsId(ctx context.Context, tournIdArr tournaments.IDArray) ([]tournaments.GetTournamentsTotalInfo, error) {
-	var tournTotalInfo []tournaments.GetTournamentsTotalInfo
+func (p *PostgresStorage) GetMatchesByTournamentsId(ctx context.Context, tournIdArr tournaments.IDArray) ([]tournaments.GetMatchesByTourId, error) {
+	//var tournTotalInfo []tournaments.GetTournamentsTotalInfo
+	var matchesInfo []tournaments.GetMatchesByTourId
 
 	query, args, err := sq.
-		Select(MatchId, HomeTeam, fmt.Sprintf("homeTeam.%s", TeamAbbrev), HomeScore, AwayTeam, fmt.Sprintf("awayTeam.%s", TeamAbbrev),
+		Select(MatchId, HomeTeam, fmt.Sprintf("homeTeam.%s", TeamAbbrev),
+			fmt.Sprintf("homeTeam.%s", TeamLogo), HomeScore, AwayTeam,
+			fmt.Sprintf("awayTeam.%s", TeamAbbrev), fmt.Sprintf("awayTeam.%s", TeamLogo),
 			AwayScore, StartTime, EndTime, EventId, StatusMatch, fmt.Sprintf("%s.%s", MatchesTable, League)).
 		From(MatchesTable).
 		Join(
@@ -406,35 +410,34 @@ func (p *PostgresStorage) GetMatchesByTournamentsId(ctx context.Context, tournId
 		ToSql()
 
 	if err != nil {
-		return tournTotalInfo, err
+		return matchesInfo, err
 	}
 
 	rows, err := p.db.QueryxContext(ctx, query, args...)
 	if err != nil {
-		return tournTotalInfo, err
+		return matchesInfo, err
 	}
 
 	for rows.Next() {
-		var curTourInfo tournaments.GetTournamentsTotalInfo
+		//var curMatchInfo tournaments.GetTournamentsTotalInfo
+		var curMatchInfo tournaments.GetMatchesByTourId
+		var timeStart int64
+		var timeEnd int64
 
-		err = rows.Scan(&curTourInfo.MatchId, &curTourInfo.HomeTeamId, &curTourInfo.HomeTeamAbbrev, &curTourInfo.HomeScore, &curTourInfo.AwayTeamId, &curTourInfo.AwayTeamAbbrev, &curTourInfo.AwayScore, &curTourInfo.StartAt, &curTourInfo.EndAt, &curTourInfo.EventId, &curTourInfo.StatusEvent, &curTourInfo.League)
+		err = rows.Scan(&curMatchInfo.MatchId, &curMatchInfo.HomeTeamId, &curMatchInfo.HomeTeamAbbrev, &curMatchInfo.HomeTeamLogo,
+			&curMatchInfo.HomeScore, &curMatchInfo.AwayTeamId, &curMatchInfo.AwayTeamAbbrev, &curMatchInfo.AwayTeamLogo,
+			&curMatchInfo.AwayScore, &timeStart, &timeEnd, &curMatchInfo.EventId,
+			&curMatchInfo.StatusEvent, &curMatchInfo.League)
 		if err != nil {
 			log.Printf("GetMatchesByTournamentsId: ScanErr: %v", err)
 		}
+		// Преобразование времени из int64 в time.Time
+		curMatchInfo.StartAt = time.Unix(0, timeStart*int64(time.Millisecond))
+		curMatchInfo.EndAt = time.Unix(0, timeEnd*int64(time.Millisecond))
 
-		tournTotalInfo = append(tournTotalInfo, curTourInfo)
-
-		//tournTotalInfo = append(tournTotalInfo, applications.ApplicationInfoByFilter{
-		//	ApplicationID: curTourInfo.ApplicationID,
-		//	CarID:         curTourInfo.CarID,
-		//	StatusID:      curTourInfo.StatusID,
-		//	Created:       curTourInfo.Created,
-		//	FilialID:      curTourInfo.FilialID,
-		//	Millage:       curTourInfo.Millage,
-		//	ProblemName:   curTourInfo.ProblemName,
-		//})
+		matchesInfo = append(matchesInfo, curMatchInfo)
 	}
 	rows.Close()
 
-	return tournTotalInfo, err
+	return matchesInfo, err
 }

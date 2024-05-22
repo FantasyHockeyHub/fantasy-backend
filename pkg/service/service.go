@@ -46,7 +46,7 @@ type Teams interface {
 
 type Tournaments interface {
 	GetTournaments(context.Context, tournaments.League) ([]tournaments.Tournament, error)
-	GetMatchesByTournamentsId(context.Context, tournaments.ID) ([]tournaments.GetTournamentsTotalInfo, error)
+	GetMatchesByTournamentsId(context.Context, tournaments.ID) ([]tournaments.GetMatchesByTourId, error)
 	GetRosterByTournamentID(userID uuid.UUID, tournamentID int) (players.TournamentRosterResponse, error)
 	CreateTournamentTeam(inp tournaments.TournamentTeamModel) error
 	CheckUserTeam(tournamentInfo tournaments.Tournament, userTeam []int) error

@@ -35,7 +35,7 @@ type TournamentsStorage interface {
 	CreateTournaments(context.Context, []tournaments.Tournament) error
 	GetTournamentsByDate(context.Context, int64, int64, tournaments.League) ([]tournaments.Tournament, error)
 	GetInfoByTournamentsId(context.Context, tournaments.ID) (tournaments.GetShotTournaments, error)
-	GetMatchesByTournamentsId(context.Context, tournaments.IDArray) ([]tournaments.GetTournamentsTotalInfo, error)
+	GetMatchesByTournamentsId(context.Context, tournaments.IDArray) ([]tournaments.GetMatchesByTourId, error)
 	GetMatchesByTournamentID(tournamentID int) ([]int, error)
 	GetTeamsByMatches(matchesIDs []int) ([]int, error)
 	GetTeamDataByID(teamID int) (players.TeamData, error)
@@ -69,9 +69,9 @@ func (s *TournamentsService) GetTournaments(ctx context.Context, league tourname
 	return tournamentsInfo, nil
 }
 
-func (s *TournamentsService) GetMatchesByTournamentsId(ctx context.Context, tournId tournaments.ID) ([]tournaments.GetTournamentsTotalInfo, error) {
+func (s *TournamentsService) GetMatchesByTournamentsId(ctx context.Context, tournId tournaments.ID) ([]tournaments.GetMatchesByTourId, error) {
 
-	var tournTotalInfo []tournaments.GetTournamentsTotalInfo
+	var tournTotalInfo []tournaments.GetMatchesByTourId
 	tourInfo, err := s.storage.GetInfoByTournamentsId(ctx, tournId)
 	if err != nil {
 		return tournTotalInfo, fmt.Errorf("GetInfoByTournamentsId: %v", err)
