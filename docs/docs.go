@@ -2108,7 +2108,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "statusParticipation": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "statusTournament": {
                     "type": "string"

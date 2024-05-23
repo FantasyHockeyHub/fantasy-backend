@@ -59,7 +59,7 @@ type Tournament struct {
 	Deposit             int       `db:"deposit" json:"deposit"`
 	PrizeFond           int       `db:"prize_fond" json:"prizeFond"`
 	StatusTournament    string    `db:"status_tournament" json:"statusTournament"`
-	StatusParticipation string    `db:"status_participation" json:"statusParticipation"`
+	StatusParticipation bool      `db:"status_participation" json:"statusParticipation"`
 }
 
 type GetShotTournaments struct {
