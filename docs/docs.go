@@ -840,7 +840,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.GetTournamentsTotalInfo"
+                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.GetMatchesByTourId"
                             }
                         }
                     },
@@ -1991,7 +1991,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.GetTournamentsTotalInfo": {
+        "github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.GetMatchesByTourId": {
             "type": "object",
             "properties": {
                 "awayScore": {
@@ -2003,8 +2003,11 @@ const docTemplate = `{
                 "awayTeamId": {
                     "type": "integer"
                 },
+                "awayTeamLogo": {
+                    "type": "string"
+                },
                 "endAt": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "eventId": {
                     "type": "integer"
@@ -2012,10 +2015,13 @@ const docTemplate = `{
                 "homeScore": {
                     "type": "integer"
                 },
+                "homeTeamAbbrev": {
+                    "type": "string"
+                },
                 "homeTeamId": {
                     "type": "integer"
                 },
-                "homeTemeAbrev": {
+                "homeTeamLogo": {
                     "type": "string"
                 },
                 "league": {
@@ -2025,7 +2031,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "startAt": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "statusEvent": {
                     "type": "string"

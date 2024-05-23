@@ -34,7 +34,7 @@ type EventsStorage interface {
 	GetTournamentsByDate(context.Context, int64, int64, tournaments.League) ([]tournaments.Tournament, error)
 	UpdateStatusTournamentsByIds(context.Context, []tournaments.ID, string) error
 	GetInfoByTournamentsId(context.Context, tournaments.ID) (tournaments.GetShotTournaments, error)
-	GetMatchesByTournamentsId(context.Context, tournaments.IDArray) ([]tournaments.GetTournamentsTotalInfo, error)
+	GetMatchesByTournamentsId(context.Context, tournaments.IDArray) ([]tournaments.GetMatchesByTourId, error)
 	UpdateMatchesInfo(context.Context, []tournaments.GameResult) error
 	AddPlayersStatistic(context.Context, []players.PlayersStatisticDB) error
 	GetUserTeamsByTournamentID(ctx context.Context, tournamentID int64) ([]players.TournamentTeamsResults, error)

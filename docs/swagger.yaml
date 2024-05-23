@@ -262,7 +262,7 @@ definitions:
       rarityName:
         type: string
     type: object
-  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.GetTournamentsTotalInfo:
+  github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.GetMatchesByTourId:
     properties:
       awayScore:
         type: integer
@@ -270,22 +270,26 @@ definitions:
         type: string
       awayTeamId:
         type: integer
+      awayTeamLogo:
+        type: string
       endAt:
-        type: integer
+        type: string
       eventId:
         type: integer
       homeScore:
         type: integer
+      homeTeamAbbrev:
+        type: string
       homeTeamId:
         type: integer
-      homeTemeAbrev:
+      homeTeamLogo:
         type: string
       league:
         $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.League'
       matchId:
         type: integer
       startAt:
-        type: integer
+        type: string
       statusEvent:
         type: string
     type: object
@@ -1030,7 +1034,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.GetTournamentsTotalInfo'
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_tournaments.GetMatchesByTourId'
             type: array
         "400":
           description: Bad Request

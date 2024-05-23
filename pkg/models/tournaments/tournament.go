@@ -73,7 +73,7 @@ type GetShotTournaments struct {
 type GetMatchesByTourId struct {
 	MatchId        int       `json:"matchId" db:"id"`
 	HomeTeamId     int       `json:"homeTeamId" db:"home_team_id"`
-	HomeTeamAbbrev string    `json:"homeTemeAbrev" db:"team_abbrev"`
+	HomeTeamAbbrev string    `json:"homeTeamAbbrev" db:"team_abbrev"`
 	HomeTeamLogo   string    `json:"homeTeamLogo" db:"team_logo"`
 	HomeScore      int       `json:"homeScore" db:"home_team_score"`
 	AwayTeamId     int       `json:"awayTeamId" db:"away_team_id"`
@@ -85,21 +85,6 @@ type GetMatchesByTourId struct {
 	EventId        int       `json:"eventId" db:"event_id"`
 	StatusEvent    string    `json:"statusEvent" db:"status"`
 	League         League    `json:"league" db:"league"`
-}
-
-type GetTournamentsTotalInfo struct {
-	MatchId        int    `json:"matchId" db:"id"`
-	HomeTeamId     int    `json:"homeTeamId" db:"home_team_id"`
-	HomeTeamAbbrev string `json:"homeTemeAbrev" db:"team_abbrev"`
-	HomeScore      int    `json:"homeScore" db:"home_team_score"`
-	AwayTeamId     int    `json:"awayTeamId" db:"away_team_id"`
-	AwayTeamAbbrev string `json:"awayTeamAbbrev" db:"team_abbrev"`
-	AwayScore      int    `json:"awayScore" db:"away_team_score"`
-	StartAt        int64  `json:"startAt" db:"start_at"`
-	EndAt          int64  `json:"endAt" db:"end_at"`
-	EventId        int    `json:"eventId" db:"event_id"`
-	StatusEvent    string `json:"statusEvent" db:"status"`
-	League         League `json:"league" db:"league"`
 }
 
 func GetMatchesID(matches []Matches) []ID {
