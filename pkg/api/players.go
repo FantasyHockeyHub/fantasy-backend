@@ -19,17 +19,24 @@ import (
 
 // createKHLPlayers godoc
 // @Summary Добавление игроков КХЛ
+// @Security ApiKeyAuth
 // @Schemes
 // @Description Добавление игроков КХЛ в базу данных
 // @Tags players
 // @Accept json
 // @Produce json
 // @Success 200 {object} StatusResponse
+// @Failure 401 {object} Error
 // @Failure 500 {object} Error
 // @Router /players/khl/create [post]
 func (api Api) createKHLPlayers(ctx *gin.Context) {
-	var allPlayersData []players.Player
+	_, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("CreateKHLPlayers:", err)
+		return
+	}
 
+	var allPlayersData []players.Player
 	page := 1
 	for {
 		url := fmt.Sprintf("https://khl.api.webcaster.pro/api/khl_mobile/players_v2.json?page=%d", page)
@@ -85,7 +92,7 @@ func (api Api) createKHLPlayers(ctx *gin.Context) {
 		page++
 	}
 
-	err := api.services.Players.CreatePlayers(allPlayersData)
+	err = api.services.Players.CreatePlayers(allPlayersData)
 	if err != nil {
 		log.Println("CreateKHLPlayers:", err)
 		ctx.JSON(http.StatusInternalServerError, getInternalServerError())
@@ -97,15 +104,23 @@ func (api Api) createKHLPlayers(ctx *gin.Context) {
 
 // createNHLPlayers godoc
 // @Summary Добавление игроков НХЛ
+// @Security ApiKeyAuth
 // @Schemes
 // @Description Добавление игроков НХЛ в базу данных
 // @Tags players
 // @Accept json
 // @Produce json
 // @Success 200 {object} StatusResponse
+// @Failure 401 {object} Error
 // @Failure 500 {object} Error
 // @Router /players/nhl/create [post]
 func (api Api) createNHLPlayers(ctx *gin.Context) {
+	_, err := parseUserIDFromContext(ctx)
+	if err != nil {
+		log.Println("CreateNHLPlayers:", err)
+		return
+	}
+
 	var allPlayersData []players.Player
 	teams := make([]string, 0, len(tournaments.NHLId))
 	for key := range tournaments.NHLId {
@@ -159,7 +174,7 @@ func (api Api) createNHLPlayers(ctx *gin.Context) {
 		}
 	}
 
-	err := api.services.Players.CreatePlayers(allPlayersData)
+	err = api.services.Players.CreatePlayers(allPlayersData)
 	if err != nil {
 		log.Println("CreateNHLPlayers:", err)
 		ctx.JSON(http.StatusInternalServerError, getInternalServerError())

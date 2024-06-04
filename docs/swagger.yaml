@@ -797,10 +797,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/pkg_api.StatusResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
       summary: Добавление игроков КХЛ
       tags:
       - players
@@ -816,10 +822,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/pkg_api.StatusResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
       summary: Добавление игроков НХЛ
       tags:
       - players
@@ -925,6 +937,12 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
       summary: Создание команд KHL
       tags:
       - tournament
@@ -940,6 +958,12 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/pkg_api.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      security:
+      - ApiKeyAuth: []
       summary: Создание команд NHL
       tags:
       - tournament

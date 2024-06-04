@@ -79,12 +79,12 @@ func (api *Api) registerRoutes() {
 
 	team := base.Group("/tournament")
 	{
-		team.GET("/create_team_nhl", api.CreateTeamsNHL)
-		team.GET("/create_team_khl", api.CreateTeamsKHL)
 		team.GET("/get_matches/:league", api.GetMatches)
 
 		teamAuthenticated := team.Group("/", api.userIdentity)
 		{
+			teamAuthenticated.GET("/create_team_nhl", api.CreateTeamsNHL)
+			teamAuthenticated.GET("/create_team_khl", api.CreateTeamsKHL)
 			teamAuthenticated.GET("/roster", api.getTournamentRoster)
 			teamAuthenticated.POST("team/create", api.createTournamentTeam)
 			teamAuthenticated.GET("team", api.getTournamentTeam)
@@ -111,12 +111,12 @@ func (api *Api) registerRoutes() {
 
 	players := base.Group("/players")
 	{
-		players.POST("/khl/create", api.createKHLPlayers)
-		players.POST("/nhl/create", api.createNHLPlayers)
 		players.GET("/info", api.getPlayers)
 		players.GET("/cards", api.getPlayerCards)
 		playersAuthenticated := players.Group("/", api.userIdentity)
 		{
+			playersAuthenticated.POST("/khl/create", api.createKHLPlayers)
+			playersAuthenticated.POST("/nhl/create", api.createNHLPlayers)
 			playersAuthenticated.POST("/cards/unpack", api.cardUnpacking)
 			playersAuthenticated.GET("/statistic_player/:player_id", api.GetStatisticByPlayerId)
 		}

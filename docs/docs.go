@@ -454,6 +454,11 @@ const docTemplate = `{
         },
         "/players/khl/create": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Добавление игроков КХЛ в базу данных",
                 "consumes": [
                     "application/json"
@@ -472,6 +477,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/pkg_api.StatusResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -483,6 +494,11 @@ const docTemplate = `{
         },
         "/players/nhl/create": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Добавление игроков НХЛ в базу данных",
                 "consumes": [
                     "application/json"
@@ -499,6 +515,12 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/pkg_api.StatusResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
                         }
                     },
                     "500": {
@@ -652,6 +674,11 @@ const docTemplate = `{
         },
         "/tournament/create_team_khl": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Добавлят информацию о команде KHL",
                 "produces": [
                     "application/json"
@@ -669,12 +696,23 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
                     }
                 }
             }
         },
         "/tournament/create_team_nhl": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Добавлят информацию о команде NHL",
                 "produces": [
                     "application/json"
@@ -689,6 +727,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }
