@@ -648,59 +648,6 @@ paths:
       summary: Регистрация
       tags:
       - auth
-  /players:
-    get:
-      consumes:
-      - application/json
-      description: Получение списка игроков
-      parameters:
-      - description: profileID
-        in: query
-        name: profileID
-        type: string
-      - description: players
-        in: query
-        name: id
-        type: array
-      - description: teams
-        in: query
-        name: teams
-        type: array
-      - description: position
-        enum:
-        - G
-        - D
-        - F
-        in: query
-        name: position
-        type: string
-      - description: league
-        enum:
-        - NHL
-        - KHL
-        in: query
-        name: league
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/pkg_api.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/pkg_api.Error'
-      summary: Получение списка игроков
-      tags:
-      - players
   /players/cards:
     get:
       consumes:
@@ -783,6 +730,59 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Распаковка карточки игрока
+      tags:
+      - players
+  /players/info:
+    get:
+      consumes:
+      - application/json
+      description: Получение списка игроков
+      parameters:
+      - description: profileID
+        in: query
+        name: profileID
+        type: string
+      - description: players
+        in: query
+        name: id
+        type: array
+      - description: teams
+        in: query
+        name: teams
+        type: array
+      - description: position
+        enum:
+        - G
+        - D
+        - F
+        in: query
+        name: position
+        type: string
+      - description: league
+        enum:
+        - NHL
+        - KHL
+        in: query
+        name: league
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg_api.Error'
+      summary: Получение списка игроков
       tags:
       - players
   /players/khl/create:

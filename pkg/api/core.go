@@ -113,7 +113,7 @@ func (api *Api) registerRoutes() {
 	{
 		players.POST("/khl/create", api.createKHLPlayers)
 		players.POST("/nhl/create", api.createNHLPlayers)
-		players.GET("/", api.getPlayers)
+		players.GET("/info", api.getPlayers)
 		players.GET("/cards", api.getPlayerCards)
 		playersAuthenticated := players.Group("/", api.userIdentity)
 		{

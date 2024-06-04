@@ -184,7 +184,7 @@ func (api Api) createNHLPlayers(ctx *gin.Context) {
 // @Success 200 {array} players.PlayerResponse
 // @Failure 400 {object} Error
 // @Failure 500 {object} Error
-// @Router /players [get]
+// @Router /players/info [get]
 func (api Api) getPlayers(ctx *gin.Context) {
 	var filterPlayers players.PlayersFilter
 
