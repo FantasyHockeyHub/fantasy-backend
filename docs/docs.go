@@ -245,85 +245,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/players": {
-            "get": {
-                "description": "Получение списка игроков",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "players"
-                ],
-                "summary": "Получение списка игроков",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "profileID",
-                        "name": "profileID",
-                        "in": "query"
-                    },
-                    {
-                        "type": "array",
-                        "description": "players",
-                        "name": "id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "array",
-                        "description": "teams",
-                        "name": "teams",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "G",
-                            "D",
-                            "F"
-                        ],
-                        "type": "string",
-                        "description": "position",
-                        "name": "position",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "NHL",
-                            "KHL"
-                        ],
-                        "type": "string",
-                        "description": "league",
-                        "name": "league",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/pkg_api.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/pkg_api.Error"
-                        }
-                    }
-                }
-            }
-        },
         "/players/cards": {
             "get": {
                 "description": "Получение списка карточек игроков",
@@ -452,8 +373,92 @@ const docTemplate = `{
                 }
             }
         },
+        "/players/info": {
+            "get": {
+                "description": "Получение списка игроков",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Получение списка игроков",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profileID",
+                        "name": "profileID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "description": "players",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "description": "teams",
+                        "name": "teams",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "G",
+                            "D",
+                            "F"
+                        ],
+                        "type": "string",
+                        "description": "position",
+                        "name": "position",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "NHL",
+                            "KHL"
+                        ],
+                        "type": "string",
+                        "description": "league",
+                        "name": "league",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_Frozen-Fantasy_fantasy-backend_git_pkg_models_players.PlayerResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/players/khl/create": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Добавление игроков КХЛ в базу данных",
                 "consumes": [
                     "application/json"
@@ -472,6 +477,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/pkg_api.StatusResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -483,6 +494,11 @@ const docTemplate = `{
         },
         "/players/nhl/create": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Добавление игроков НХЛ в базу данных",
                 "consumes": [
                     "application/json"
@@ -499,6 +515,12 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/pkg_api.StatusResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
                         }
                     },
                     "500": {
@@ -652,6 +674,11 @@ const docTemplate = `{
         },
         "/tournament/create_team_khl": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Добавлят информацию о команде KHL",
                 "produces": [
                     "application/json"
@@ -669,12 +696,23 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
                     }
                 }
             }
         },
         "/tournament/create_team_nhl": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Добавлят информацию о команде NHL",
                 "produces": [
                     "application/json"
@@ -689,6 +727,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg_api.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/pkg_api.Error"
                         }

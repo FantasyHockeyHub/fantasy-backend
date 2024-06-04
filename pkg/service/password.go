@@ -37,13 +37,13 @@ func (h *SHA1Hasher) Hash(password string) (string, error) {
 	return fmt.Sprintf("%x", hash.Sum([]byte(h.salt))), nil
 }
 
-func ComparePasswords(currentPasswod string, passwordInput string, passwordSalt string) error {
+func ComparePasswords(currentPassword string, passwordInput string, passwordSalt string) error {
 	hasher := NewSHA1Hasher(passwordSalt)
 	inputPasswordHash, err := hasher.Hash(passwordInput)
 	if err != nil {
 		return err
 	}
-	if inputPasswordHash != currentPasswod {
+	if inputPasswordHash != currentPassword {
 		return IncorrectPasswordError
 	}
 
